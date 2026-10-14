@@ -1,0 +1,79 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #e53935;
+  /* Darker red for small white text (WCAG AA contrast). */
+  --color-primary-dark: #c62828;
+  --color-navy: #1f3a5f;
+  --color-cream: #fff6ef;
+  --color-accent: #ffc107;
+  --color-success: #43a047;
+  --color-success-dark: #2e7d32;
+  --color-error: #e53935;
+  --color-ink: #2b2f38;
+  --color-muted: #5f6673;
+
+  --font-display: 'Baloo 2', 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-body: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 22px;
+  --shadow-soft: 0 6px 20px -6px rgb(31 58 95 / 0.18), 0 2px 6px -2px rgb(31 58 95 / 0.08);
+  --shadow-pop: 0 4px 0 0 rgb(0 0 0 / 0.14);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: linear-gradient(160deg, #ffe3dc 0%, #fff6ef 45%, #ffe9d6 100%) fixed;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+}
+
+button {
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-navy);
+  outline-offset: 2px;
+}
+
+/* Sticker-style tape strip used to decorate cards, like in the proposal. */
+.tape {
+  background: repeating-linear-gradient(135deg, #ffd1cc 0 8px, #ffe1dd 8px 16px);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.safe-top {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+.safe-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.leaflet-container {
+  font-family: var(--font-body);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

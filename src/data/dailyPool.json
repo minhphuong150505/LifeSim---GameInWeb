@@ -1,0 +1,378 @@
+[
+  {
+    "id": "nose-1",
+    "topic": "nosebleed",
+    "question": "Bị chảy máu cam thì nên ngửa cổ ra sau để máu ngừng chảy.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Ngửa cổ làm máu chảy xuống họng, gây buồn nôn, sặc. Hãy ngồi, cúi đầu nhẹ về phía trước."
+  },
+  {
+    "id": "nose-2",
+    "topic": "nosebleed",
+    "question": "Khi chảy máu cam, cần bóp vào đâu và trong bao lâu?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Sống mũi cứng, 1–2 phút"
+      },
+      {
+        "id": "b",
+        "text": "Phần mềm của mũi, 10–15 phút"
+      },
+      {
+        "id": "c",
+        "text": "Hai bên thái dương, 5 phút"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Bóp chặt phần mềm của mũi liên tục 10–15 phút, cúi đầu về trước và thở bằng miệng."
+  },
+  {
+    "id": "nose-3",
+    "topic": "nosebleed",
+    "question": "Nhét bông sâu vào mũi rồi nằm ngửa là cách xử trí chảy máu cam đúng.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Nên ngồi cúi đầu về trước và bóp phần mềm của mũi 10–15 phút; không nằm ngửa."
+  },
+  {
+    "id": "seizure-1",
+    "topic": "seizure",
+    "question": "Người đang co giật: nên nhét thìa hoặc khăn vào miệng để khỏi cắn lưỡi.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Không nhét bất cứ thứ gì vào miệng – có thể gãy răng, tắc đường thở hoặc bị cắn."
+  },
+  {
+    "id": "seizure-2",
+    "topic": "seizure",
+    "question": "Khi thấy một người lên cơn co giật, việc nào nên làm?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Giữ chặt tay chân để ghì cơn giật"
+      },
+      {
+        "id": "b",
+        "text": "Kê vật mềm dưới đầu, dọn vật cứng xung quanh và bấm giờ"
+      },
+      {
+        "id": "c",
+        "text": "Vắt chanh vào miệng"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Bảo vệ đầu, dọn vật nguy hiểm, tính thời gian cơn giật. Không ghì giữ, không cho gì vào miệng."
+  },
+  {
+    "id": "seizure-3",
+    "topic": "seizure",
+    "question": "Sau khi cơn co giật dừng, nên đặt người bệnh ở tư thế nào?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Nằm nghiêng an toàn (tư thế hồi phục)"
+      },
+      {
+        "id": "b",
+        "text": "Ngồi dậy và cho uống nước ngay"
+      },
+      {
+        "id": "c",
+        "text": "Nằm sấp"
+      }
+    ],
+    "correctId": "a",
+    "explanation": "Đặt nằm nghiêng ở tư thế hồi phục để đường thở thông thoáng và theo dõi cho tới khi tỉnh hẳn."
+  },
+  {
+    "id": "seizure-4",
+    "topic": "seizure",
+    "question": "Cơn co giật kéo dài hơn 5 phút thì cần gọi 115.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "a",
+    "explanation": "Đúng. Cơn giật trên 5 phút, lặp lại liên tiếp hoặc người bệnh không tỉnh lại → gọi 115 ngay."
+  },
+  {
+    "id": "faint-1",
+    "topic": "fainting",
+    "question": "Bạn cùng lớp choáng váng sắp ngất. Nên làm gì?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đỡ bạn đứng dựa tường"
+      },
+      {
+        "id": "b",
+        "text": "Đặt bạn nằm xuống và kê cao chân"
+      },
+      {
+        "id": "c",
+        "text": "Cho bạn uống cà phê"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Đặt nằm ngửa, kê cao chân để máu về não, nới lỏng quần áo và để nơi thoáng khí."
+  },
+  {
+    "id": "faint-2",
+    "topic": "fainting",
+    "question": "Người vừa ngất nên được đỡ ngồi dậy ngay cho mau tỉnh.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Hãy để nằm, kê cao chân. Khi tỉnh, cho ngồi dậy từ từ. Không tỉnh lại nhanh hoặc không thở → gọi 115."
+  },
+  {
+    "id": "bleed-1",
+    "topic": "bleeding",
+    "question": "Vết thương đang chảy máu nhiều. Việc quan trọng nhất là gì?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Rắc thuốc lá/bột cà phê lên"
+      },
+      {
+        "id": "b",
+        "text": "Ấn trực tiếp lên vết thương bằng gạc hoặc vải sạch"
+      },
+      {
+        "id": "c",
+        "text": "Rửa dưới vòi nước thật lâu"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Ấn trực tiếp và giữ chặt bằng gạc/vải sạch để cầm máu; chảy nhiều không cầm → gọi 115."
+  },
+  {
+    "id": "bleed-2",
+    "topic": "bleeding",
+    "question": "Gạc đã thấm đẫm máu thì nên bỏ ra để thay gạc mới.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Không gỡ lớp gạc cũ (làm bong cục máu đông) – đặt thêm gạc lên trên và tiếp tục ấn chặt."
+  },
+  {
+    "id": "bleed-3",
+    "topic": "bleeding",
+    "question": "Rắc thuốc lá sợi hoặc bột lạ lên vết thương giúp cầm máu an toàn.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Mẹo này gây nhiễm trùng. Cách đúng là ấn trực tiếp bằng gạc sạch."
+  },
+  {
+    "id": "cpr-1",
+    "topic": "cpr",
+    "question": "Ép tim cho người lớn nên theo nhịp nào?",
+    "options": [
+      {
+        "id": "a",
+        "text": "60–80 lần/phút"
+      },
+      {
+        "id": "b",
+        "text": "100–120 lần/phút"
+      },
+      {
+        "id": "c",
+        "text": "Trên 150 lần/phút"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Ép tim 100–120 lần/phút, sâu 5–6 cm ở giữa ngực."
+  },
+  {
+    "id": "cpr-2",
+    "topic": "cpr",
+    "question": "Kiểm tra hơi thở của người bất tỉnh không nên quá 10 giây.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "a",
+    "explanation": "Đúng. Nhìn – nghe – cảm nhận tối đa 10 giây; không thở hoặc thở ngáp → ép tim ngay."
+  },
+  {
+    "id": "cpr-3",
+    "topic": "cpr",
+    "question": "Số điện thoại cấp cứu y tế tại Việt Nam là số nào?",
+    "options": [
+      {
+        "id": "a",
+        "text": "113"
+      },
+      {
+        "id": "b",
+        "text": "114"
+      },
+      {
+        "id": "c",
+        "text": "115"
+      }
+    ],
+    "correctId": "c",
+    "explanation": "115 là cấp cứu y tế. (113: công an, 114: cứu hỏa – cứu nạn.)"
+  },
+  {
+    "id": "choke-1",
+    "topic": "choking",
+    "question": "Người bị hóc không ho, không nói được. Xử trí đúng là gì?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Cho uống nước"
+      },
+      {
+        "id": "b",
+        "text": "5 lần vỗ lưng rồi 5 lần ấn bụng, xen kẽ"
+      },
+      {
+        "id": "c",
+        "text": "Móc họng bằng ngón tay"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Cho cúi người về trước, vỗ lưng 5 lần giữa hai bả vai, rồi ấn bụng 5 lần, lặp lại xen kẽ."
+  },
+  {
+    "id": "choke-2",
+    "topic": "choking",
+    "question": "Người bị hóc còn ho được thành tiếng thì nên khuyến khích họ tiếp tục ho.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "a",
+    "explanation": "Đúng. Ho là cách tống dị vật hiệu quả nhất khi đường thở chỉ tắc một phần."
+  },
+  {
+    "id": "burn-1",
+    "topic": "burn",
+    "question": "Bôi kem đánh răng lên vết bỏng giúp mau lành.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Kem đánh răng giữ nhiệt và gây nhiễm trùng. Hãy xả nước mát khoảng 20 phút."
+  },
+  {
+    "id": "burn-2",
+    "topic": "burn",
+    "question": "Nên làm mát vết bỏng bằng cách nào?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Chườm đá trực tiếp"
+      },
+      {
+        "id": "b",
+        "text": "Xả nước mát sạch khoảng 20 phút"
+      },
+      {
+        "id": "c",
+        "text": "Thoa nước mắm"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Dùng nước mát (không phải nước đá) xả liên tục khoảng 20 phút."
+  },
+  {
+    "id": "burn-3",
+    "topic": "burn",
+    "question": "Bóng nước ở vết bỏng nên được chọc vỡ để mau khô.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Đúng"
+      },
+      {
+        "id": "b",
+        "text": "Sai"
+      }
+    ],
+    "correctId": "b",
+    "explanation": "Sai. Giữ nguyên bóng nước để tránh nhiễm trùng; che lỏng bằng gạc sạch hoặc màng bọc thực phẩm."
+  }
+]

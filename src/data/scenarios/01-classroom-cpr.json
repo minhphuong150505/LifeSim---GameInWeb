@@ -1,0 +1,249 @@
+{
+  "id": "classroom-cpr",
+  "title": "Bạn ngất xỉu trong lớp",
+  "topic": "cpr",
+  "location": "Lớp học",
+  "difficulty": 2,
+  "background": "classroom",
+  "intro": "Giờ ra chơi, Minh đang đứng nói chuyện thì bất ngờ ngã gục xuống sàn. Cả lớp hoảng hốt. Hãy quan sát thật nhanh để hiểu chuyện gì đang xảy ra.",
+  "clues": [
+    {
+      "id": "motionless",
+      "x": 61,
+      "y": 71,
+      "w": 27,
+      "h": 13,
+      "label": "Nằm bất động",
+      "description": "Minh nằm im, tay chân không cử động dù xung quanh rất ồn."
+    },
+    {
+      "id": "chest",
+      "x": 35.5,
+      "y": 70,
+      "w": 25,
+      "h": 14,
+      "label": "Ngực không phập phồng",
+      "description": "Lồng ngực không nhô lên hạ xuống – dấu hiệu bạn có thể đã ngừng thở."
+    },
+    {
+      "id": "lips",
+      "x": 20,
+      "y": 69.5,
+      "w": 15,
+      "h": 15,
+      "label": "Môi tím tái",
+      "description": "Môi chuyển màu tím: cơ thể đang thiếu oxy nghiêm trọng."
+    },
+    {
+      "id": "aed",
+      "x": 78,
+      "y": 22,
+      "w": 16,
+      "h": 18,
+      "label": "Hộp AED ở hành lang",
+      "description": "Máy khử rung tim tự động (AED) treo ngay ngoài cửa lớp – cần nhờ người lấy ngay."
+    }
+  ],
+  "requiredClueIds": [
+    "motionless",
+    "chest",
+    "lips",
+    "aed"
+  ],
+  "steps": [
+    {
+      "id": "scene-safety",
+      "prompt": "Bạn thấy Minh nằm bất động trên sàn. Việc ĐẦU TIÊN cần làm là gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Lao ngay tới và đỡ Minh ngồi dậy",
+          "correct": false,
+          "feedback": "Chưa đúng. Đỡ ngồi dậy không giúp ích và có thể làm bạn bị chấn thương thêm. Trước hết phải bảo đảm hiện trường an toàn.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Quan sát nhanh xem xung quanh có nguy hiểm không rồi mới tiến lại",
+          "correct": true,
+          "feedback": "Đúng! Luôn kiểm tra hiện trường an toàn (điện, vật rơi, sàn trơn…) trước – người sơ cứu an toàn thì mới giúp được nạn nhân.",
+          "points": 10
+        },
+        {
+          "id": "c",
+          "text": "Tạt nước vào mặt cho bạn tỉnh",
+          "correct": false,
+          "feedback": "Sai. Tạt nước không làm người ngừng thở tỉnh lại, chỉ làm mất thời gian và có thể gây sặc.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Đứng chờ xem bạn có tự tỉnh lại không",
+          "correct": false,
+          "feedback": "Sai. Với ngừng tim, mỗi phút chậm trễ làm giảm mạnh cơ hội sống. Cần hành động ngay.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "check-response",
+      "prompt": "Hiện trường an toàn. Làm sao để biết Minh còn phản ứng hay không?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Vỗ nhẹ hai vai và gọi to: “Minh ơi, có nghe mình nói không?”",
+          "correct": true,
+          "feedback": "Đúng! Vỗ vai và gọi to là cách kiểm tra phản ứng nhanh và an toàn.",
+          "points": 10
+        },
+        {
+          "id": "b",
+          "text": "Cho bạn uống một ngụm nước",
+          "correct": false,
+          "feedback": "Sai. Không cho người bất tỉnh ăn uống bất cứ thứ gì – rất dễ sặc vào đường thở.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Lắc thật mạnh đầu và cổ bạn",
+          "correct": false,
+          "feedback": "Sai. Lắc mạnh đầu cổ có thể gây tổn thương thêm. Chỉ cần vỗ vai và gọi to.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Tạt nước lạnh vào mặt",
+          "correct": false,
+          "feedback": "Sai. Tạt nước không phải cách kiểm tra phản ứng và làm chậm việc cấp cứu.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "call-help",
+      "prompt": "Minh không phản ứng. Chạm lần lượt để sắp xếp các việc cần làm theo đúng thứ tự.",
+      "timeLimitSec": 40,
+      "type": "order",
+      "orderItems": [
+        {
+          "id": "aed",
+          "text": "Nhờ một bạn chạy lấy AED ở hành lang"
+        },
+        {
+          "id": "breath",
+          "text": "Kiểm tra hơi thở của Minh"
+        },
+        {
+          "id": "shout",
+          "text": "Hô to gọi mọi người đến giúp"
+        },
+        {
+          "id": "call",
+          "text": "Gọi 115, bật loa ngoài, nói rõ địa điểm"
+        }
+      ],
+      "correctOrder": [
+        "shout",
+        "call",
+        "aed",
+        "breath"
+      ],
+      "explanation": "Gọi người hỗ trợ, gọi 115 và cho người đi lấy AED càng sớm càng tốt; bật loa ngoài để vừa nghe hướng dẫn vừa sơ cứu."
+    },
+    {
+      "id": "check-breathing",
+      "prompt": "Kiểm tra hơi thở của Minh như thế nào là đúng?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Theo dõi thật kỹ trong 1–2 phút cho chắc chắn",
+          "correct": false,
+          "feedback": "Chưa đúng. Kiểm tra quá lâu làm mất thời gian vàng. Chỉ nhìn – nghe – cảm nhận tối đa 10 giây.",
+          "points": 3
+        },
+        {
+          "id": "b",
+          "text": "Nhìn lồng ngực, nghe và cảm nhận hơi thở – không quá 10 giây",
+          "correct": true,
+          "feedback": "Đúng! Không thở hoặc chỉ thở ngáp trong 10 giây → coi như ngừng tim và bắt đầu ép tim ngay.",
+          "points": 10
+        },
+        {
+          "id": "c",
+          "text": "Bỏ qua bước này, đỡ bạn ngồi dựa vào tường cho dễ thở",
+          "correct": false,
+          "feedback": "Sai. Người bất tỉnh không tự giữ được đường thở khi ngồi; cần kiểm tra hơi thở khi bạn nằm ngửa.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Cho bạn ngửi dầu gió rồi chờ",
+          "correct": false,
+          "feedback": "Sai. Dầu gió không giúp ích khi nạn nhân ngừng thở và làm chậm cấp cứu.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "start-cpr",
+      "prompt": "Minh không thở. Trong lúc chờ AED và xe cấp cứu, bạn làm gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Chờ xem sao, đợi nhân viên y tế tới",
+          "correct": false,
+          "feedback": "Sai. Không ép tim thì não thiếu oxy chỉ sau vài phút. Người có mặt tại chỗ phải bắt đầu ngay.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Đỡ bạn ngồi dậy và cho uống nước đường",
+          "correct": false,
+          "feedback": "Sai. Không cho người bất tỉnh uống gì và không đỡ ngồi dậy – cần ép tim ngay.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Ép tim ngay: hai tay chồng lên nhau ở giữa ngực, ép sâu 5–6 cm",
+          "correct": true,
+          "feedback": "Đúng! Ép mạnh và nhanh ở giữa ngực, 100–120 lần/phút, để ngực nở lại hoàn toàn sau mỗi lần ép.",
+          "points": 10
+        },
+        {
+          "id": "d",
+          "text": "Tạt nước vào mặt rồi quạt cho thoáng",
+          "correct": false,
+          "feedback": "Sai. Những việc này không giúp tim đập lại. Hãy ép tim ngay.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "compressions",
+      "prompt": "Ép tim! Chạm nút theo nhịp 100–120 lần/phút trong 15 giây.",
+      "timeLimitSec": 15,
+      "type": "rhythm",
+      "rhythm": {
+        "minBpm": 100,
+        "maxBpm": 120,
+        "durationSec": 15
+      },
+      "explanation": "Ép ở giữa ngực, sâu 5–6 cm, 100–120 lần/phút và không dừng cho tới khi có AED hoặc nhân viên y tế tiếp nhận."
+    }
+  ],
+  "takeaways": [
+    "An toàn hiện trường trước, rồi vỗ vai – gọi to để kiểm tra phản ứng.",
+    "Gọi 115 (bật loa ngoài) và nhờ người lấy AED càng sớm càng tốt.",
+    "Kiểm tra hơi thở không quá 10 giây; không thở hoặc thở ngáp → ép tim ngay.",
+    "Ép giữa ngực, sâu 5–6 cm, 100–120 lần/phút, không ngừng cho tới khi có hỗ trợ.",
+    "Không tạt nước, không đỡ ngồi dậy, không cho uống nước, không chờ xem sao."
+  ]
+}

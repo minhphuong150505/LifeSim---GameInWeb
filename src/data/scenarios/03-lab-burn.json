@@ -1,0 +1,241 @@
+{
+  "id": "lab-burn",
+  "title": "Bỏng nước sôi ở phòng thí nghiệm",
+  "topic": "burn",
+  "location": "Phòng thí nghiệm",
+  "difficulty": 1,
+  "background": "lab",
+  "intro": "Trong giờ thực hành, ấm nước vừa sôi bị gạt đổ, nước nóng hắt vào tay Huy. Bạn ấy kêu lên vì đau. Hãy quan sát hiện trường.",
+  "clues": [
+    {
+      "id": "kettle",
+      "x": 8,
+      "y": 26,
+      "w": 32,
+      "h": 23,
+      "label": "Ấm nước sôi bị đổ",
+      "description": "Nước vừa sôi còn bốc hơi trên mặt bàn – nguồn nhiệt vẫn ở rất gần."
+    },
+    {
+      "id": "arm",
+      "x": 35,
+      "y": 68,
+      "w": 30,
+      "h": 15,
+      "label": "Cánh tay đỏ, phồng rộp",
+      "description": "Da đỏ và xuất hiện bóng nước: dấu hiệu bỏng độ II, cần làm mát ngay."
+    },
+    {
+      "id": "watch",
+      "x": 66,
+      "y": 65,
+      "w": 13,
+      "h": 17,
+      "label": "Đồng hồ trên tay bị bỏng",
+      "description": "Tay sẽ sưng lên nhanh – đồng hồ, vòng tay có thể siết chặt gây cản trở máu lưu thông."
+    },
+    {
+      "id": "tap",
+      "x": 70,
+      "y": 18,
+      "w": 27,
+      "h": 25,
+      "label": "Vòi nước mát",
+      "description": "Ngay cạnh có vòi nước sạch – thứ bạn cần nhất lúc này."
+    }
+  ],
+  "requiredClueIds": [
+    "kettle",
+    "arm",
+    "watch"
+  ],
+  "steps": [
+    {
+      "id": "remove-source",
+      "prompt": "Huy vừa bị nước sôi hắt vào tay. Việc cần làm ngay là gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Đưa Huy ra xa ấm nước và vùng nước nóng đang chảy",
+          "correct": true,
+          "feedback": "Đúng! Tách nạn nhân khỏi nguồn nhiệt trước để không bị bỏng thêm – và giữ an toàn cho chính bạn.",
+          "points": 10
+        },
+        {
+          "id": "b",
+          "text": "Chạy đi tìm kem đánh răng",
+          "correct": false,
+          "feedback": "Sai. Kem đánh răng là mẹo dân gian gây hại: giữ nhiệt, kích ứng và tăng nguy cơ nhiễm trùng.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Lấy đá lạnh áp thẳng vào vết bỏng",
+          "correct": false,
+          "feedback": "Sai. Chườm đá trực tiếp có thể gây bỏng lạnh và làm tổn thương da nặng hơn.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Đứng chờ giáo viên quay lại xử lý",
+          "correct": false,
+          "feedback": "Sai. Bỏng cần được làm mát càng sớm càng tốt – hãy hành động và nhờ bạn khác gọi giáo viên.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "cool",
+      "prompt": "Làm mát vết bỏng thế nào cho đúng?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ngâm tay vào chậu nước đá",
+          "correct": false,
+          "feedback": "Sai. Nước đá quá lạnh làm co mạch và tổn thương da thêm. Dùng nước mát, không phải nước đá.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Bôi nước mắm lên cho dịu",
+          "correct": false,
+          "feedback": "Sai. Nước mắm không làm mát, gây xót và dễ nhiễm trùng.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Xả dưới vòi nước mát, sạch liên tục khoảng 20 phút",
+          "correct": true,
+          "feedback": "Đúng! Xả nước mát khoảng 20 phút giúp hạ nhiệt, giảm đau và hạn chế tổn thương lan sâu.",
+          "points": 10
+        },
+        {
+          "id": "d",
+          "text": "Thoa dầu ăn hoặc mỡ lên vết bỏng",
+          "correct": false,
+          "feedback": "Sai. Dầu mỡ giữ nhiệt lại trong da và làm tăng nguy cơ nhiễm trùng.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "jewelry",
+      "prompt": "Trên cổ tay bị bỏng của Huy có đồng hồ. Bạn xử lý thế nào?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Để nguyên, tháo ra sẽ làm bạn đau",
+          "correct": false,
+          "feedback": "Sai. Tay sẽ sưng nhanh, đồng hồ có thể siết chặt và rất khó tháo về sau.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Nhẹ nhàng tháo đồng hồ, vòng tay sớm – trước khi tay sưng",
+          "correct": true,
+          "feedback": "Đúng! Tháo trang sức và đồ bó chặt gần vùng bỏng sớm. Nếu đã dính vào da thì không cố gỡ.",
+          "points": 10
+        },
+        {
+          "id": "c",
+          "text": "Đợi khi tay sưng hẳn rồi mới tháo",
+          "correct": false,
+          "feedback": "Sai. Khi đã sưng, việc tháo sẽ khó và đau hơn nhiều, có thể cản trở máu lưu thông.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Giật thật nhanh kể cả khi dây đã dính vào da",
+          "correct": false,
+          "feedback": "Sai. Không cố gỡ vật đã dính vào vết bỏng – sẽ làm rách da. Chỉ tháo nhẹ nhàng những gì chưa dính.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "id": "cover",
+      "prompt": "Sau khi làm mát đủ lâu, bạn che vết bỏng bằng gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Bôi kem đánh răng rồi băng kín lại",
+          "correct": false,
+          "feedback": "Sai. Không bôi bất cứ thứ gì theo mẹo dân gian lên vết bỏng.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Quấn chặt bằng bông gòn",
+          "correct": false,
+          "feedback": "Sai. Sợi bông dính vào vết bỏng, và quấn chặt gây chèn ép khi tay sưng.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Chườm túi đá lên rồi để hở",
+          "correct": false,
+          "feedback": "Sai. Không chườm đá trực tiếp lên vết bỏng.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Che lỏng bằng màng bọc thực phẩm hoặc gạc sạch không dính",
+          "correct": true,
+          "feedback": "Đúng! Màng bọc thực phẩm sạch hoặc gạc vô khuẩn giúp giữ sạch và giảm đau; phủ lỏng, không quấn chặt.",
+          "points": 10
+        }
+      ]
+    },
+    {
+      "id": "blister",
+      "prompt": "Vết bỏng nổi bóng nước. Điều nào sau đây là ĐÚNG?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Chọc vỡ bóng nước cho nhanh khô",
+          "correct": false,
+          "feedback": "Sai. Bóng nước là lớp bảo vệ tự nhiên; chọc vỡ dễ gây nhiễm trùng.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Không chọc bóng nước; bỏng rộng, bỏng sâu hoặc bỏng ở mặt thì phải đi viện",
+          "correct": true,
+          "feedback": "Đúng! Giữ nguyên bóng nước. Bỏng rộng hơn lòng bàn tay nạn nhân, bỏng sâu, bỏng ở mặt/bàn tay/khớp cần đến cơ sở y tế.",
+          "points": 10
+        },
+        {
+          "id": "c",
+          "text": "Bóc lớp da phồng rồi rắc thuốc bột lên",
+          "correct": false,
+          "feedback": "Sai. Không bóc da và không rắc thuốc bột – tăng nguy cơ nhiễm trùng và sẹo.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Bỏng ở mặt chỉ cần thoa dầu ăn ở nhà",
+          "correct": false,
+          "feedback": "Sai. Bỏng ở mặt luôn cần được nhân viên y tế kiểm tra; không thoa dầu ăn.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "takeaways": [
+    "Tách nạn nhân khỏi nguồn nhiệt trước tiên.",
+    "Xả nước mát (không phải nước đá) liên tục khoảng 20 phút.",
+    "Tháo đồng hồ, trang sức sớm trước khi sưng; không gỡ vật đã dính vào da.",
+    "Che lỏng bằng màng bọc thực phẩm hoặc gạc sạch.",
+    "Không chọc bóng nước; không bôi kem đánh răng, nước mắm, dầu ăn; bỏng rộng hoặc ở mặt → đi viện."
+  ]
+}
