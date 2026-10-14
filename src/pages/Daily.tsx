@@ -92,7 +92,7 @@ export function Daily() {
       <div className="space-y-4 px-4">
         <section className="relative overflow-hidden rounded-card bg-gradient-to-br from-[#FFB74D] to-[#F4511E] p-4 text-white shadow-soft">
           <img
-            src={assets.proposal.characterPeace}
+            src={assets.mascot.happy}
             alt=""
             aria-hidden
             loading="lazy"

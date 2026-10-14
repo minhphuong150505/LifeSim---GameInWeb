@@ -42,7 +42,7 @@ export function Result({
       <Card tape className="overflow-hidden text-center">
         <div className="flex items-center justify-center gap-2">
           <motion.img
-            src={happy ? assets.proposal.characterPeace : assets.proposal.characterConfused}
+            src={happy ? assets.mascot.happy : assets.mascot.worried}
             alt=""
             aria-hidden
             className="h-28 w-auto"

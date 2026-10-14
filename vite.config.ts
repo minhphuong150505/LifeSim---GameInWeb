@@ -35,11 +35,13 @@ export default defineConfig({
       },
       workbox: {
         // Precache everything needed to play offline (map tiles stay network-only).
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,mp3,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,mp3,woff2,glb}'],
         navigateFallback: '/index.html',
       },
     }),
   ],
+  // three.js (lazy-loaded for the 3D mascot) is a single ~630 kB chunk.
+  build: { chunkSizeWarningLimit: 700 },
   test: {
     environment: 'jsdom',
     globals: true,
