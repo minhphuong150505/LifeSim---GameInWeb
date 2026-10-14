@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
@@ -8,16 +7,11 @@ import { Logo } from '../components/Logo';
 import { Sticker } from '../components/Sticker';
 import { assets, AVATAR_IDS, type AvatarId } from '../data/assets';
 import { DISCLAIMER, SLOGAN } from '../data/copy';
+import { Mascot3D } from '../features/mascot/Mascot3D';
 import { cn } from '../lib/cn';
 import { playSound } from '../lib/sound';
 import { useUserStore } from '../store/user';
 
-const AVATAR_NAMES: Record<AvatarId, string> = {
-  'avatar-1': 'Bình tĩnh',
-  'avatar-2': 'Lo lắng',
-  'avatar-3': 'Vui vẻ',
-  'avatar-4': 'Suy tư',
-};
 const MIN_NAME = 2;
 const MAX_NAME = 16;
 
@@ -58,15 +52,7 @@ export function Onboarding() {
               Luyện sơ cứu qua tình huống mô phỏng, mỗi ngày vài phút.
             </p>
           </div>
-          <motion.img
-            src={assets.proposal.characterHero}
-            alt="Nhân vật LifeSim đeo balo cứu thương"
-            width={440}
-            height={673}
-            className="-mr-4 h-44 w-auto shrink-0"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          />
+          <Mascot3D className="-mr-3 h-44 w-40 shrink-0" />
         </div>
 
         <form
@@ -93,9 +79,9 @@ export function Onboarding() {
 
             <fieldset className="mt-4">
               <legend className="font-display text-lg font-bold text-navy">Chọn avatar</legend>
-              <div className="mt-2 grid grid-cols-4 gap-2">
-                {AVATAR_IDS.map((id) => (
-                  <label key={id} className="flex cursor-pointer flex-col items-center gap-1">
+              <div className="mt-2 grid grid-cols-6 gap-1">
+                {AVATAR_IDS.map((id, i) => (
+                  <label key={id} className="flex cursor-pointer flex-col items-center">
                     <input
                       type="radio"
                       name="avatar"
@@ -113,9 +99,9 @@ export function Onboarding() {
                         avatar === id ? 'scale-105 bg-primary' : 'bg-transparent',
                       )}
                     >
-                      <Avatar id={id} size={60} />
+                      <Avatar id={id} size={44} />
                     </span>
-                    <span className="text-xs font-semibold text-navy">{AVATAR_NAMES[id]}</span>
+                    <span className="sr-only">Nhân vật {i + 1}</span>
                   </label>
                 ))}
               </div>

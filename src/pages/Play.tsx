@@ -169,7 +169,7 @@ function PlaySession({ scenario }: { scenario: Scenario }) {
                   <p className="mt-1 text-[15px] leading-relaxed text-ink">{scenario.intro}</p>
                 </div>
                 <img
-                  src={assets.proposal.characterThinking}
+                  src={assets.mascot.thinking}
                   alt=""
                   aria-hidden
                   className="h-24 w-auto shrink-0 self-end"

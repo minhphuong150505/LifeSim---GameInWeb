@@ -9,47 +9,42 @@
   "clues": [
     {
       "id": "hands",
-      "x": 42,
-      "y": 47,
-      "w": 21,
-      "h": 13,
+      "x": 41,
+      "y": 69,
+      "w": 20,
+      "h": 11,
       "label": "Hai tay ôm cổ",
       "description": "Ôm lấy cổ họng là dấu hiệu điển hình của người bị hóc dị vật."
     },
     {
       "id": "silent",
       "x": 67,
-      "y": 18,
-      "w": 27,
-      "h": 21,
+      "y": 30,
+      "w": 23,
+      "h": 16.5,
       "label": "Không nói, không ho được",
       "description": "Lan há miệng nhưng không phát ra tiếng – đường thở đã bị tắc nặng."
     },
     {
       "id": "face",
-      "x": 42,
-      "y": 28,
-      "w": 21,
-      "h": 18,
+      "x": 43,
+      "y": 55,
+      "w": 16,
+      "h": 13,
       "label": "Mặt đỏ rồi tím dần",
       "description": "Da mặt chuyển từ đỏ sang tím: cơ thể đang thiếu oxy, phải xử trí ngay."
     },
     {
       "id": "skewer",
-      "x": 6,
-      "y": 67,
-      "w": 28,
-      "h": 13,
+      "x": 0,
+      "y": 61,
+      "w": 24,
+      "h": 12,
       "label": "Xiên thịt viên ăn dở",
       "description": "Một viên thịt đang ăn dở – rất có thể đây là dị vật gây hóc."
     }
   ],
-  "requiredClueIds": [
-    "hands",
-    "silent",
-    "face",
-    "skewer"
-  ],
+  "requiredClueIds": ["hands", "silent", "face", "skewer"],
   "steps": [
     {
       "id": "ask",
@@ -146,12 +141,7 @@
           "text": "Vỗ mạnh 5 lần vào giữa hai bả vai bằng gót bàn tay"
         }
       ],
-      "correctOrder": [
-        "lean",
-        "blows",
-        "thrusts",
-        "repeat"
-      ],
+      "correctOrder": ["lean", "blows", "thrusts", "repeat"],
       "explanation": "Cho nạn nhân cúi về trước, vỗ lưng 5 lần; nếu chưa ra thì ấn bụng 5 lần (Heimlich) và lặp lại xen kẽ. Sau khi ấn bụng nên đi khám kiểm tra."
     },
     {

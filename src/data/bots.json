@@ -26,49 +26,49 @@
   {
     "id": "bot-05",
     "nickname": "Cà Phê Sữa",
-    "avatar": "avatar-1",
+    "avatar": "avatar-5",
     "skill": 0.67
   },
   {
     "id": "bot-06",
     "nickname": "Trà Đào",
-    "avatar": "avatar-2",
+    "avatar": "avatar-6",
     "skill": 0.775
   },
   {
     "id": "bot-07",
     "nickname": "Mây Lang Thang",
-    "avatar": "avatar-3",
+    "avatar": "avatar-7",
     "skill": 0.58
   },
   {
     "id": "bot-08",
     "nickname": "Bơ Đậu",
-    "avatar": "avatar-4",
+    "avatar": "avatar-8",
     "skill": 0.685
   },
   {
     "id": "bot-09",
     "nickname": "Tôm Hùm Nhỏ",
-    "avatar": "avatar-1",
+    "avatar": "avatar-9",
     "skill": 0.79
   },
   {
     "id": "bot-10",
     "nickname": "Kẹo Dẻo",
-    "avatar": "avatar-2",
+    "avatar": "avatar-10",
     "skill": 0.595
   },
   {
     "id": "bot-11",
     "nickname": "Nắng Sài Gòn",
-    "avatar": "avatar-3",
+    "avatar": "avatar-11",
     "skill": 0.7
   },
   {
     "id": "bot-12",
     "nickname": "Chuột Lang",
-    "avatar": "avatar-4",
+    "avatar": "avatar-12",
     "skill": 0.805
   },
   {
@@ -98,25 +98,25 @@
   {
     "id": "bot-17",
     "nickname": "Dế Mèn",
-    "avatar": "avatar-1",
+    "avatar": "avatar-5",
     "skill": 0.73
   },
   {
     "id": "bot-18",
     "nickname": "Mực Nướng",
-    "avatar": "avatar-2",
+    "avatar": "avatar-6",
     "skill": 0.835
   },
   {
     "id": "bot-19",
     "nickname": "Ong Vàng",
-    "avatar": "avatar-3",
+    "avatar": "avatar-7",
     "skill": 0.64
   },
   {
     "id": "bot-20",
     "nickname": "Khoai Lang",
-    "avatar": "avatar-4",
+    "avatar": "avatar-8",
     "skill": 0.745
   }
 ]

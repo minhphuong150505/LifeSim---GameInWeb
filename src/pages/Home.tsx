@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
@@ -8,6 +7,7 @@ import { SoundToggle } from '../components/SoundToggle';
 import { Sticker } from '../components/Sticker';
 import { assets } from '../data/assets';
 import { EVENT_NAME } from '../data/copy';
+import { Mascot3D } from '../features/mascot/Mascot3D';
 import { scenarios } from '../data/scenarios';
 import { activeStreak } from '../features/streak/streakLogic';
 import { toDateKey } from '../lib/date';
@@ -63,17 +63,7 @@ export function Home() {
                 Hôm nay luyện một tình huống để sẵn sàng cho ngày mai nhé!
               </p>
             </div>
-            <motion.img
-              src={assets.proposal.characterHero}
-              alt="Nhân vật LifeSim đeo balo cứu thương"
-              width={440}
-              height={673}
-              fetchPriority="high"
-              className="-mb-4 -mr-2 h-48 w-auto shrink-0"
-              initial={{ x: 24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 120, damping: 16 }}
-            />
+            <Mascot3D className="-mb-3 -mr-3 h-48 w-44 shrink-0" />
           </div>
         </div>
       </section>

@@ -93,7 +93,13 @@ Mỗi hotspot nên rộng/cao ≥ 13% để vùng chạm ≥ 44px trên màn 360
 
 ## Thay ảnh / âm thanh
 
-Mọi đường dẫn asset nằm ở **một chỗ**: `src/data/assets.ts`. Thay file trong `public/assets/…` (giữ tên) hoặc sửa đường dẫn trong file này. Ảnh cảnh hiện là **placeholder SVG** (`*-placeholder.svg`) – khi thay, nhớ chỉnh lại toạ độ `clues` trong JSON nếu bố cục thay đổi. Nguồn và license của từng asset: xem [`CREDITS.md`](./CREDITS.md).
+Mọi đường dẫn asset nằm ở **một chỗ**: `src/data/assets.ts`. Thay file trong `public/assets/…` (giữ tên) hoặc sửa đường dẫn trong file này. Khi thay ảnh cảnh, nhớ chỉnh lại toạ độ `clues` trong JSON nếu bố cục thay đổi.
+
+### Nhân vật 3D
+
+- Mascot ở Trang chủ/Onboarding là model 3D thật (`public/assets/models/mascot.glb`, Three.js): kéo để xoay, chạm để vẫy tay. Three.js chỉ tải sau khi trang đã hiện (ảnh poster hiện trước), tự dừng khi ra khỏi màn hình, và quay về ảnh tĩnh nếu máy không hỗ trợ WebGL.
+- Cảnh chơi, avatar và ảnh mascot ở các màn khác được **render từ chính các model 3D đó** (giữ vị trí manh mối cố định, nhẹ cho điện thoại).
+- Render lại: chạy một static server trong `scripts/render3d/` (cần symlink `three` → `node_modules/three`, `chars` → thư mục GLB của Kenney Mini Characters, `furn` → GLTF của Furniture Kit), rồi `node shoot.mjs classroom canteen lab posterHero …`. Dùng `overlay.py` để kiểm tra ô manh mối. Nguồn và license của từng asset: xem [`CREDITS.md`](./CREDITS.md).
 
 Các script trích asset từ proposal nằm trong `scripts/` (Python: `pymupdf`, `pillow`, `rembg`); chỉ cần chạy lại khi muốn trích lại ảnh.
 

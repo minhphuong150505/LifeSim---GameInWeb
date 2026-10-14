@@ -9,47 +9,42 @@
   "clues": [
     {
       "id": "motionless",
-      "x": 61,
-      "y": 71,
-      "w": 27,
-      "h": 13,
+      "x": 42,
+      "y": 79,
+      "w": 20,
+      "h": 12,
       "label": "Nằm bất động",
       "description": "Minh nằm im, tay chân không cử động dù xung quanh rất ồn."
     },
     {
       "id": "chest",
-      "x": 35.5,
-      "y": 70,
-      "w": 25,
-      "h": 14,
+      "x": 31,
+      "y": 67,
+      "w": 22,
+      "h": 11,
       "label": "Ngực không phập phồng",
       "description": "Lồng ngực không nhô lên hạ xuống – dấu hiệu bạn có thể đã ngừng thở."
     },
     {
       "id": "lips",
-      "x": 20,
-      "y": 69.5,
-      "w": 15,
-      "h": 15,
-      "label": "Môi tím tái",
-      "description": "Môi chuyển màu tím: cơ thể đang thiếu oxy nghiêm trọng."
+      "x": 30,
+      "y": 54,
+      "w": 18,
+      "h": 13,
+      "label": "Mặt và môi tím tái",
+      "description": "Da mặt, môi chuyển màu tím tái: cơ thể đang thiếu oxy nghiêm trọng."
     },
     {
       "id": "aed",
-      "x": 78,
-      "y": 22,
-      "w": 16,
-      "h": 18,
+      "x": 68,
+      "y": 4.5,
+      "w": 19,
+      "h": 19,
       "label": "Hộp AED ở hành lang",
       "description": "Máy khử rung tim tự động (AED) treo ngay ngoài cửa lớp – cần nhờ người lấy ngay."
     }
   ],
-  "requiredClueIds": [
-    "motionless",
-    "chest",
-    "lips",
-    "aed"
-  ],
+  "requiredClueIds": ["motionless", "chest", "lips", "aed"],
   "steps": [
     {
       "id": "scene-safety",
@@ -146,12 +141,7 @@
           "text": "Gọi 115, bật loa ngoài, nói rõ địa điểm"
         }
       ],
-      "correctOrder": [
-        "shout",
-        "call",
-        "aed",
-        "breath"
-      ],
+      "correctOrder": ["shout", "call", "aed", "breath"],
       "explanation": "Gọi người hỗ trợ, gọi 115 và cho người đi lấy AED càng sớm càng tốt; bật loa ngoài để vừa nghe hướng dẫn vừa sơ cứu."
     },
     {
