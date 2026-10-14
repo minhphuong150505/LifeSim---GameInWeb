@@ -1,0 +1,5 @@
+dist
+node_modules
+proposal
+*.pdf
+package-lock.json

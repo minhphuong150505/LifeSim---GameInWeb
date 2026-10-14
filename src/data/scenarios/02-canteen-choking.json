@@ -1,0 +1,230 @@
+{
+  "id": "canteen-choking",
+  "title": "Hóc dị vật ở căng tin",
+  "topic": "choking",
+  "location": "Căng tin",
+  "difficulty": 1,
+  "background": "canteen",
+  "intro": "Giờ ăn trưa, Lan vừa ăn thịt viên xiên vừa cười nói. Bỗng bạn ấy đứng bật dậy, vẻ mặt hoảng sợ. Chuyện gì đang xảy ra?",
+  "clues": [
+    {
+      "id": "hands",
+      "x": 42,
+      "y": 47,
+      "w": 21,
+      "h": 13,
+      "label": "Hai tay ôm cổ",
+      "description": "Ôm lấy cổ họng là dấu hiệu điển hình của người bị hóc dị vật."
+    },
+    {
+      "id": "silent",
+      "x": 67,
+      "y": 18,
+      "w": 27,
+      "h": 21,
+      "label": "Không nói, không ho được",
+      "description": "Lan há miệng nhưng không phát ra tiếng – đường thở đã bị tắc nặng."
+    },
+    {
+      "id": "face",
+      "x": 42,
+      "y": 28,
+      "w": 21,
+      "h": 18,
+      "label": "Mặt đỏ rồi tím dần",
+      "description": "Da mặt chuyển từ đỏ sang tím: cơ thể đang thiếu oxy, phải xử trí ngay."
+    },
+    {
+      "id": "skewer",
+      "x": 6,
+      "y": 67,
+      "w": 28,
+      "h": 13,
+      "label": "Xiên thịt viên ăn dở",
+      "description": "Một viên thịt đang ăn dở – rất có thể đây là dị vật gây hóc."
+    }
+  ],
+  "requiredClueIds": [
+    "hands",
+    "silent",
+    "face",
+    "skewer"
+  ],
+  "steps": [
+    {
+      "id": "ask",
+      "prompt": "Thấy Lan ôm cổ, bạn nên làm gì trước tiên?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Hỏi nhanh: “Bạn bị hóc phải không?”",
+          "correct": true,
+          "feedback": "Đúng! Hỏi để xác định: nếu bạn gật đầu mà không nói được, đường thở đã tắc nặng.",
+          "points": 10
+        },
+        {
+          "id": "b",
+          "text": "Đưa ngay cốc nước cho bạn uống",
+          "correct": false,
+          "feedback": "Sai. Uống nước không đẩy được dị vật ra và có thể gây sặc nặng hơn.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Dùng ngón tay móc vào họng bạn",
+          "correct": false,
+          "feedback": "Sai. Móc họng khi không nhìn thấy dị vật có thể đẩy nó vào sâu hơn.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Bảo bạn nằm xuống nghỉ một lát",
+          "correct": false,
+          "feedback": "Sai. Nằm xuống không giúp dị vật ra và làm mất thời gian quý giá.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "coughing",
+      "prompt": "Giả sử Lan vẫn còn ho được thành tiếng. Bạn nên làm gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Cho uống nước để dị vật trôi xuống",
+          "correct": false,
+          "feedback": "Sai. Không cho ăn uống khi đang hóc – nguy cơ sặc và tắc hoàn toàn.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Vỗ lưng thật mạnh ngay lập tức",
+          "correct": false,
+          "feedback": "Chưa đúng. Khi còn ho hiệu quả, ho chính là cách tống dị vật tốt nhất. Chỉ vỗ lưng khi bạn không ho được nữa.",
+          "points": 3
+        },
+        {
+          "id": "c",
+          "text": "Khuyến khích bạn ho mạnh và ở bên theo dõi",
+          "correct": true,
+          "feedback": "Đúng! Còn ho được nghĩa là đường thở chỉ tắc một phần – hãy động viên ho mạnh và sẵn sàng hỗ trợ.",
+          "points": 10
+        },
+        {
+          "id": "d",
+          "text": "Dùng ngón tay móc họng",
+          "correct": false,
+          "feedback": "Sai. Không móc họng mù – có thể đẩy dị vật vào sâu hơn.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "back-blows",
+      "prompt": "Lan KHÔNG ho, không nói được nữa. Chạm lần lượt để sắp xếp các bước xử trí.",
+      "timeLimitSec": 45,
+      "type": "order",
+      "orderItems": [
+        {
+          "id": "thrusts",
+          "text": "Chưa ra: đứng phía sau, ấn bụng 5 lần (trên rốn, giật vào trong và lên trên)"
+        },
+        {
+          "id": "lean",
+          "text": "Đứng bên cạnh, đỡ ngực và cho bạn hơi cúi người về phía trước"
+        },
+        {
+          "id": "repeat",
+          "text": "Lặp lại xen kẽ 5 vỗ lưng – 5 ấn bụng tới khi dị vật bật ra"
+        },
+        {
+          "id": "blows",
+          "text": "Vỗ mạnh 5 lần vào giữa hai bả vai bằng gót bàn tay"
+        }
+      ],
+      "correctOrder": [
+        "lean",
+        "blows",
+        "thrusts",
+        "repeat"
+      ],
+      "explanation": "Cho nạn nhân cúi về trước, vỗ lưng 5 lần; nếu chưa ra thì ấn bụng 5 lần (Heimlich) và lặp lại xen kẽ. Sau khi ấn bụng nên đi khám kiểm tra."
+    },
+    {
+      "id": "lean-why",
+      "prompt": "Vì sao phải cho Lan cúi người về phía trước khi vỗ lưng?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Để dị vật văng ra ngoài miệng thay vì tụt sâu xuống",
+          "correct": true,
+          "feedback": "Đúng! Tư thế cúi về trước giúp trọng lực hỗ trợ đẩy dị vật ra ngoài.",
+          "points": 10
+        },
+        {
+          "id": "b",
+          "text": "Không cần – vỗ lưng khi đứng thẳng cũng như nhau",
+          "correct": false,
+          "feedback": "Sai. Vỗ lưng khi nạn nhân đứng thẳng có thể làm dị vật rơi sâu hơn vào đường thở.",
+          "points": 0
+        },
+        {
+          "id": "c",
+          "text": "Để bạn ấy đỡ mỏi chân",
+          "correct": false,
+          "feedback": "Sai. Mục đích là để dị vật đi ra ngoài miệng chứ không tụt xuống.",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "id": "unconscious",
+      "prompt": "Dị vật chưa ra, Lan lịm dần rồi bất tỉnh. Bạn làm gì?",
+      "timeLimitSec": 20,
+      "type": "single",
+      "options": [
+        {
+          "id": "a",
+          "text": "Đổ nước vào miệng cho bạn tỉnh",
+          "correct": false,
+          "feedback": "Sai. Tuyệt đối không đổ nước vào miệng người bất tỉnh.",
+          "points": 0
+        },
+        {
+          "id": "b",
+          "text": "Đỡ bạn nằm xuống sàn, gọi 115 và bắt đầu ép tim (CPR)",
+          "correct": true,
+          "feedback": "Đúng! Khi nạn nhân bất tỉnh: đặt nằm ngửa, gọi 115 và ép tim ngay. Chỉ lấy dị vật khi nhìn thấy rõ trong miệng.",
+          "points": 10
+        },
+        {
+          "id": "c",
+          "text": "Thò ngón tay vào sâu trong họng để tìm dị vật",
+          "correct": false,
+          "feedback": "Sai. Không móc họng khi không nhìn thấy dị vật – có thể đẩy nó vào sâu hơn.",
+          "points": 0
+        },
+        {
+          "id": "d",
+          "text": "Tiếp tục giữ bạn đứng để vỗ lưng",
+          "correct": false,
+          "feedback": "Sai. Người bất tỉnh cần được đặt nằm, gọi 115 và ép tim.",
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "takeaways": [
+    "Hỏi “Bạn bị hóc phải không?” – không nói, không ho được là tắc nặng.",
+    "Còn ho được → khuyến khích ho mạnh, chưa cần can thiệp.",
+    "Không ho được → cúi người về trước, 5 lần vỗ lưng rồi 5 lần ấn bụng, xen kẽ.",
+    "Bất tỉnh → gọi 115 và bắt đầu CPR.",
+    "Không cho uống nước, không móc họng mù, không vỗ lưng khi đứng thẳng."
+  ]
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+.vercel
+*.local
+.DS_Store
+
+# Proposal source file is kept local, not published
+*.pdf

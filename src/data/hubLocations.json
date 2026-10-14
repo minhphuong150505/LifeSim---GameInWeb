@@ -1,0 +1,146 @@
+[
+  {
+    "id": "loc-a",
+    "name": "Khóa sơ cứu cơ bản – Điểm A (demo)",
+    "lat": 10.8494,
+    "lng": 106.7537,
+    "address": "Khu trung tâm, TP. Thủ Đức",
+    "days": [
+      6
+    ],
+    "time": "08:30–11:30",
+    "priceVnd": 0,
+    "topics": [
+      "cpr",
+      "choking"
+    ],
+    "level": "Cơ bản"
+  },
+  {
+    "id": "loc-b",
+    "name": "Thực hành ép tim & AED – Điểm B (demo)",
+    "lat": 10.87,
+    "lng": 106.803,
+    "address": "Khu đại học, TP. Thủ Đức",
+    "days": [
+      0
+    ],
+    "time": "14:00–17:00",
+    "priceVnd": 150000,
+    "topics": [
+      "cpr"
+    ],
+    "level": "Cơ bản"
+  },
+  {
+    "id": "loc-c",
+    "name": "Sơ cứu bỏng và vết thương – Điểm C (demo)",
+    "lat": 10.9068,
+    "lng": 106.7694,
+    "address": "Khu trung tâm, TP. Dĩ An",
+    "days": [
+      3,
+      6
+    ],
+    "time": "18:00–20:00",
+    "priceVnd": 90000,
+    "topics": [
+      "burn",
+      "bleeding"
+    ],
+    "level": "Cơ bản"
+  },
+  {
+    "id": "loc-d",
+    "name": "Xử trí hóc dị vật cho mọi lứa tuổi – Điểm D (demo)",
+    "lat": 10.8231,
+    "lng": 106.7297,
+    "address": "Khu Thảo Điền, TP. Thủ Đức",
+    "days": [
+      2,
+      4
+    ],
+    "time": "18:30–20:30",
+    "priceVnd": 120000,
+    "topics": [
+      "choking"
+    ],
+    "level": "Cơ bản"
+  },
+  {
+    "id": "loc-e",
+    "name": "Sơ cứu học đường nâng cao – Điểm E (demo)",
+    "lat": 10.7769,
+    "lng": 106.7009,
+    "address": "Khu trung tâm, Quận 1",
+    "days": [
+      6,
+      0
+    ],
+    "time": "08:00–16:00",
+    "priceVnd": 450000,
+    "topics": [
+      "cpr",
+      "seizure",
+      "fainting",
+      "bleeding"
+    ],
+    "level": "Nâng cao"
+  },
+  {
+    "id": "loc-f",
+    "name": "Workshop co giật – ngất – chảy máu cam – Điểm F (demo)",
+    "lat": 10.8015,
+    "lng": 106.712,
+    "address": "Khu Bình Thạnh",
+    "days": [
+      5
+    ],
+    "time": "18:00–20:00",
+    "priceVnd": 80000,
+    "topics": [
+      "seizure",
+      "fainting",
+      "nosebleed"
+    ],
+    "level": "Cơ bản"
+  },
+  {
+    "id": "loc-g",
+    "name": "Sơ cứu ngoài trời & dã ngoại – Điểm G (demo)",
+    "lat": 10.894,
+    "lng": 106.743,
+    "address": "Khu Bình Thắng, TP. Dĩ An",
+    "days": [
+      0
+    ],
+    "time": "07:30–11:30",
+    "priceVnd": 250000,
+    "topics": [
+      "bleeding",
+      "burn",
+      "fainting"
+    ],
+    "level": "Trung cấp"
+  },
+  {
+    "id": "loc-h",
+    "name": "CLB luyện tập sơ cứu hằng tuần – Điểm H (demo)",
+    "lat": 10.8411,
+    "lng": 106.8098,
+    "address": "Khu công nghệ cao, TP. Thủ Đức",
+    "days": [
+      1,
+      4
+    ],
+    "time": "17:30–19:00",
+    "priceVnd": 0,
+    "topics": [
+      "cpr",
+      "choking",
+      "burn",
+      "nosebleed"
+    ],
+    "level": "Mọi cấp độ"
+  }
+]
