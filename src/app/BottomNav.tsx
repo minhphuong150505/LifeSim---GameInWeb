@@ -27,7 +27,7 @@ const TABS: Tab[] = [
   },
   {
     to: '/scenarios',
-    label: 'Tình huống',
+    label: 'Bản đồ',
     icon: icon(
       <>
         <rect x="3" y="6" width="18" height="14" rx="3" />
@@ -68,7 +68,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Điều hướng chính"
-      className="fixed bottom-0 left-1/2 z-[1000] w-full max-w-[480px] -translate-x-1/2 rounded-t-3xl border-t border-navy/10 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_-8px_rgb(31_58_95/0.25)]"
+      className="wood fixed bottom-0 left-1/2 z-[1000] w-full max-w-[480px] -translate-x-1/2 rounded-t-3xl border-x-[2.5px] border-t-[2.5px] border-navy pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="grid grid-cols-5">
         {TABS.map((tab) => (
@@ -78,8 +78,8 @@ export function BottomNav() {
               end={tab.to === '/'}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold',
-                  isActive ? 'text-primary-dark' : 'text-muted',
+                  'flex min-h-16 flex-col items-center justify-center gap-0.5 font-display text-[13px]',
+                  isActive ? 'text-navy' : 'text-navy/75',
                 )
               }
             >
@@ -88,7 +88,7 @@ export function BottomNav() {
                   <span
                     className={cn(
                       'grid h-8 w-12 place-items-center rounded-full transition-colors',
-                      isActive && 'bg-primary/12',
+                      isActive ? 'ink-border bg-accent' : 'border-[2.5px] border-transparent',
                     )}
                   >
                     {tab.icon}

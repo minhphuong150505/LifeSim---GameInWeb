@@ -1,5 +1,5 @@
 import type { TopicStats } from '../../store/progress';
-import type { Topic } from '../scenario/types';
+import type { Topic } from '../../data/topics';
 
 export type HubLocation = {
   id: string;
@@ -16,7 +16,13 @@ export type HubLocation = {
 };
 
 export type LatLng = { lat: number; lng: number };
-export type HubFilters = { maxKm: number | null; day: number | null; budgetVnd: number | null };
+export type HubFilters = {
+  maxKm: number | null;
+  day: number | null;
+  budgetVnd: number | null;
+  /** Nhu cầu: the skill the player wants to practise. */
+  topic: Topic | null;
+};
 export type RankedLocation = HubLocation & { distanceKm: number; recommended: boolean };
 
 /** Fallback map center when geolocation is denied: Thủ Đức. */
@@ -62,7 +68,8 @@ export function rankLocations(
       (loc) =>
         (filters.maxKm === null || loc.distanceKm <= filters.maxKm) &&
         (filters.day === null || loc.days.includes(filters.day)) &&
-        (filters.budgetVnd === null || loc.priceVnd <= filters.budgetVnd),
+        (filters.budgetVnd === null || loc.priceVnd <= filters.budgetVnd) &&
+        (filters.topic === null || loc.topics.includes(filters.topic)),
     )
     .sort((a, b) => Number(b.recommended) - Number(a.recommended) || a.distanceKm - b.distanceKm);
 }

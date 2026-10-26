@@ -1,11 +1,11 @@
 import { STREAK_MILESTONES } from '../features/streak/streakLogic';
-import type { ScenarioRecord } from '../store/progress';
+import type { RoundRecord } from '../store/progress';
 
 export type BadgeInfo = { id: string; emoji: string; label: string; hint: string; earned: boolean };
 
 type BadgeInput = {
-  scenarios: Record<string, ScenarioRecord>;
-  scenarioCount: number;
+  rounds: Record<string, RoundRecord>;
+  roundCount: number;
   bestStreak: number;
   teamWins: number;
 };
@@ -14,33 +14,33 @@ const STREAK_EMOJI: Record<number, string> = { 3: '🩹', 7: '🎁', 14: '🏅' 
 
 /** Badges are derived from saved progress, so they never go out of sync. */
 export function computeBadges({
-  scenarios,
-  scenarioCount,
+  rounds,
+  roundCount,
   bestStreak,
   teamWins,
 }: BadgeInput): BadgeInfo[] {
-  const records = Object.values(scenarios);
+  const cleared = Object.values(rounds).filter((r) => r.wins > 0);
   return [
     {
       id: 'first-rescue',
       emoji: '🚑',
       label: 'Ca đầu tiên',
-      hint: 'Hoàn thành 1 tình huống',
-      earned: records.length >= 1,
+      hint: 'Vượt qua 1 round',
+      earned: cleared.length >= 1,
     },
     {
       id: 'all-clear',
       emoji: '🎓',
       label: 'Tốt nghiệp',
-      hint: 'Hoàn thành mọi tình huống',
-      earned: scenarioCount > 0 && records.length >= scenarioCount,
+      hint: 'Vượt qua mọi round',
+      earned: roundCount > 0 && cleared.length >= roundCount,
     },
     {
       id: 'three-stars',
       emoji: '🌟',
-      label: 'Chuẩn chỉnh',
-      hint: 'Đạt 3 sao ở 1 tình huống',
-      earned: records.some((r) => r.bestStars >= 3),
+      label: 'Không tia sét',
+      hint: 'Đạt 3 sao ở 1 round',
+      earned: cleared.some((r) => r.bestStars >= 3),
     },
     ...STREAK_MILESTONES.map((m) => ({
       id: `streak-${m}`,

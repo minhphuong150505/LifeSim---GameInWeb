@@ -15,6 +15,9 @@ const Leaderboard = lazy(() =>
 );
 const Hub = lazy(() => import('../pages/Hub').then((m) => ({ default: m.Hub })));
 const Profile = lazy(() => import('../pages/Profile').then((m) => ({ default: m.Profile })));
+const ArtGallery = import.meta.env.DEV
+  ? lazy(() => import('../dev/ArtGallery').then((m) => ({ default: m.ArtGallery })))
+  : null;
 
 function RequireOnboarding() {
   const onboarded = useUserStore((s) => s.onboarded);
@@ -37,6 +40,7 @@ export function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/onboarding" element={<Onboarding />} />
+            {ArtGallery && <Route path="/dev/art" element={<ArtGallery />} />}
             <Route element={<RequireOnboarding />}>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Home />} />

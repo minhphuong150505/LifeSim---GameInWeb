@@ -13,8 +13,9 @@ export type LeaderboardEntry = {
 };
 
 export const PLAYER_ENTRY_ID = 'player';
-const BOT_MIN_SCORE = 320;
-const BOT_MAX_SCORE = 980;
+// Scaled to a day of Core Simulation: the three rounds of a scenario add up to ~2,300 points.
+const BOT_MIN_SCORE = 400;
+const BOT_MAX_SCORE = 2100;
 
 /** Simulated score of a bot for one day; stable for the whole day. */
 export function botDailyScore(botId: string, dateKey: DateKey): number {
@@ -59,7 +60,8 @@ export function buildWeeklyLeaderboard(
   bots: readonly Bot[],
   today: DateKey,
   player: Omit<PlayerEntry, 'score'>,
-  playerDailyBest: Record<DateKey, number>,
+  /** Player's Core Simulation score per day. */
+  playerDailyScores: Record<DateKey, number>,
 ): LeaderboardEntry[] {
   const days = weekDaysSoFar(today);
   const rows = bots.map((b) => ({
@@ -69,6 +71,6 @@ export function buildWeeklyLeaderboard(
     score: days.reduce((sum, d) => sum + botDailyScore(b.id, d), 0),
     isPlayer: false,
   }));
-  const score = days.reduce((sum, d) => sum + (playerDailyBest[d] ?? 0), 0);
+  const score = days.reduce((sum, d) => sum + (playerDailyScores[d] ?? 0), 0);
   return rank([...rows, playerRow({ ...player, score })]);
 }

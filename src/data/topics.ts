@@ -1,4 +1,4 @@
-import type { Topic } from '../features/scenario/types';
+export type Topic = 'cpr' | 'choking' | 'burn' | 'bleeding' | 'seizure' | 'fainting' | 'nosebleed';
 
 export const TOPIC_LABELS: Record<Topic, string> = {
   cpr: 'Ép tim (CPR)',

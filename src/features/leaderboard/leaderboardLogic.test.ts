@@ -37,9 +37,10 @@ describe('leaderboard seed', () => {
     expect(today).not.toEqual(tomorrow);
   });
   it('inserts the player and ranks by score descending', () => {
-    const board = buildDailyLeaderboard(bots, '2026-10-14', { ...me, score: 1000 });
+    // Above the bots' daily ceiling (2,100), i.e. a near-perfect day of Core Simulation.
+    const board = buildDailyLeaderboard(bots, '2026-10-14', { ...me, score: 2200 });
     expect(board).toHaveLength(21);
-    expect(board[0]).toMatchObject({ isPlayer: true, rank: 1, score: 1000 });
+    expect(board[0]).toMatchObject({ isPlayer: true, rank: 1, score: 2200 });
     expect(board.map((e) => e.score)).toEqual([...board.map((e) => e.score)].sort((x, y) => y - x));
     const last = buildDailyLeaderboard(bots, '2026-10-14', { ...me, score: 0 });
     expect(last[20]?.isPlayer).toBe(true);
@@ -93,7 +94,7 @@ describe('team rescue simulation', () => {
 
 describe('practice hub ranking', () => {
   const locations = locationsJson as HubLocation[];
-  const all = { maxKm: null, day: null, budgetVnd: null };
+  const all = { maxKm: null, day: null, budgetVnd: null, topic: null };
   it('ships 8 demo locations clearly labelled as demo', () => {
     expect(locations).toHaveLength(8);
     expect(locations.every((l) => l.name.includes('(demo)'))).toBe(true);
@@ -107,6 +108,16 @@ describe('practice hub ranking', () => {
         choking: { correct: 0, total: 0 },
       }),
     ).toBe('burn');
+  });
+  it('filters by need (topic)', () => {
+    const nosebleed = rankLocations(
+      locations,
+      DEFAULT_CENTER,
+      { ...all, topic: 'nosebleed' },
+      null,
+    );
+    expect(nosebleed.length).toBeGreaterThan(0);
+    expect(nosebleed.every((l) => l.topics.includes('nosebleed'))).toBe(true);
   });
   it('filters by budget, day and distance and puts recommended courses first', () => {
     expect(

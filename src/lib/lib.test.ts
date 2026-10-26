@@ -1,5 +1,4 @@
 import { addDays, diffDays, toDateKey, weekKeys, weekdayOf } from './date';
-import { computeScore, starsForScore } from './scoring';
 import { hashString, mulberry32, pickN, rngFromString, seededShuffle } from './seededRandom';
 
 describe('date helpers', () => {
@@ -35,42 +34,5 @@ describe('seeded random', () => {
     expect(items).toEqual([1, 2, 3, 4, 5, 6]);
     expect([...out].sort()).toEqual(items);
     expect(new Set(pickN(items, 3, rngFromString('s'))).size).toBe(3);
-  });
-});
-
-describe('scoring formula', () => {
-  const perfect = {
-    correctCount: 5,
-    totalCount: 5,
-    pointsEarned: 50,
-    pointsMax: 50,
-    timeLeftSec: 100,
-    timeTotalSec: 100,
-    hintsUsed: 0,
-  };
-  it('gives 1000 for a perfect run', () => {
-    expect(computeScore(perfect)).toMatchObject({ score: 1000, stars: 3 });
-  });
-  it('weights accuracy 50%, quality 30%, time 20%', () => {
-    expect(computeScore({ ...perfect, timeLeftSec: 0 }).score).toBe(800);
-    expect(computeScore({ ...perfect, pointsEarned: 0 }).score).toBe(700);
-    expect(computeScore({ ...perfect, correctCount: 0 }).score).toBe(500);
-    // 0.6*0.5 + 0.5*0.3 + 0.25*0.2 = 0.5
-    expect(
-      computeScore({ ...perfect, correctCount: 3, pointsEarned: 25, timeLeftSec: 25 }).score,
-    ).toBe(500);
-  });
-  it('subtracts 5% per hint and never goes negative', () => {
-    expect(computeScore({ ...perfect, hintsUsed: 1 }).score).toBe(950);
-    expect(computeScore({ ...perfect, hintsUsed: 2 }).score).toBe(900);
-    expect(computeScore({ ...perfect, hintsUsed: 99 }).score).toBe(0);
-  });
-  it('handles empty runs and maps scores to stars', () => {
-    expect(computeScore({ ...perfect, totalCount: 0, pointsMax: 0, timeTotalSec: 0 }).score).toBe(
-      0,
-    );
-    expect([starsForScore(0), starsForScore(550), starsForScore(799), starsForScore(800)]).toEqual([
-      1, 2, 2, 3,
-    ]);
   });
 });

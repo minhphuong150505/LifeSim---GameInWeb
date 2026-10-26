@@ -4,9 +4,33 @@
 
 Bản demo chơi được của LifeSim: game web mô phỏng sơ cứu cho người trẻ Việt Nam. 100% frontend, không backend, không API key; dữ liệu người chơi lưu trong `localStorage`.
 
-**Tính năng:** tìm manh mối trong hiện trường → ra quyết định có đếm giờ → mini-game ép tim theo nhịp · Daily Rescue Streak · Bảng xếp hạng (mô phỏng) · Team Rescue 5v5 (đấu với bot) · Practice Hub (bản đồ khóa học demo) · PWA chơi offline.
+Nội dung và cơ chế theo tài liệu **"Nội dung game Lifesim_Dev"**.
+
+| Tính năng                 | Cơ chế                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Core Emergency Simulation | Câu chuyện → câu hỏi A/B/C có hình minh hoạ → trái tim / tia sét → băng gạc → mở khoá round tiếp theo |
+| Daily Rescue Streak       | Mỗi ngày 3 câu nhanh, **2 lượt thử**, đúng ≥ 2 câu để giữ chuỗi; quà băng gạc ở mốc 3 / 7 / 14 ngày   |
+| Daily Leaderboard         | Xếp hạng theo điểm Core Simulation trong ngày (bot mô phỏng), có thêm tab tuần                        |
+| Practice Hub              | Lọc khóa học theo khu vực (khoảng cách), thời gian (ngày học), ngân sách và **nhu cầu** (chủ đề)      |
+| 5v5 Event                 | Bản thử nghiệm đấu với bot – cơ chế chính thức chưa chốt                                              |
 
 **Stack:** Vite · React · TypeScript (strict) · Tailwind CSS · React Router · Zustand (persist) · Framer Motion · React-Leaflet + OpenStreetMap · Howler.js · vite-plugin-pwa · Vitest.
+
+## Core Emergency Simulation
+
+**Tình huống 1 – Chảy máu cam** gồm 3 round, độ khó tăng dần: 1.1 _Chảy máu cam nhẹ_ (+20 băng gạc), 1.2 _Lời khuyên trái chiều_ (+25), 1.3 _Máu chảy không ngừng_ (+30). Các tình huống Ép tim, Hóc dị vật, Bỏng hiển thị "Sắp ra mắt" trên bản đồ.
+
+- **Mở đầu:** bối cảnh → lời thoại từng nhân vật (chạm để tiếp) → nhiệm vụ.
+- **Trả lời đúng:** +1 trái tim, hiện giải thích, bấm **"Đã hiểu"**; cảnh phòng khách đổi theo (em trai cúi về trước, bóp mũi, thở miệng, đồng hồ 15 phút…) và ô _Cận cảnh_ cho thấy tư thế nhìn nghiêng.
+- **Trả lời sai:** +1 tia sét, chọn lại đến khi đúng. **3 tia sét = thua**, chơi lại tốn **10 băng gạc** hoặc xem quảng cáo.
+- **Thắng:** sao theo số tia sét (0 → 3 sao), nhận băng gạc x1 hoặc **x2 khi xem quảng cáo**.
+- **Vật dụng:** mua trong **Cửa hàng** bằng băng gạc → vào **Túi vật dụng** → dùng ngay trong round:
+  - 1.2 câu 3: chạm đúng vị trí bóp trên hình cận cảnh mũi.
+  - 1.2 câu 5: mua **túi đá chườm lạnh (40)**, kéo thả lên mũi em trai (không bắt buộc).
+  - 1.3 câu 2: mua **điện thoại (30)**, bấm **115** và gọi (cuộc gọi mô phỏng).
+- Người chơi mới có **50 băng gạc** quà chào mừng. Quảng cáo là **mô phỏng** (đếm ngược 5 giây, không có mạng quảng cáo thật).
+
+Điểm xếp hạng mỗi round = (100 × số câu + 50 × số tia sét còn lại) × hệ số độ khó (1 / 1,25 / 1,5). Điểm ngày = tổng điểm cao nhất của từng round trong ngày. Xem `src/features/sim/engine.ts`.
 
 ## Cài đặt & chạy
 
@@ -37,93 +61,42 @@ Mẹo: mở DevTools → chế độ thiết bị (360×740 hoặc 390×844). Tr
 
 Sau khi deploy, mở trên điện thoại → "Thêm vào màn hình chính" để cài như một app (PWA). Asset được cache để chơi offline; riêng ô bản đồ ở Practice Hub cần mạng.
 
-## Thêm tình huống mới (chỉ cần JSON)
+## Thêm tình huống / round mới
 
-1. Tạo file trong `src/data/scenarios/`, ví dụ `04-yard-nosebleed.json`. **Tên file quyết định thứ tự** màn chơi và thứ tự mở khóa.
-2. Điền theo kiểu `Scenario` trong `src/features/scenario/types.ts`:
+1. Tạo file dữ liệu trong `src/data/sim/` theo mẫu `nosebleed.ts` (kiểu `SimScenario` trong `src/features/sim/types.ts`): mỗi round có `intro` (bối cảnh / lời thoại / nhiệm vụ), `questions` (3 đáp án `a | b | c`, `correctId`, `explanation`), `effect` (thay đổi cảnh sau khi đúng) và `task` tuỳ chọn (`nose-tap`, `ice-pack`, `call-115`).
+2. Thêm scenario vào mảng `simScenarios` trong `src/data/sim/index.ts` (thứ tự mảng = thứ tự mở khoá) và bỏ nó khỏi `upcomingScenarios`.
+3. Mỗi đáp án trỏ tới một hình minh hoạ trong `src/features/sim/optionArt.tsx` (`art: 'pose-forward'`…); thêm hình mới vào bảng `ART` ở đó.
+4. Chạy `npm test` – test dữ liệu kiểm tra mỗi câu có đúng 1 đáp án hợp lệ và hình minh hoạ tồn tại.
 
-```jsonc
-{
-  "id": "yard-nosebleed",
-  "title": "Chảy máu cam ở sân trường",
-  "topic": "nosebleed", // cpr | choking | burn | bleeding | seizure | fainting | nosebleed
-  "location": "Sân trường",
-  "difficulty": 1, // 1 | 2 | 3
-  "background": "yard", // key trong assets.scenes, hoặc đường dẫn ảnh trực tiếp
-  "intro": "…",
-  "clues": [
-    // hotspot theo % của ảnh nền (x, y = góc trên-trái)
-    { "id": "blood", "x": 40, "y": 30, "w": 15, "h": 15, "label": "…", "description": "…" },
-  ],
-  "requiredClueIds": ["blood"], // phải tìm đủ mới được sang bước quyết định
-  "steps": [
-    {
-      "id": "s1",
-      "type": "single",
-      "prompt": "…",
-      "timeLimitSec": 20,
-      "options": [{ "id": "a", "text": "…", "correct": true, "feedback": "…", "points": 10 }],
-    },
-    {
-      "id": "s2",
-      "type": "order",
-      "prompt": "…",
-      "timeLimitSec": 40,
-      "orderItems": [{ "id": "x", "text": "…" }],
-      "correctOrder": ["x"],
-      "explanation": "…",
-    },
-    {
-      "id": "s3",
-      "type": "rhythm",
-      "prompt": "…",
-      "timeLimitSec": 15,
-      "rhythm": { "minBpm": 100, "maxBpm": 120, "durationSec": 15 },
-      "explanation": "…",
-    },
-  ],
-  "takeaways": ["…"],
-}
-```
+## Đồ hoạ
 
-3. Thêm ảnh nền vào `public/assets/scenes/` và khai báo key trong `src/data/assets.ts` (mục `scenes`).
-4. Chạy `npm test` – test "bundled scenario data" tự kiểm tra tính nhất quán (clue hợp lệ, mỗi câu có đúng 1 đáp án đúng…). Cập nhật danh sách id mong đợi trong `src/features/scenario/engine.test.ts`.
+Toàn bộ hình ảnh là **SVG vẽ tay trong code** theo một phong cách 2D chung (nét viền nâu đậm, màu pastel, nền giấy kem, bảng gỗ) – không có file ảnh nhân vật/cảnh. Màu dùng chung ở `src/art/ink.ts`, token giao diện ở `src/index.css`.
 
-Mỗi hotspot nên rộng/cao ≥ 13% để vùng chạm ≥ 44px trên màn 360px.
+- `src/art/` – phòng khách, nhân vật chính diện (`Person`), em trai nhìn nghiêng (`Profile`), mascot, avatar, icon.
+- Khi chạy `npm run dev`, mở **`/dev/art`** để xem toàn bộ hình vẽ (nhân vật, tư thế, hình đáp án, icon) trên một trang.
 
-## Thay ảnh / âm thanh
+## Thay âm thanh
 
-Mọi đường dẫn asset nằm ở **một chỗ**: `src/data/assets.ts`. Thay file trong `public/assets/…` (giữ tên) hoặc sửa đường dẫn trong file này. Khi thay ảnh cảnh, nhớ chỉnh lại toạ độ `clues` trong JSON nếu bố cục thay đổi.
-
-### Nhân vật 3D
-
-- Mascot ở Trang chủ/Onboarding là model 3D thật (`public/assets/models/mascot.glb`, Three.js): kéo để xoay, chạm để vẫy tay. Three.js chỉ tải sau khi trang đã hiện (ảnh poster hiện trước), tự dừng khi ra khỏi màn hình, và quay về ảnh tĩnh nếu máy không hỗ trợ WebGL.
-- Cảnh chơi, avatar và ảnh mascot ở các màn khác được **render từ chính các model 3D đó** (giữ vị trí manh mối cố định, nhẹ cho điện thoại).
-- Render lại: chạy một static server trong `scripts/render3d/` (cần symlink `three` → `node_modules/three`, `chars` → thư mục GLB của Kenney Mini Characters, `furn` → GLTF của Furniture Kit), rồi `node shoot.mjs classroom canteen lab posterHero …`. Dùng `overlay.py` để kiểm tra ô manh mối. Nguồn và license của từng asset: xem [`CREDITS.md`](./CREDITS.md).
-
-Các script trích asset từ proposal nằm trong `scripts/` (Python: `pymupdf`, `pillow`, `rembg`); chỉ cần chạy lại khi muốn trích lại ảnh.
-
-## Công thức điểm
-
-`điểm = 1000 × (độ chính xác × 50% + chất lượng quyết định × 30% + hiệu quả thời gian × 20%) × (1 − 5% × số gợi ý)`
-Sao: ≥ 800 → 3 sao, ≥ 550 → 2 sao, còn lại 1 sao. Xem `src/lib/scoring.ts`.
+Đường dẫn âm thanh nằm ở `src/data/assets.ts`; thay file trong `public/assets/audio/` (giữ tên).
 
 ## Cấu trúc thư mục
 
 ```
 src/
   app/         router, layout, bottom nav
-  pages/       Home, Onboarding, Scenarios, Play, Daily, Team, Leaderboard, Hub, Profile
-  features/    scenario (engine reducer, Observe, Decide, Rhythm, Result), streak, leaderboard, team, hub
-  components/  Button, Card, Timer, ProgressBar, Badge, BottomSheet, Sticker…
-  store/       zustand: user, progress, streak, settings
-  data/        scenarios/*.json, dailyPool.json, bots.json, hubLocations.json, assets.ts
-  lib/         seededRandom, date, scoring, sound
-public/assets/ proposal/, scenes/, ui/, audio/
+  art/         đồ hoạ SVG 2D: phòng khách, nhân vật, mascot, avatar, icon
+  pages/       Home, Onboarding, Scenarios (bản đồ), Play, Daily, Team, Leaderboard, Hub, Profile
+  features/    sim (engine round, cảnh, câu hỏi, cửa hàng, túi đồ, điện thoại…), streak, leaderboard, team, hub
+  components/  Button, Card, Modal, BottomSheet, Badge, Timer…
+  store/       zustand: user, progress, wallet (băng gạc + vật dụng), streak, settings
+  data/        sim/*.ts (nội dung tình huống), dailyPool.json, bots.json, hubLocations.json
+  lib/         seededRandom, date, sound
+  dev/         trang /dev/art (chỉ có khi chạy dev)
+public/assets/ audio/, ui/ (icon PWA)
 ```
 
 ## Ghi chú về bản demo
 
-- Bảng xếp hạng, đồng đội/đối thủ 5v5 và các địa điểm ở Practice Hub đều là **dữ liệu mô phỏng**, được dán nhãn trong UI.
+- Bảng xếp hạng, đồng đội/đối thủ 5v5, quảng cáo và các địa điểm ở Practice Hub đều là **mô phỏng**, được dán nhãn trong UI.
 - Request ra ngoài duy nhất: ô bản đồ OpenStreetMap ở trang Hub (không cần key).
 - Nội dung mang tính giáo dục, tham khảo hướng dẫn sơ cứu của Hội Chữ thập đỏ; không thay thế khóa đào tạo thực tế. **Khi khẩn cấp hãy gọi 115.**

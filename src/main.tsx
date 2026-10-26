@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@fontsource/baloo-2/latin-700.css';
-import '@fontsource/baloo-2/latin-ext-700.css';
-import '@fontsource/baloo-2/vietnamese-700.css';
+import '@fontsource/itim/latin-400.css';
+import '@fontsource/itim/latin-ext-400.css';
+import '@fontsource/itim/vietnamese-400.css';
 import '@fontsource/be-vietnam-pro/latin-400.css';
 import '@fontsource/be-vietnam-pro/latin-ext-400.css';
 import '@fontsource/be-vietnam-pro/vietnamese-400.css';

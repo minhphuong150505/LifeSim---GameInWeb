@@ -12,7 +12,7 @@ import {
 } from '../features/leaderboard/leaderboardLogic';
 import { cn } from '../lib/cn';
 import { toDateKey } from '../lib/date';
-import { useProgressStore } from '../store/progress';
+import { dayScore, useProgressStore } from '../store/progress';
 import { useUserStore } from '../store/user';
 
 const bots = botsJson as Bot[];
@@ -27,16 +27,19 @@ export function Leaderboard() {
   const [tab, setTab] = useState<TabId>('today');
   const nickname = useUserStore((s) => s.nickname);
   const avatar = useUserStore((s) => s.avatar);
-  const dailyBest = useProgressStore((s) => s.dailyBest);
+  const dailyRounds = useProgressStore((s) => s.dailyRounds);
   const today = toDateKey();
   const playerRowRef = useRef<HTMLLIElement>(null);
 
   const entries = useMemo(() => {
     const me = { nickname, avatar };
+    const scores = Object.fromEntries(
+      Object.keys(dailyRounds).map((d) => [d, dayScore(dailyRounds, d)]),
+    );
     return tab === 'today'
-      ? buildDailyLeaderboard(bots, today, { ...me, score: dailyBest[today] ?? 0 })
-      : buildWeeklyLeaderboard(bots, today, me, dailyBest);
-  }, [tab, today, nickname, avatar, dailyBest]);
+      ? buildDailyLeaderboard(bots, today, { ...me, score: scores[today] ?? 0 })
+      : buildWeeklyLeaderboard(bots, today, me, scores);
+  }, [tab, today, nickname, avatar, dailyRounds]);
   const me = entries.find((e) => e.isPlayer);
 
   // Bring the player's own row into view whenever the board changes.
@@ -52,8 +55,8 @@ export function Leaderboard() {
     <div>
       <PageHeader
         title="Bảng xếp hạng"
-        subtitle="Xếp theo độ chính xác, chất lượng quyết định và tốc độ."
-        right={<Sticker name="trophy" className="h-14 w-auto" />}
+        subtitle="Theo thành tích Core Simulation · làm mới mỗi ngày."
+        right={<Sticker name="trophy" className="h-14" />}
       />
       <div className="px-4">
         <div
@@ -71,8 +74,8 @@ export function Leaderboard() {
               aria-controls="leaderboard-panel"
               onClick={() => setTab(t.id)}
               className={cn(
-                'min-h-11 rounded-xl font-display text-lg font-bold',
-                tab === t.id ? 'bg-white text-navy shadow-soft' : 'text-navy/70',
+                'min-h-11 rounded-xl font-display text-lg',
+                tab === t.id ? 'ink-border bg-paper text-navy shadow-soft' : 'text-navy/70',
               )}
             >
               {t.label}
@@ -89,9 +92,9 @@ export function Leaderboard() {
           )}
         </div>
         {me && me.score === 0 && (
-          <p className="mt-2 rounded-2xl bg-white p-3 text-sm text-ink shadow-soft">
-            Bạn chưa có điểm {tab === 'today' ? 'hôm nay' : 'tuần này'}. Hoàn thành một tình huống
-            để ghi tên lên bảng!
+          <p className="ink-border mt-2 rounded-2xl bg-paper p-3 text-sm text-ink shadow-soft">
+            Bạn chưa có điểm {tab === 'today' ? 'hôm nay' : 'tuần này'}. Vượt qua một round trong
+            Core Simulation để ghi tên lên bảng!
           </p>
         )}
 
@@ -99,7 +102,7 @@ export function Leaderboard() {
           id="leaderboard-panel"
           role="tabpanel"
           aria-labelledby={`tab-${tab}`}
-          className="mt-3 space-y-2 rounded-card bg-navy p-2"
+          className="ink-border mt-3 space-y-2 rounded-card bg-navy p-2"
         >
           {entries.map((e, i) => (
             <motion.li

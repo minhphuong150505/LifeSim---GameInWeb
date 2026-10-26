@@ -5,7 +5,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { PageHeader } from '../components/PageHeader';
 import locationsJson from '../data/hubLocations.json';
-import { TOPIC_LABELS } from '../data/topics';
+import { ALL_TOPICS, TOPIC_EMOJI, TOPIC_LABELS } from '../data/topics';
 import {
   DEFAULT_CENTER,
   formatVnd,
@@ -51,8 +51,8 @@ function Chip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'min-h-11 shrink-0 rounded-full border-2 px-3 text-sm font-semibold',
-        active ? 'border-navy bg-navy text-white' : 'border-navy/15 bg-white text-navy',
+        'min-h-11 shrink-0 whitespace-nowrap rounded-full border-2 px-3 text-sm font-semibold',
+        active ? 'border-navy bg-navy text-white' : 'border-navy/40 bg-paper text-navy',
       )}
     >
       {children}
@@ -70,7 +70,12 @@ export function Hub() {
   const focusTopic = useMemo(() => weakestTopic(topicStats), [topicStats]);
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
   const [geo, setGeo] = useState<GeoStatus>('idle');
-  const [filters, setFilters] = useState<HubFilters>({ maxKm: null, day: null, budgetVnd: null });
+  const [filters, setFilters] = useState<HubFilters>({
+    maxKm: null,
+    day: null,
+    budgetVnd: null,
+    topic: null,
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -205,7 +210,29 @@ export function Hub() {
           </div>
         </fieldset>
 
-        <h2 className="pt-1 text-lg font-bold text-navy" aria-live="polite">
+        <fieldset className="min-w-0">
+          <legend className="mb-1 text-sm font-bold text-navy">Nhu cầu</legend>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <Chip
+              active={filters.topic === null}
+              onClick={() => setFilters((f) => ({ ...f, topic: null }))}
+            >
+              Tất cả
+            </Chip>
+            {ALL_TOPICS.map((t) => (
+              <Chip
+                key={t}
+                active={filters.topic === t}
+                onClick={() => setFilters((f) => ({ ...f, topic: t }))}
+              >
+                <span aria-hidden>{TOPIC_EMOJI[t]} </span>
+                {TOPIC_LABELS[t]}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+
+        <h2 className="pt-1 font-display text-xl text-navy" aria-live="polite">
           {ranked.length} khóa học phù hợp
         </h2>
         {ranked.length === 0 && (

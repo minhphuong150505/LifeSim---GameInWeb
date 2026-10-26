@@ -1,4 +1,4 @@
-import { avatarSrc } from '../data/assets';
+import { AvatarArt } from '../art/AvatarArt';
 import { cn } from '../lib/cn';
 
 type AvatarProps = {
@@ -8,19 +8,20 @@ type AvatarProps = {
   className?: string;
 };
 
-const RINGS = { red: 'ring-primary', navy: 'ring-navy', yellow: 'ring-accent', none: 'ring-white' };
+const RINGS = {
+  red: 'ring-primary',
+  navy: 'ring-navy',
+  yellow: 'ring-accent',
+  none: 'ring-transparent',
+};
 
 export function Avatar({ id, size = 44, ring = 'none', className }: AvatarProps) {
   return (
-    <img
-      src={avatarSrc(id)}
-      alt=""
-      width={size}
-      height={size}
-      loading="lazy"
-      decoding="async"
-      className={cn('shrink-0 rounded-full object-cover ring-2', RINGS[ring], className)}
+    <span
+      className={cn('inline-block shrink-0 rounded-full ring-[3px]', RINGS[ring], className)}
       style={{ width: size, height: size }}
-    />
+    >
+      <AvatarArt id={id} className="h-full w-full" />
+    </span>
   );
 }

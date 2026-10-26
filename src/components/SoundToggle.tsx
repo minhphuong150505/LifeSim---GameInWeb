@@ -1,3 +1,4 @@
+import { SpeakerIcon } from '../art/icons';
 import { cn } from '../lib/cn';
 import { useSettingsStore } from '../store/settings';
 
@@ -11,11 +12,11 @@ export function SoundToggle({ className }: { className?: string }) {
       aria-pressed={!muted}
       aria-label={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
       className={cn(
-        'grid h-11 w-11 place-items-center rounded-full bg-white text-xl shadow-soft',
+        'ink-border grid h-11 w-11 place-items-center rounded-xl bg-paper shadow-pop',
         className,
       )}
     >
-      <span aria-hidden>{muted ? '🔇' : '🔊'}</span>
+      <SpeakerIcon muted={muted} size={28} />
     </button>
   );
 }

@@ -2,11 +2,11 @@ import { cn } from '../lib/cn';
 
 type Tone = 'red' | 'navy' | 'yellow' | 'green' | 'gray';
 const TONES: Record<Tone, string> = {
-  red: 'bg-primary/10 text-primary-dark',
-  navy: 'bg-navy/10 text-navy',
-  yellow: 'bg-accent/25 text-navy',
-  green: 'bg-success/15 text-success-dark',
-  gray: 'bg-black/5 text-muted',
+  red: 'border-primary-dark bg-[#fde3da] text-primary-dark',
+  navy: 'border-navy/60 bg-paper text-navy',
+  yellow: 'border-navy/60 bg-[#fff1c2] text-navy',
+  green: 'border-success-dark bg-[#e3f2d4] text-success-dark',
+  gray: 'border-navy/30 bg-black/5 text-muted',
 };
 
 export function Badge({
@@ -21,7 +21,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold',
+        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border-2 px-2.5 py-0.5 text-xs font-semibold',
         TONES[tone],
         className,
       )}

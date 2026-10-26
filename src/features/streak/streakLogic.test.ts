@@ -3,6 +3,7 @@ import {
   activeStreak,
   applyDailyCompletion,
   earnedMilestones,
+  passedDaily,
   pickDailyQuestions,
   type DailyQuestion,
   type StreakCore,
@@ -78,6 +79,18 @@ describe('daily question selection', () => {
     const b = pickDailyQuestions(questions, '2026-10-14');
     expect(a.map((q) => q.id)).toEqual(b.map((q) => q.id));
     expect(new Set(a.map((q) => q.id)).size).toBe(3);
+  });
+  it('gives the second attempt a different set of questions', () => {
+    const first = pickDailyQuestions(questions, '2026-10-14', 1).map((q) => q.id);
+    const second = pickDailyQuestions(questions, '2026-10-14', 2).map((q) => q.id);
+    expect(second).toHaveLength(3);
+    expect(second.filter((id) => first.includes(id))).toEqual([]);
+    expect(pickDailyQuestions(questions, '2026-10-14', 2).map((q) => q.id)).toEqual(second);
+  });
+  it('passes with at least 2 of 3 right', () => {
+    expect(passedDaily(1)).toBe(false);
+    expect(passedDaily(2)).toBe(true);
+    expect(passedDaily(3)).toBe(true);
   });
   it('varies the selection across days', () => {
     const keys = Array.from({ length: 10 }, (_, i) =>

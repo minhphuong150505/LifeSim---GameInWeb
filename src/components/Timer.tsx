@@ -11,7 +11,7 @@ export function Timer({ leftSec, totalSec, className }: TimerProps) {
       <div
         role="timer"
         aria-label={`Còn ${Math.ceil(leftSec)} giây`}
-        className="h-3 flex-1 overflow-hidden rounded-full bg-navy/10"
+        className="h-3.5 flex-1 overflow-hidden rounded-full border-2 border-navy bg-paper"
       >
         <div
           className={cn('h-full rounded-full', urgent ? 'bg-primary' : 'bg-accent')}

@@ -17,8 +17,8 @@ export default defineConfig({
         description:
           'Luyện tập sơ cứu qua mô phỏng tình huống – Practice today, be ready tomorrow.',
         lang: 'vi',
-        theme_color: '#E53935',
-        background_color: '#FFF6EF',
+        theme_color: '#d9a866',
+        background_color: '#fbf6e6',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -35,13 +35,11 @@ export default defineConfig({
       },
       workbox: {
         // Precache everything needed to play offline (map tiles stay network-only).
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,mp3,woff2,glb}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,mp3,woff2}'],
         navigateFallback: '/index.html',
       },
     }),
   ],
-  // three.js (lazy-loaded for the 3D mascot) is a single ~630 kB chunk.
-  build: { chunkSizeWarningLimit: 700 },
   test: {
     environment: 'jsdom',
     globals: true,

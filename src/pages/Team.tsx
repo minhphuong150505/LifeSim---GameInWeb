@@ -7,7 +7,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { PageHeader } from '../components/PageHeader';
 import { Sticker } from '../components/Sticker';
-import { assets } from '../data/assets';
+import { TrophyIcon, UsersIcon } from '../art/icons';
 import botsJson from '../data/bots.json';
 import { EVENT_NAME } from '../data/copy';
 import poolJson from '../data/dailyPool.json';
@@ -67,7 +67,7 @@ function TeamColumn({
           .map((m) => (
             <li
               key={m.id}
-              className="flex items-center gap-2 rounded-2xl bg-white p-1.5 shadow-soft"
+              className="ink-border flex items-center gap-2 rounded-2xl bg-paper p-1.5 shadow-soft"
             >
               <Avatar id={m.avatar} size={32} ring={team === 'ally' ? 'red' : 'navy'} />
               <span className="min-w-0 flex-1 truncate text-xs font-semibold text-navy">
@@ -172,18 +172,21 @@ export function Team() {
       <div>
         <PageHeader title="Team Rescue 5v5" subtitle={`Sự kiện: ${EVENT_NAME}`} />
         <div className="space-y-4 px-4">
-          <div className="relative overflow-hidden rounded-card shadow-soft">
-            <img
-              src={assets.proposal.teamBanner}
-              alt="Hai đội cứu hộ LifeSim đối đầu 5 vs 5"
-              width={708}
-              height={620}
-              className="h-36 w-full object-cover object-[50%_40%]"
-            />
-            <span className="absolute left-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold text-navy">
+          <div
+            role="img"
+            aria-label="Hai đội cứu hộ LifeSim đối đầu 5 vs 5"
+            className="ink-border relative flex items-center justify-around overflow-hidden rounded-card bg-navy px-3 pb-3 pt-10 shadow-soft"
+          >
+            <UsersIcon size={64} />
+            <TrophyIcon size={72} />
+            <UsersIcon size={64} />
+            <span className="ink-border absolute left-3 top-3 rounded-full bg-accent px-3 py-0.5 font-display text-sm text-navy">
               {EVENT_NAME}
             </span>
           </div>
+          <p className="ink-border rounded-2xl bg-[#fff1c2] p-2 text-center text-xs text-navy">
+            Sự kiện 5v5 đang thử nghiệm – cơ chế chính thức sẽ được cập nhật sau.
+          </p>
 
           <div className="relative flex items-start gap-3">
             <TeamColumn members={members} team="ally" label="Đội của bạn" />
@@ -281,7 +284,7 @@ export function Team() {
         <div className="flex gap-3">
           <Link
             to="/"
-            className="inline-flex min-h-11 shrink-0 items-center rounded-2xl border-2 border-navy/15 bg-white px-4 font-display font-bold text-navy shadow-pop"
+            className="inline-flex min-h-11 shrink-0 items-center ink-border rounded-2xl bg-paper px-4 font-display font-bold text-navy shadow-pop"
           >
             Trang chủ
           </Link>

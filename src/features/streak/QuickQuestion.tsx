@@ -53,10 +53,10 @@ export function QuickQuestion({ question, timeLimitSec, onAnswered }: QuickQuest
                 whileTap={{ scale: 0.98 }}
                 animate={isWrong ? { x: [0, -8, 8, -6, 6, 0] } : { x: 0 }}
                 className={cn(
-                  'flex min-h-14 w-full items-center gap-3 rounded-2xl border-2 bg-white px-4 py-2.5 text-left text-[15px] font-semibold text-navy shadow-soft',
+                  'flex min-h-14 w-full items-center gap-3 rounded-2xl border-[2.5px] bg-paper px-4 py-2.5 text-left text-[15px] font-semibold text-navy shadow-soft',
                   isCorrect && 'border-success bg-success/10',
                   isWrong && 'border-error bg-error/10',
-                  !isCorrect && !isWrong && 'border-navy/10',
+                  !isCorrect && !isWrong && 'border-navy',
                   done && !isCorrect && !isWrong && 'opacity-55',
                 )}
               >

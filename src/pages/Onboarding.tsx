@@ -5,9 +5,11 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Logo } from '../components/Logo';
 import { Sticker } from '../components/Sticker';
-import { assets, AVATAR_IDS, type AvatarId } from '../data/assets';
+import { AVATAR_IDS, type AvatarId } from '../data/assets';
+import { BandageIcon } from '../art/icons';
+import { STARTING_BANDAGES } from '../features/sim/engine';
 import { DISCLAIMER, SLOGAN } from '../data/copy';
-import { Mascot3D } from '../features/mascot/Mascot3D';
+import { Mascot } from '../art/Mascot';
 import { cn } from '../lib/cn';
 import { playSound } from '../lib/sound';
 import { useUserStore } from '../store/user';
@@ -28,31 +30,28 @@ export function Onboarding() {
 
   return (
     <main className="safe-top safe-bottom relative min-h-dvh overflow-hidden px-5">
-      <img
-        src={assets.proposal.cityBg}
-        alt=""
+      <div
         aria-hidden
-        className="absolute inset-x-0 top-0 h-56 w-full object-cover opacity-70"
-        style={{ maskImage: 'linear-gradient(#000 55%, transparent)' }}
+        className="wood absolute inset-x-0 top-0 h-28 border-b-[2.5px] border-navy"
       />
       <div className="relative">
         <div className="flex items-center justify-between pt-2">
           <Logo height={46} />
-          <p className="max-w-[9rem] text-right font-display text-sm font-bold uppercase leading-tight text-navy">
+          <p className="max-w-[9rem] text-right font-display text-sm uppercase leading-tight text-navy">
             {SLOGAN}
           </p>
         </div>
 
-        <div className="mt-3 flex items-end justify-between">
+        <div className="mt-8 flex items-end justify-between">
           <div className="pb-4">
-            <h1 className="text-[30px] font-bold text-navy">
+            <h1 className="text-[32px] text-navy">
               Sẵn sàng <span className="text-primary-dark">cứu người</span> chưa?
             </h1>
             <p className="mt-1 text-sm text-ink">
               Luyện sơ cứu qua tình huống mô phỏng, mỗi ngày vài phút.
             </p>
           </div>
-          <Mascot3D className="-mr-3 h-44 w-40 shrink-0" />
+          <Mascot interactive className="-mr-3 h-44 w-40 shrink-0" />
         </div>
 
         <form
@@ -64,7 +63,7 @@ export function Onboarding() {
           }}
         >
           <Card tape className="mt-1">
-            <label htmlFor="nickname" className="font-display text-lg font-bold text-navy">
+            <label htmlFor="nickname" className="font-display text-xl text-navy">
               Tên của bạn
             </label>
             <input
@@ -74,11 +73,11 @@ export function Onboarding() {
               maxLength={MAX_NAME}
               autoComplete="nickname"
               placeholder="Ví dụ: Minh Anh"
-              className="mt-1 h-12 w-full rounded-2xl border-2 border-navy/20 bg-cream px-4 text-base font-semibold text-navy placeholder:font-normal placeholder:text-muted"
+              className="ink-border mt-1 h-12 w-full rounded-2xl bg-cream px-4 text-base font-semibold text-navy placeholder:font-normal placeholder:text-muted"
             />
 
             <fieldset className="mt-4">
-              <legend className="font-display text-lg font-bold text-navy">Chọn avatar</legend>
+              <legend className="font-display text-xl text-navy">Chọn avatar</legend>
               <div className="mt-2 grid grid-cols-6 gap-1">
                 {AVATAR_IDS.map((id, i) => (
                   <label key={id} className="flex cursor-pointer flex-col items-center">
@@ -108,7 +107,15 @@ export function Onboarding() {
             </fieldset>
           </Card>
 
-          <Card className="mt-3 flex gap-3 bg-white/80">
+          <Card className="mt-3 flex items-center gap-3 bg-[#fff1c2]">
+            <BandageIcon size={44} />
+            <p className="text-[14px] leading-snug text-navy">
+              <b>Quà chào mừng: {STARTING_BANDAGES} băng gạc!</b> Dùng để mua vật dụng trong cửa
+              hàng hoặc chơi lại khi thua.
+            </p>
+          </Card>
+
+          <Card className="mt-3 flex gap-3">
             <Sticker name="kit" className="h-12 w-12 shrink-0" />
             <p className="text-[13px] leading-snug text-ink">{DISCLAIMER}</p>
           </Card>

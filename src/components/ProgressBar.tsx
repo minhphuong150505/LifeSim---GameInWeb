@@ -34,7 +34,7 @@ export function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={Math.round(value)}
-        className="h-3 w-full overflow-hidden rounded-full bg-navy/10"
+        className="h-3.5 w-full overflow-hidden rounded-full border-2 border-navy bg-paper"
       >
         <div
           className={cn('h-full rounded-full transition-[width] duration-300', TONES[tone])}
