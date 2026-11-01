@@ -1,6 +1,18 @@
 import { motion } from 'framer-motion';
+import { CastFace } from '../../art/CastFace';
+import {
+  BackIcon,
+  BagIcon,
+  BoltIcon,
+  BookIcon,
+  CheckIcon,
+  ClockIcon,
+  CrossIcon,
+  HeartIcon,
+  ShopIcon,
+} from '../../art/icons';
 import { Button } from '../../components/Button';
-import { BackIcon, BoltIcon, CheckIcon, HeartIcon } from '../../art/icons';
+import { CurrencyPill } from '../../components/CurrencyPill';
 import { cn } from '../../lib/cn';
 import { MAX_BOLTS } from './engine';
 import { OptionArt } from './optionArt';
@@ -8,60 +20,125 @@ import { CAST_NAMES } from './stageLayout';
 import type { Beat, OptionId, SimQuestion } from './types';
 
 const LETTERS: Record<OptionId, string> = { a: 'A', b: 'B', c: 'C' };
+/** The older sister (the player's character) comments on every answer. */
+const GUIDE_NAME = 'Chị';
+
+const hudBtn =
+  'ink-border relative grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-paper shadow-pop active:translate-y-0.5';
+
+function PointArrow() {
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2"
+      animate={{ y: [0, 6, 0] }}
+      transition={{ repeat: Infinity, duration: 0.9 }}
+    >
+      <svg viewBox="0 0 30 40" width={24} height={32}>
+        <path
+          d="M10 38 V18 H3 L15 2 L27 18 H20 V38 Z"
+          fill="#fffdf6"
+          stroke="#3b2d26"
+          strokeWidth={3}
+          strokeLinejoin="round"
+        />
+      </svg>
+    </motion.span>
+  );
+}
 
 export function Hud({
+  title,
   hearts,
   heartSlots,
   bolts,
+  clock,
+  bagCount,
+  pointAt,
   onBack,
   onHelp,
+  onBag,
+  onShop,
 }: {
+  title: string;
   hearts: number;
   heartSlots: number;
   bolts: number;
+  clock: string | null;
+  bagCount: number;
+  pointAt: 'bag' | 'shop' | null;
   onBack: () => void;
   onHelp: () => void;
+  onBag: () => void;
+  onShop: () => void;
 }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <button
-        type="button"
-        onClick={onBack}
-        aria-label="Thoát round"
-        className="ink-border grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-paper shadow-pop"
-      >
+    <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1.5 px-[max(8px,env(safe-area-inset-left))] pr-[max(8px,env(safe-area-inset-right))] pt-[max(6px,env(safe-area-inset-top))]">
+      <button type="button" onClick={onBack} aria-label="Thoát màn chơi" className={hudBtn}>
         <BackIcon size={26} />
       </button>
+      <p className="ink-border min-w-0 shrink truncate rounded-xl bg-paper/95 px-2 py-1 font-display text-[15px] text-navy">
+        {title}
+      </p>
       <div
-        className="flex min-w-0 flex-1 items-center justify-center gap-0.5"
+        className="ink-border flex shrink-0 items-center rounded-xl bg-paper/95 px-1 py-0.5"
         role="img"
-        aria-label={`${hearts}/${heartSlots} trái tim`}
+        aria-label={`${hearts}/${heartSlots} trái tim, ${bolts}/${MAX_BOLTS} tia sét`}
       >
         {Array.from({ length: heartSlots }, (_, i) => (
           <motion.span key={i} animate={i === hearts - 1 ? { scale: [1, 1.4, 1] } : undefined}>
-            <HeartIcon filled={i < hearts} size={24} />
+            <HeartIcon filled={i < hearts} size={22} />
           </motion.span>
         ))}
-      </div>
-      <div
-        className="flex items-center gap-0"
-        role="img"
-        aria-label={`${bolts}/${MAX_BOLTS} tia sét`}
-      >
+        <span aria-hidden className="mx-1 h-5 w-0.5 bg-navy/25" />
         {Array.from({ length: MAX_BOLTS }, (_, i) => (
           <motion.span
             key={i}
             animate={i === bolts - 1 ? { scale: [1, 1.6, 1], rotate: [0, -12, 0] } : undefined}
           >
-            <BoltIcon filled={i < bolts} size={24} />
+            <BoltIcon filled={i < bolts} size={22} />
           </motion.span>
         ))}
+      </div>
+      {clock && (
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="ink-border hidden shrink-0 items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-display text-sm text-navy sm:flex"
+        >
+          <ClockIcon minutes={15} size={20} />
+          {clock}
+        </motion.span>
+      )}
+      <span className="flex-1" />
+      <CurrencyPill className="shrink-0" />
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onBag}
+          aria-label={`Túi vật dụng (${bagCount} món)`}
+          className={hudBtn}
+        >
+          <BagIcon size={30} />
+          {bagCount > 0 && (
+            <span className="ink-border absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 font-display text-xs text-navy">
+              {bagCount}
+            </span>
+          )}
+        </button>
+        {pointAt === 'bag' && <PointArrow />}
+      </div>
+      <div className="relative">
+        <button type="button" onClick={onShop} aria-label="Cửa hàng vật dụng" className={hudBtn}>
+          <ShopIcon size={30} />
+        </button>
+        {pointAt === 'shop' && <PointArrow />}
       </div>
       <button
         type="button"
         onClick={onHelp}
         aria-label="Cách chơi"
-        className="ink-border grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper font-display text-2xl text-navy shadow-pop"
+        className={cn(hudBtn, 'rounded-full font-display text-2xl text-navy')}
       >
         ?
       </button>
@@ -69,57 +146,100 @@ export function Hud({
   );
 }
 
-export function IntroPanel({
+/** Visual-novel style dialogue box popping up over the scene (tap to continue). */
+export function DialogueBox({
   beat,
   onNext,
   onSkip,
   showSkip,
 }: {
-  beat: Beat;
+  beat: Extract<Beat, { kind: 'narration' | 'line' }>;
   onNext: () => void;
   onSkip: () => void;
   showSkip: boolean;
 }) {
+  const narration = beat.kind === 'narration';
   return (
-    <motion.div
-      key={beat.kind + ('text' in beat ? beat.text : '')}
-      initial={{ y: 16, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="flex flex-1 flex-col gap-3"
-    >
-      {beat.kind === 'narration' && (
-        <div className="ink-border rounded-card bg-paper p-4 shadow-soft">
-          <p className="font-display text-sm text-primary-dark">Bối cảnh</p>
-          <p className="mt-1 text-[16px] italic leading-relaxed text-ink">“{beat.text}”</p>
-        </div>
-      )}
-      {beat.kind === 'line' && (
-        <div className="ink-border rounded-card bg-paper p-4 shadow-soft">
-          <p className="font-display text-lg text-primary-dark">{CAST_NAMES[beat.speaker]}</p>
-          <p className="text-[17px] font-semibold leading-relaxed text-navy">“{beat.text}”</p>
-        </div>
-      )}
-      {beat.kind === 'mission' && (
-        <div className="ink-border relative rounded-card bg-[#fff1c2] p-4 shadow-soft">
-          <span className="ink-border absolute -top-3.5 left-4 rounded-full bg-primary px-3 font-display text-white">
-            NHIỆM VỤ
+    <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-[max(10px,env(safe-area-inset-bottom))]">
+      <motion.button
+        type="button"
+        key={beat.text}
+        onClick={onNext}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="ink-border relative flex w-full max-w-4xl items-start gap-3 rounded-[22px] bg-paper/97 p-3 pr-10 text-left shadow-pop"
+        aria-label={`${narration ? 'Bối cảnh' : CAST_NAMES[beat.speaker]}: ${beat.text}. Chạm để tiếp tục`}
+      >
+        <span className="ink-border grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#fff1c2]">
+          {narration ? <BookIcon size={44} /> : <CastFace kind={beat.speaker} size={64} />}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="ink-border -mt-6 mb-1 inline-block rounded-full bg-primary px-3 font-display text-white">
+            {narration ? 'Bối cảnh' : CAST_NAMES[beat.speaker]}
           </span>
-          <p className="mt-1 font-display text-[21px] leading-snug text-navy">{beat.text}</p>
-        </div>
-      )}
-      <Button size="lg" block className="mt-auto" onClick={onNext}>
-        {beat.kind === 'mission' ? 'Bắt đầu nhiệm vụ' : 'Tiếp tục ▸'}
-      </Button>
-      {showSkip && beat.kind !== 'mission' && (
+          <span
+            className={cn(
+              'block leading-relaxed text-navy',
+              narration ? 'text-[16px] italic' : 'text-[18px] font-semibold',
+            )}
+          >
+            “{beat.text}”
+          </span>
+        </span>
+        <motion.span
+          aria-hidden
+          className="absolute bottom-2 right-3 font-display text-xl text-primary-dark"
+          animate={{ x: [0, 5, 0] }}
+          transition={{ repeat: Infinity, duration: 0.9 }}
+        >
+          ▸
+        </motion.span>
+      </motion.button>
+      {showSkip && (
         <button
           type="button"
           onClick={onSkip}
-          className="-mt-1 min-h-11 font-semibold text-muted underline"
+          className="ink-border absolute -top-11 right-4 rounded-xl bg-paper px-3 py-1.5 font-semibold text-navy shadow-pop"
         >
-          Bỏ qua phần mở đầu
+          Bỏ qua ⏭
         </button>
       )}
-    </motion.div>
+    </div>
+  );
+}
+
+/** Mission card that pops up in the middle of the scene at the end of the intro. */
+export function MissionPopup({ text, onStart }: { text: string; onStart: () => void }) {
+  return (
+    <div className="absolute inset-0 z-20 grid place-items-center bg-navy/30 p-4">
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="ink-border relative w-full max-w-lg rounded-[24px] bg-[#fff1c2] p-5 pt-6 text-center shadow-pop"
+      >
+        <span className="ink-border absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 font-display text-lg text-white">
+          NHIỆM VỤ
+        </span>
+        <p className="font-display text-[22px] leading-snug text-navy">{text}</p>
+        <Button size="lg" className="mt-4" onClick={onStart}>
+          Bắt đầu nhiệm vụ ▸
+        </Button>
+      </motion.div>
+    </div>
+  );
+}
+
+/** Right-hand popup holding the question / feedback / task; the scene stays visible on the left. */
+export function SidePanel({ children, label }: { children: React.ReactNode; label: string }) {
+  return (
+    <motion.section
+      aria-label={label}
+      initial={{ x: 60, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      className="ink-border absolute bottom-[max(8px,env(safe-area-inset-bottom))] right-[max(8px,env(safe-area-inset-right))] top-[60px] z-20 flex w-[min(54%,580px)] flex-col overflow-y-auto rounded-[22px] bg-paper p-3 pb-2 shadow-pop"
+    >
+      {children}
+    </motion.section>
   );
 }
 
@@ -139,17 +259,17 @@ export function QuestionPanel({
   return (
     <motion.div
       key={question.id}
-      initial={{ x: 30, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className="flex flex-col gap-2.5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col gap-2"
     >
       <div>
-        <p className="font-display text-base text-primary-dark">
+        <p className="font-display text-sm text-primary-dark">
           Câu {index + 1}/{total}
         </p>
-        <h2 className="font-display text-[21px] leading-snug text-navy">{question.prompt}</h2>
+        <h2 className="font-display text-[19px] leading-snug text-navy">{question.prompt}</h2>
       </div>
-      <ul className="flex flex-col gap-2.5">
+      <ul className="flex flex-col gap-1.5">
         {question.options.map((o) => {
           const wrong = wrongIds.includes(o.id);
           return (
@@ -163,31 +283,31 @@ export function QuestionPanel({
                 transition={{ duration: 0.4 }}
                 aria-label={`${LETTERS[o.id]}. ${o.text}${wrong ? ' (đã chọn sai)' : ''}`}
                 className={cn(
-                  'ink-border relative flex w-full items-center gap-3 rounded-2xl bg-paper p-2 text-left shadow-pop',
+                  'ink-border relative flex w-full items-center gap-2.5 rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop',
                   wrong && 'bg-[#efe9dc] shadow-none',
                 )}
               >
                 <OptionArt
                   art={o.art}
                   className={cn(
-                    'aspect-square w-[84px] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-cream',
+                    'aspect-square w-[54px] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper',
                     wrong && 'opacity-45 grayscale',
                   )}
                 />
+                <span className="ink-border grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent font-display text-base text-navy">
+                  {LETTERS[o.id]}
+                </span>
                 <span
                   className={cn(
                     'flex-1 text-[15px] font-semibold leading-snug text-navy',
                     wrong && 'text-muted line-through',
                   )}
                 >
-                  <span className="ink-border mr-1.5 inline-grid h-7 w-7 place-items-center rounded-full bg-accent font-display text-base text-navy no-underline">
-                    {LETTERS[o.id]}
-                  </span>
                   {o.text}
                 </span>
                 {wrong && (
                   <span className="absolute -right-1.5 -top-2">
-                    <BoltIcon size={28} />
+                    <BoltIcon size={26} />
                   </span>
                 )}
               </motion.button>
@@ -195,6 +315,103 @@ export function QuestionPanel({
           );
         })}
       </ul>
+    </motion.div>
+  );
+}
+
+function GuideSays({
+  tone,
+  title,
+  children,
+  aside,
+}: {
+  tone: 'good' | 'bad';
+  title: string;
+  children: React.ReactNode;
+  aside?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <motion.span
+        initial={{ y: 20, scale: 0.6 }}
+        animate={{ y: 0, scale: 1 }}
+        className="ink-border grid h-[72px] w-[72px] shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#fff1c2]"
+      >
+        <CastFace kind="player" size={72} />
+      </motion.span>
+      <div
+        className={cn(
+          'ink-border relative min-w-0 flex-1 rounded-2xl p-3',
+          tone === 'good' ? 'bg-[#eef7e6]' : 'bg-[#fde3da]',
+        )}
+      >
+        <span
+          aria-hidden
+          className={cn(
+            'absolute -left-[9px] top-6 h-4 w-4 rotate-45 border-b-[2.5px] border-l-[2.5px] border-navy',
+            tone === 'good' ? 'bg-[#eef7e6]' : 'bg-[#fde3da]',
+          )}
+        />
+        <div className="flex items-center gap-2">
+          {tone === 'good' ? <CheckIcon size={30} /> : <CrossIcon size={30} />}
+          <p
+            className={cn(
+              'font-display text-2xl',
+              tone === 'good' ? 'text-success-dark' : 'text-primary-dark',
+            )}
+          >
+            {title}
+          </p>
+          {aside && <span className="ml-auto">{aside}</span>}
+        </div>
+        <p className="mt-0.5 font-display text-sm text-navy/70">{GUIDE_NAME} nói:</p>
+        <div className="text-[15px] leading-relaxed text-ink">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Wrong pick: the sister explains it is not right and nudges the player, then they try again. */
+export function WrongPanel({
+  question,
+  picked,
+  onRetry,
+}: {
+  question: SimQuestion;
+  picked: OptionId;
+  onRetry: () => void;
+}) {
+  const option = question.options.find((o) => o.id === picked);
+  return (
+    <motion.div
+      role="alert"
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="flex flex-1 flex-col gap-2"
+    >
+      <GuideSays
+        tone="bad"
+        title="Chưa đúng rồi!"
+        aside={
+          <span className="flex items-center font-display text-lg text-navy">
+            +1 <BoltIcon size={24} />
+          </span>
+        }
+      >
+        {option && (
+          <p>
+            Cách “<b>{option.text}</b>” chưa phải lựa chọn phù hợp trong tình huống này.
+          </p>
+        )}
+        <p className="mt-1">
+          💡 {question.hint ?? 'Hãy nghĩ xem cách nào an toàn nhất cho em trai nhé.'}
+        </p>
+      </GuideSays>
+      <div className="sticky bottom-0 mt-auto bg-paper pt-1">
+        <Button size="lg" block onClick={onRetry}>
+          Chọn lại
+        </Button>
+      </div>
     </motion.div>
   );
 }
@@ -212,39 +429,43 @@ export function ExplainPanel({
   return (
     <motion.div
       role="status"
-      initial={{ y: 30, opacity: 0 }}
+      initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="flex flex-1 flex-col gap-3"
     >
-      <div className="ink-border rounded-card bg-[#eef7e6] p-4 shadow-soft">
-        <div className="flex items-center gap-2">
-          <CheckIcon size={34} />
-          <p className="font-display text-2xl text-success-dark">
-            {firstTry ? 'Chính xác!' : 'Đúng rồi!'}
-          </p>
-          <span className="ml-auto flex items-center font-display text-lg text-navy">
+      <GuideSays
+        tone="good"
+        title={firstTry ? 'Chính xác!' : 'Đúng rồi!'}
+        aside={
+          <span className="flex items-center font-display text-lg text-navy">
             +1 <HeartIcon size={24} />
           </span>
-        </div>
+        }
+      >
         {answer && (
-          <div className="mt-3 flex items-center gap-3">
+          <div className="my-1.5 flex items-center gap-2">
             <OptionArt
               art={answer.art}
-              className="aspect-square w-[72px] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-cream"
+              className="aspect-square w-[44px] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-cream"
             />
-            <p className="font-display text-[17px] leading-snug text-navy">
+            <p className="font-display text-[16px] leading-snug text-navy">
               {LETTERS[answer.id]}. {answer.text}
             </p>
           </div>
         )}
-        <p className="mt-3 border-t-2 border-dashed border-navy/25 pt-2 text-[15px] leading-relaxed text-ink">
+        <p>
           <span className="font-bold text-navy">Giải thích: </span>
           {question.explanation}
         </p>
+        {question.caption && (
+          <p className="mt-1 text-sm font-semibold text-success-dark">✨ {question.caption}</p>
+        )}
+      </GuideSays>
+      <div className="sticky bottom-0 mt-auto bg-paper pt-1">
+        <Button size="lg" variant="green" block onClick={onAck}>
+          Đã hiểu ▸
+        </Button>
       </div>
-      <Button size="lg" variant="green" block className="mt-auto" onClick={onAck}>
-        Đã hiểu
-      </Button>
     </motion.div>
   );
 }

@@ -12,6 +12,8 @@ type ModalProps = {
   sparkle?: boolean;
   children: React.ReactNode;
   className?: string;
+  /** `lg` for wide landscape dialogs (lists, details). */
+  size?: 'md' | 'lg';
 };
 
 const TONES = {
@@ -50,6 +52,7 @@ export function Modal({
   sparkle,
   children,
   className,
+  size = 'md',
 }: ModalProps) {
   useEffect(() => {
     if (!open || !onClose) return;
@@ -61,7 +64,7 @@ export function Modal({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3">
           <motion.div
             aria-hidden
             className="absolute inset-0 bg-navy/50"
@@ -75,7 +78,8 @@ export function Modal({
             aria-modal="true"
             aria-label={title}
             className={cn(
-              'ink-border relative w-full max-w-[400px] overflow-hidden rounded-[24px] bg-paper shadow-pop',
+              'ink-border relative flex max-h-[94dvh] w-full flex-col overflow-hidden rounded-[24px] bg-paper shadow-pop',
+              size === 'lg' ? 'max-w-[700px]' : 'max-w-[460px]',
               className,
             )}
             initial={{ scale: 0.85, opacity: 0, y: 20 }}
@@ -85,7 +89,7 @@ export function Modal({
           >
             <div
               className={cn(
-                'relative border-b-[2.5px] border-navy px-5 pb-4 pt-5 text-center',
+                'relative shrink-0 border-b-[2.5px] border-navy px-12 py-2.5 text-center',
                 TONES[tone],
               )}
             >
@@ -97,19 +101,19 @@ export function Modal({
                   <Sparkle className="bottom-2 right-14 h-4 w-4" />
                 </>
               )}
-              <h2 className="font-display text-[28px] leading-tight">{title}</h2>
+              <h2 className="font-display text-[26px] leading-tight">{title}</h2>
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Đóng"
-                  className="ink-border absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-xl bg-paper text-xl leading-none text-navy"
+                  className="ink-border absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl bg-paper text-xl leading-none text-navy"
                 >
                   ×
                 </button>
               )}
             </div>
-            <div className="max-h-[75dvh] overflow-y-auto p-4">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
           </motion.div>
         </div>
       )}

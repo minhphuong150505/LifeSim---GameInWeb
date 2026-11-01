@@ -33,13 +33,13 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className="safe-bottom relative w-full max-w-[480px] rounded-t-[28px] border-x-[2.5px] border-t-[2.5px] border-navy bg-paper px-5 pt-3 shadow-soft"
+            className="safe-bottom relative w-full max-w-[560px] rounded-t-[28px] border-x-[2.5px] border-t-[2.5px] border-navy bg-paper px-5 pt-3 shadow-soft"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
           >
-            <span aria-hidden className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-navy/15" />
+            <span aria-hidden className="mx-auto mb-1 block h-1.5 w-12 rounded-full bg-navy/15" />
             <div className="mb-2 flex items-start justify-between gap-3">
               <h2 className="font-display text-2xl text-navy">{title}</h2>
               <button
@@ -51,7 +51,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                 ×
               </button>
             </div>
-            <div className="max-h-[70dvh] overflow-y-auto pb-2">{children}</div>
+            <div className="max-h-[68dvh] overflow-y-auto pb-2">{children}</div>
           </motion.div>
         </div>
       )}

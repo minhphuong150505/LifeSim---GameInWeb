@@ -49,6 +49,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Ngồi ngửa đầu ra phía sau.', art: 'pose-head-back' },
             { id: 'c', text: 'Nằm ngửa trên giường.', art: 'pose-lie' },
           ],
+          hint: 'Hãy nghĩ xem nếu ngửa đầu hay nằm ngửa thì máu sẽ chảy đi đâu nhé.',
           correctId: 'a',
           explanation:
             'Ngồi hơi cúi đầu về trước giúp ngăn máu chảy xuống họng, hạn chế nguy cơ nuốt máu gây buồn nôn hoặc khó chịu.',
@@ -63,6 +64,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Tạo áp lực lên các mạch máu, giúp cầm máu.', art: 'pressure' },
             { id: 'c', text: 'Đẩy máu còn lại ra khỏi mũi nhanh hơn.', art: 'push-blood' },
           ],
+          hint: 'Bóp mũi tác động trực tiếp lên các mạch máu đang chảy – vậy mục đích là gì?',
           correctId: 'b',
           explanation:
             'Bóp giữ phần mềm của mũi tạo áp lực lên các mạch máu đang chảy, giúp máu đông lại và hỗ trợ cầm máu.',
@@ -75,6 +77,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Chỉ bịt lỗ mũi đang chảy máu.', art: 'pinch-one' },
             { id: 'c', text: 'Phần mềm của mũi, ngay phía trên hai lỗ mũi.', art: 'pinch-soft' },
           ],
+          hint: 'Vị trí cần bóp là phần mũi mềm, có thể bóp lại được.',
           correctId: 'c',
           explanation:
             'Phần mềm ngay phía trên hai lỗ mũi là vị trí cần ép để tạo áp lực cầm máu. Bóp phần xương cứng ở sống mũi không mang lại hiệu quả tương tự.',
@@ -89,6 +92,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Thở nhẹ nhàng bằng miệng.', art: 'breathe-mouth' },
             { id: 'c', text: 'Nín thở cho đến khi máu ngừng chảy.', art: 'hold-breath' },
           ],
+          hint: 'Khi hai cánh mũi đang được bóp kín, em vẫn cần thở nhẹ nhàng, thoải mái.',
           correctId: 'b',
           explanation:
             'Khi hai cánh mũi được bóp giữ, người bị chảy máu cam nên thở bình thường bằng miệng để duy trì hô hấp thoải mái.',
@@ -103,6 +107,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: '10–15 phút, không thả tay liên tục để kiểm tra.', art: 'timer-15' },
             { id: 'c', text: '30 giây, sau đó xì mũi thật mạnh.', art: 'timer-blow' },
           ],
+          hint: 'Thả tay quá sớm hoặc kiểm tra liên tục sẽ làm gián đoạn quá trình cầm máu.',
           correctId: 'b',
           explanation:
             'Cần bóp giữ phần mềm mũi liên tục khoảng 10–15 phút để hỗ trợ cầm máu. Thả tay quá sớm hoặc kiểm tra liên tục có thể làm gián đoạn quá trình cầm máu. Nếu máu vẫn không ngừng sau 15 phút giữ ép đúng cách, cần tìm hỗ trợ y tế.',
@@ -148,6 +153,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Sai, vì máu có thể chảy xuống họng.', art: 'blood-throat' },
             { id: 'c', text: 'Đúng, miễn là em trai không nuốt máu.', art: 'head-back-swallow' },
           ],
+          hint: 'Ngửa đầu ra sau có thể khiến máu chảy đi đâu?',
           correctId: 'b',
           explanation:
             'Ngửa đầu ra sau có thể khiến máu chảy xuống họng, gây buồn nôn hoặc khó chịu. Nên ngồi thẳng và hơi cúi đầu về trước.',
@@ -166,6 +172,7 @@ export const nosebleed: SimScenario = {
               art: 'pinch-soft',
             },
           ],
+          hint: 'Tự nhét bông hoặc giấy sâu vào mũi có thể gây kích ứng – còn cách nào tạo áp lực cầm máu?',
           correctId: 'c',
           explanation:
             'Việc tự nhét bông hoặc giấy sâu vào mũi có thể gây kích ứng. Nên ưu tiên bóp giữ phần mềm của mũi để tạo áp lực cầm máu.',
@@ -178,6 +185,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Phần mềm của mũi, ngay phía trên hai lỗ mũi.', art: 'pinch-soft' },
             { id: 'c', text: 'Chỉ bóp một bên cánh mũi đang chảy máu.', art: 'pinch-one' },
           ],
+          hint: 'Bóp phần xương cứng hay chỉ một bên cánh mũi thì không tạo đủ áp lực cầm máu.',
           correctId: 'b',
           explanation:
             'Bóp giữ phần mềm hai bên mũi giúp tạo áp lực lên các mạch máu đang chảy, hỗ trợ cầm máu.',
@@ -197,6 +205,7 @@ export const nosebleed: SimScenario = {
               art: 'mouth-15min',
             },
           ],
+          hint: 'Nhớ lại cách thở và thời gian giữ ép ở màn trước nhé.',
           correctId: 'c',
           explanation:
             'Khi bóp giữ hai cánh mũi, cần thở bằng miệng và duy trì áp lực liên tục khoảng 10–15 phút, không thả tay quá sớm để kiểm tra.',
@@ -215,6 +224,7 @@ export const nosebleed: SimScenario = {
             },
             { id: 'c', text: 'Đặt đá lạnh trực tiếp vào trong lỗ mũi.', art: 'ice-in-nose' },
           ],
+          hint: 'Biện pháp quan trọng nhất vẫn là gì? Túi chườm chỉ đóng vai trò hỗ trợ.',
           correctId: 'b',
           explanation:
             'Hiệu quả của chườm lạnh trong việc cầm máu cam chưa được chứng minh rõ ràng. Bóp giữ phần mềm mũi liên tục vẫn là biện pháp quan trọng nhất.',
@@ -266,6 +276,7 @@ export const nosebleed: SimScenario = {
             },
             { id: 'c', text: 'Mũi hơi khô nhưng không có biểu hiện bất thường.', art: 'dry-nose' },
           ],
+          hint: 'Dấu hiệu đáng lo là máu chảy nhiều, kéo dài và kèm theo triệu chứng khác.',
           correctId: 'b',
           explanation:
             'Chảy máu nhiều, không ngừng sau khi sơ cấp cứu đúng cách hoặc kèm chóng mặt, choáng váng là những dấu hiệu đáng lo ngại, cần được đánh giá y tế kịp thời.',
@@ -280,6 +291,7 @@ export const nosebleed: SimScenario = {
             { id: 'b', text: 'Cho em trai đứng dậy đi lại để tỉnh táo hơn.', art: 'stand-up' },
             { id: 'c', text: 'Gọi cấp cứu 115 để được hỗ trợ ngay.', art: 'call-115' },
           ],
+          hint: 'Chảy máu kéo dài kèm chóng mặt thì không nên tiếp tục chờ đợi hay để em tự đi lại.',
           correctId: 'c',
           explanation:
             'Chảy máu cam kéo dài kèm chóng mặt có thể là dấu hiệu nguy hiểm. Cần liên hệ cấp cứu thay vì tiếp tục chờ đợi hoặc để người bệnh tự đi lại.',
@@ -297,6 +309,7 @@ export const nosebleed: SimScenario = {
             },
             { id: 'c', text: 'Chỉ cần cung cấp tên và tuổi của em trai.', art: 'name-age' },
           ],
+          hint: 'Nhân viên cấp cứu cần đủ thông tin để đánh giá tình huống và tìm đến đúng nơi.',
           correctId: 'b',
           explanation:
             'Nhân viên cấp cứu cần biết địa điểm, tình trạng của người bệnh, những dấu hiệu bất thường và thời gian đã sơ cấp cứu để đánh giá tình huống và đưa ra hướng dẫn phù hợp.',
@@ -318,6 +331,7 @@ export const nosebleed: SimScenario = {
               art: 'lie-head-back',
             },
           ],
+          hint: 'Người đang chóng mặt không nên tự đi lại hay ngửa đầu ra sau.',
           correctId: 'b',
           explanation:
             'Trong lúc chờ hỗ trợ, cần trấn an người bệnh, tiếp tục chăm sóc phù hợp và làm theo hướng dẫn của nhân viên cấp cứu. Không để người đang chóng mặt tự đi lại hoặc ngửa đầu ra sau.',

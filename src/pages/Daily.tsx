@@ -95,7 +95,7 @@ export function Daily() {
 
   if (playing && question) {
     return (
-      <div className="safe-top px-4">
+      <div className="mx-auto max-w-3xl px-4 pt-[max(12px,env(safe-area-inset-top))]">
         <div className="mb-3 flex items-center justify-between">
           <p className="font-display text-xl text-navy">
             Lượt {attempt}/{DAILY_ATTEMPTS} · Câu {index + 1}/{questions.length}
@@ -120,128 +120,133 @@ export function Daily() {
   return (
     <div>
       <PageHeader title="Daily Rescue Streak" subtitle="Mỗi ngày một thử thách ngắn để giữ lửa." />
-      <div className="space-y-4 px-4">
-        <section className="ink-border relative overflow-hidden rounded-card bg-gradient-to-br from-[#ffd23f] to-[#f5874f] p-4 shadow-soft">
-          <Mascot mood="happy" className="absolute -bottom-3 right-1 h-36 w-28" />
-          <p className="font-display text-lg text-navy">Chuỗi hiện tại</p>
-          <p className="mt-1 flex items-center gap-1 font-display text-6xl leading-none text-navy">
-            <motion.span
-              aria-hidden
-              className="inline-block"
-              animate={{ scale: [1, 1.12, 1] }}
-              transition={{ repeat: Infinity, duration: 1.6 }}
-            >
-              <FlameIcon size={60} lit={streakDays > 0} />
-            </motion.span>
-            {streakDays}
-            <span className="ml-1 text-2xl">ngày</span>
-          </p>
-          <p className="ink-border mt-2 w-fit rounded-full bg-paper px-3 py-0.5 font-display text-navy">
-            Ngày {Math.min(streakDays, nextMilestone)}/{nextMilestone} · Kỷ lục {streak.best}
-          </p>
-        </section>
-
-        <WeekCalendar today={today} completedDays={passedDays} />
-
-        <Card tape>
-          {todayResult?.passed ? (
-            <div className="text-center">
-              <h2 className="font-display text-2xl text-navy">Hôm nay bạn đã hoàn thành! 🎉</h2>
-              <p className="mt-1 text-ink">
-                Đúng <span className="font-bold text-success-dark">{todayResult.correct}</span>/
-                {todayResult.total} câu. Quay lại vào ngày mai để nối dài chuỗi nhé.
-              </p>
-              <Link
-                to="/scenarios"
-                className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary-dark underline"
+      <div className="mx-auto grid max-w-6xl grid-cols-2 items-start gap-4 px-4">
+        <div className="space-y-4">
+          <section className="ink-border relative overflow-hidden rounded-card bg-gradient-to-br from-[#ffd23f] to-[#f5874f] p-4 shadow-soft">
+            <Mascot mood="happy" className="absolute -bottom-3 right-1 h-36 w-28" />
+            <p className="font-display text-lg text-navy">Chuỗi hiện tại</p>
+            <p className="mt-1 flex items-center gap-1 font-display text-6xl leading-none text-navy">
+              <motion.span
+                aria-hidden
+                className="inline-block"
+                animate={{ scale: [1, 1.12, 1] }}
+                transition={{ repeat: Infinity, duration: 1.6 }}
               >
-                Luyện thêm tình huống
-              </Link>
-            </div>
-          ) : (
-            <div>
-              <h2 className="font-display text-2xl text-navy">Thử thách hôm nay</h2>
-              <p className="mt-1 text-sm text-ink">
-                {DAILY_QUESTION_COUNT} câu · {DAILY_TIME_LIMIT_SEC} giây mỗi câu · đúng từ{' '}
-                {DAILY_PASS_MIN} câu trở lên để giữ chuỗi.
-              </p>
-              <div
-                className="mt-2 flex items-center gap-2"
-                aria-label={`Còn ${triesLeft}/${DAILY_ATTEMPTS} lượt thử`}
-              >
-                <span className="text-sm font-semibold text-navy">Lượt thử:</span>
-                {Array.from({ length: DAILY_ATTEMPTS }, (_, i) => (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className={cn(
-                      'ink-border h-5 w-5 rounded-full',
-                      i < triesLeft ? 'bg-primary' : 'bg-[#d8d1c2]',
-                    )}
-                  />
-                ))}
-              </div>
-              {lastRun !== null && !passedDaily(lastRun) && (
-                <p
-                  role="status"
-                  className="mt-2 rounded-xl bg-[#fde3da] p-2 text-sm text-primary-dark"
-                >
-                  Bạn đúng {lastRun}/{DAILY_QUESTION_COUNT} câu – chưa đủ để giữ chuỗi.
-                  {triesLeft > 0 ? ' Còn 1 lượt nữa với bộ câu hỏi mới!' : ' Hẹn bạn ngày mai nhé.'}
+                <FlameIcon size={60} lit={streakDays > 0} />
+              </motion.span>
+              {streakDays}
+              <span className="ml-1 text-2xl">ngày</span>
+            </p>
+            <p className="ink-border mt-2 w-fit rounded-full bg-paper px-3 py-0.5 font-display text-navy">
+              Ngày {Math.min(streakDays, nextMilestone)}/{nextMilestone} · Kỷ lục {streak.best}
+            </p>
+          </section>
+
+          <WeekCalendar today={today} completedDays={passedDays} />
+        </div>
+        <div className="space-y-4">
+          <Card tape>
+            {todayResult?.passed ? (
+              <div className="text-center">
+                <h2 className="font-display text-2xl text-navy">Hôm nay bạn đã hoàn thành! 🎉</h2>
+                <p className="mt-1 text-ink">
+                  Đúng <span className="font-bold text-success-dark">{todayResult.correct}</span>/
+                  {todayResult.total} câu. Quay lại vào ngày mai để nối dài chuỗi nhé.
                 </p>
-              )}
-              <Button block size="lg" className="mt-3" disabled={triesLeft === 0} onClick={start}>
-                {triesLeft === 0
-                  ? 'Hết lượt hôm nay'
-                  : attempt > 1
-                    ? 'Thử lại (lượt 2)'
-                    : 'Bắt đầu'}
-              </Button>
-            </div>
-          )}
-        </Card>
-
-        <Card>
-          <h2 className="font-display text-xl text-navy">Quà theo mốc</h2>
-          <ul className="mt-2 grid grid-cols-3 gap-2">
-            {STREAK_MILESTONES.map((m) => {
-              const reached = streak.best >= m;
-              const claimed = streak.claimedGifts.includes(m);
-              return (
-                <li
-                  key={m}
-                  className={cn(
-                    'flex flex-col items-center rounded-2xl border-2 p-2 text-center',
-                    reached ? 'border-navy bg-[#fff1c2]' : 'border-navy/20 bg-black/5',
-                  )}
+                <Link
+                  to="/core"
+                  className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary-dark underline"
                 >
-                  <GiftIcon
-                    open={claimed}
-                    size={40}
-                    className={cn(!reached && 'opacity-40 grayscale')}
-                  />
-                  <span className="font-display text-lg text-navy">{m} ngày</span>
-                  <span className="flex items-center text-xs font-semibold text-navy">
-                    +{STREAK_GIFTS[m]} <BandageIcon size={18} />
-                  </span>
-                  {reached && !claimed ? (
-                    <Button
-                      variant="yellow"
-                      className="mt-1 min-h-9 px-2 text-base"
-                      onClick={() => claim(m)}
-                    >
-                      Nhận
-                    </Button>
-                  ) : (
-                    <span className="mt-1 text-[11px] text-muted">
-                      {claimed ? 'Đã nhận' : 'Chưa đạt'}
+                  Luyện thêm tình huống
+                </Link>
+              </div>
+            ) : (
+              <div>
+                <h2 className="font-display text-2xl text-navy">Thử thách hôm nay</h2>
+                <p className="mt-1 text-sm text-ink">
+                  {DAILY_QUESTION_COUNT} câu · {DAILY_TIME_LIMIT_SEC} giây mỗi câu · đúng từ{' '}
+                  {DAILY_PASS_MIN} câu trở lên để giữ chuỗi.
+                </p>
+                <div
+                  className="mt-2 flex items-center gap-2"
+                  aria-label={`Còn ${triesLeft}/${DAILY_ATTEMPTS} lượt thử`}
+                >
+                  <span className="text-sm font-semibold text-navy">Lượt thử:</span>
+                  {Array.from({ length: DAILY_ATTEMPTS }, (_, i) => (
+                    <span
+                      key={i}
+                      aria-hidden
+                      className={cn(
+                        'ink-border h-5 w-5 rounded-full',
+                        i < triesLeft ? 'bg-primary' : 'bg-[#d8d1c2]',
+                      )}
+                    />
+                  ))}
+                </div>
+                {lastRun !== null && !passedDaily(lastRun) && (
+                  <p
+                    role="status"
+                    className="mt-2 rounded-xl bg-[#fde3da] p-2 text-sm text-primary-dark"
+                  >
+                    Bạn đúng {lastRun}/{DAILY_QUESTION_COUNT} câu – chưa đủ để giữ chuỗi.
+                    {triesLeft > 0
+                      ? ' Còn 1 lượt nữa với bộ câu hỏi mới!'
+                      : ' Hẹn bạn ngày mai nhé.'}
+                  </p>
+                )}
+                <Button block size="lg" className="mt-3" disabled={triesLeft === 0} onClick={start}>
+                  {triesLeft === 0
+                    ? 'Hết lượt hôm nay'
+                    : attempt > 1
+                      ? 'Thử lại (lượt 2)'
+                      : 'Bắt đầu'}
+                </Button>
+              </div>
+            )}
+          </Card>
+
+          <Card>
+            <h2 className="font-display text-xl text-navy">Quà theo mốc</h2>
+            <ul className="mt-2 grid grid-cols-3 gap-2">
+              {STREAK_MILESTONES.map((m) => {
+                const reached = streak.best >= m;
+                const claimed = streak.claimedGifts.includes(m);
+                return (
+                  <li
+                    key={m}
+                    className={cn(
+                      'flex flex-col items-center rounded-2xl border-2 p-2 text-center',
+                      reached ? 'border-navy bg-[#fff1c2]' : 'border-navy/20 bg-black/5',
+                    )}
+                  >
+                    <GiftIcon
+                      open={claimed}
+                      size={40}
+                      className={cn(!reached && 'opacity-40 grayscale')}
+                    />
+                    <span className="font-display text-lg text-navy">{m} ngày</span>
+                    <span className="flex items-center text-xs font-semibold text-navy">
+                      +{STREAK_GIFTS[m]} <BandageIcon size={18} />
                     </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
+                    {reached && !claimed ? (
+                      <Button
+                        variant="yellow"
+                        className="mt-1 min-h-9 px-2 text-base"
+                        onClick={() => claim(m)}
+                      >
+                        Nhận
+                      </Button>
+                    ) : (
+                      <span className="mt-1 text-[11px] text-muted">
+                        {claimed ? 'Đã nhận' : 'Chưa đạt'}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        </div>
       </div>
     </div>
   );

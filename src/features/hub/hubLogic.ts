@@ -4,6 +4,8 @@ import type { Topic } from '../../data/topics';
 export type HubLocation = {
   id: string;
   name: string;
+  /** Training unit running the course (đơn vị đào tạo). */
+  provider: string;
   lat: number;
   lng: number;
   address: string;

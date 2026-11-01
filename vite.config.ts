@@ -20,7 +20,7 @@ export default defineConfig({
         theme_color: '#d9a866',
         background_color: '#fbf6e6',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'landscape',
         start_url: '/',
         icons: [
           { src: '/assets/ui/pwa-192.png', sizes: '192x192', type: 'image/png' },
@@ -34,7 +34,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precache everything needed to play offline (map tiles stay network-only).
+        // Precache everything needed to play offline (all art is inline SVG).
         globPatterns: ['**/*.{js,css,html,svg,png,mp3,woff2}'],
         navigateFallback: '/index.html',
       },

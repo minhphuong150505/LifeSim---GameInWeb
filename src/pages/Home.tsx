@@ -1,166 +1,328 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { BandageIcon, FlameIcon, TrophyIcon } from '../art/icons';
-import { LivingRoom } from '../art/LivingRoom';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  BookIcon,
+  FlameIcon,
+  GearIcon,
+  HelpIcon,
+  PartyIcon,
+  PinIcon,
+  PlayIcon,
+  ScrollIcon,
+  TrophyIcon,
+} from '../art/icons';
+import { LivingRoom, ROOM_H, ROOM_W } from '../art/LivingRoom';
 import { Mascot } from '../art/Mascot';
-import { Person } from '../art/Person';
 import { Avatar } from '../components/Avatar';
-import { Badge } from '../components/Badge';
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Logo } from '../components/Logo';
-import { SoundToggle } from '../components/SoundToggle';
-import { Sticker } from '../components/Sticker';
-import { EVENT_NAME } from '../data/copy';
+import { CurrencyPill } from '../components/CurrencyPill';
 import { allRounds, scenarioOf } from '../data/sim';
+import { NewsPopup } from '../features/lobby/NewsPopup';
+import { MissionsModal } from '../features/lobby/MissionsModal';
+import { SettingsModal } from '../features/lobby/SettingsModal';
+import {
+  claimableCount,
+  missionsDoneCount,
+  MISSIONS,
+  type MissionInput,
+} from '../features/missions/missionLogic';
+import { usePlayerLevel } from '../features/profile/usePlayerLevel';
+import { Shop } from '../features/sim/Shop';
 import { nextRoundToPlay } from '../features/sim/unlock';
 import { activeStreak } from '../features/streak/streakLogic';
+import { cn } from '../lib/cn';
 import { toDateKey } from '../lib/date';
+import { useMissionStore } from '../store/missions';
 import { useProgressStore } from '../store/progress';
+import { useSessionStore } from '../store/session';
 import { attemptsLeft, useStreakStore } from '../store/streak';
 import { useUserStore } from '../store/user';
-import { useWalletStore } from '../store/wallet';
 
-const TEAM_AVATARS = ['avatar-2', 'avatar-5', 'avatar-7', 'avatar-9', 'avatar-11'];
+function SideButton({
+  label,
+  icon,
+  onClick,
+  badge,
+  glow,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  badge?: number;
+  glow?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative flex flex-col items-center"
+      aria-label={badge ? `${label} (${badge} mới)` : label}
+    >
+      <span
+        className={cn(
+          'ink-border relative grid h-[clamp(34px,10dvh,48px)] w-[clamp(34px,10dvh,48px)] place-items-center rounded-2xl shadow-pop transition-transform group-active:translate-y-0.5 [&>svg]:h-[72%] [&>svg]:w-[72%]',
+          glow ? 'animate-pulse bg-[#bfe3a6] ring-4 ring-success/60' : 'bg-paper',
+        )}
+      >
+        {icon}
+        {badge ? (
+          <span className="ink-border absolute -right-2 -top-2 grid h-6 min-w-6 place-items-center rounded-full bg-primary px-1 font-display text-sm text-white">
+            {badge}
+          </span>
+        ) : null}
+      </span>
+      <span className="mt-0.5 rounded-md bg-paper/85 px-1 font-display text-[12px] leading-[14px] text-navy">
+        {label}
+      </span>
+    </button>
+  );
+}
 
+function BigButton({
+  title,
+  subtitle,
+  icon,
+  onClick,
+  tone,
+  delay,
+}: {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  tone: string;
+  delay: number;
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      initial={{ x: 40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ delay }}
+      whileTap={{ scale: 0.97, y: 2 }}
+      className="ink-border flex w-full items-center gap-3 rounded-[20px] px-3 py-[clamp(4px,1.4dvh,10px)] text-left shadow-pop"
+      style={{ backgroundColor: tone }}
+    >
+      <span className="ink-border grid h-[clamp(40px,11dvh,56px)] w-[clamp(40px,11dvh,56px)] shrink-0 place-items-center rounded-2xl bg-paper">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-display text-[clamp(22px,6dvh,32px)] leading-tight text-navy">
+          {title}
+        </span>
+        <span className="block truncate text-[13px] font-semibold text-navy/80">{subtitle}</span>
+      </span>
+      <PlayIcon size={30} />
+    </motion.button>
+  );
+}
+
+/** Step 2 – main screen: profile, missions character, Core game / Streak / Hub and side menu. */
 export function Home() {
   const navigate = useNavigate();
   const nickname = useUserStore((s) => s.nickname);
+  const avatar = useUserStore((s) => s.avatar);
   const records = useProgressStore((s) => s.rounds);
-  const bandages = useWalletStore((s) => s.bandages);
   const streak = useStreakStore();
+  const missions = useMissionStore();
+  const newsSeen = useSessionStore((s) => s.newsSeen);
+  const markNewsSeen = useSessionStore((s) => s.markNewsSeen);
+  const { level, into, needed } = usePlayerLevel();
+  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | null>(null);
+
   const today = toDateKey();
   const streakDays = activeStreak(streak, today);
   const todayResult = streak.results[today];
   const triesLeft = attemptsLeft(todayResult);
-  // "Chơi ngay" jumps to the first round the player has not cleared yet.
   const next = nextRoundToPlay(allRounds, records);
   const nextScenario = next ? scenarioOf(next.id) : undefined;
 
+  const missionInput: MissionInput = {
+    today,
+    activity: missions.activity,
+    claimed: missions.claimed,
+    streakPassed: Boolean(todayResult?.passed),
+  };
+  const doneCount = missionsDoneCount(missionInput);
+  const claimable = claimableCount(missionInput);
+
   return (
-    <div>
-      <header className="wood safe-top border-b-[2.5px] border-navy px-4 pb-2.5">
-        <div className="flex items-center justify-between">
-          <Logo height={42} />
-          <div className="flex items-center gap-2">
-            <Link
-              to="/daily"
-              aria-label={`Chuỗi ${streakDays} ngày. Mở thử thách hôm nay`}
-              className="ink-border flex h-11 items-center gap-0.5 rounded-xl bg-paper pl-1 pr-2 font-display text-xl text-navy shadow-pop"
-            >
-              <FlameIcon lit={streakDays > 0} size={28} />
-              {streakDays}
-            </Link>
-            <span
-              aria-label={`${bandages} băng gạc`}
-              className="ink-border flex h-11 items-center gap-0.5 rounded-xl bg-paper pl-1 pr-2 font-display text-xl text-navy shadow-pop"
-            >
-              <BandageIcon size={28} />
-              {bandages}
-            </span>
-            <SoundToggle />
-          </div>
-        </div>
-      </header>
+    <main className="relative h-dvh min-h-[320px] overflow-hidden">
+      <svg
+        viewBox={`0 0 ${ROOM_W} ${ROOM_H}`}
+        preserveAspectRatio="xMidYMid slice"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden
+      >
+        <LivingRoom />
+      </svg>
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-cream/10 via-cream/40 to-cream/70"
+      />
 
-      <div className="space-y-4 px-4 pt-4">
-        <section className="ink-border relative overflow-hidden rounded-[24px] bg-[#f3eed3] shadow-soft">
-          <svg viewBox="0 40 400 200" className="block w-full" aria-hidden>
-            <LivingRoom />
-            <Person
-              kind="brother"
-              pose="sit"
-              x={200}
-              y={170}
-              eyes="happy"
-              mouth="smile"
-              armR="wave"
-            />
-          </svg>
-          <div className="relative flex items-end justify-between gap-2 border-t-[2.5px] border-navy bg-paper px-4 pb-3 pt-2">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-navy">Xin chào,</p>
-              <h1 className="break-words font-display text-[30px] leading-tight text-navy">
-                {nickname} 👋
-              </h1>
-              <p className="text-sm text-ink">
-                Hôm nay luyện một tình huống để sẵn sàng cho ngày mai nhé!
-              </p>
-            </div>
-            <Mascot interactive className="-mb-2 -mt-24 h-36 w-28 shrink-0" />
-          </div>
-        </section>
-
-        <div>
-          <Button size="lg" block onClick={() => next && navigate(`/play/${next.id}`)}>
-            ▶ Chơi ngay
-          </Button>
-          {next && nextScenario && (
-            <p className="mt-1.5 text-center text-sm text-muted">
-              Tiếp theo:{' '}
-              <span className="font-semibold text-navy">
-                Tình huống {nextScenario.number} · Round {next.code} – {next.title}
+      <div className="relative grid h-full grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)_auto] grid-rows-[auto_minmax(0,1fr)] gap-x-3 px-[max(12px,env(safe-area-inset-left))] pb-[max(8px,env(safe-area-inset-bottom))] pr-[max(12px,env(safe-area-inset-right))] pt-[max(8px,env(safe-area-inset-top))]">
+        {/* top-left: profile */}
+        <div className="col-span-2 flex items-start gap-2">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            aria-label="Hồ sơ nhân vật"
+            className="ink-border flex min-w-0 items-center gap-2 rounded-2xl bg-paper/95 py-1 pl-1 pr-3 shadow-pop"
+          >
+            <span className="relative">
+              <Avatar id={avatar} size={46} ring="red" />
+              <span className="ink-border absolute -bottom-1 -right-2 rounded-full bg-accent px-1 font-display text-[11px] leading-4 text-navy">
+                Lv{level}
               </span>
-            </p>
-          )}
+            </span>
+            <span className="min-w-0 text-left">
+              <span className="block max-w-[150px] truncate font-display text-lg leading-tight text-navy">
+                {nickname}
+              </span>
+              <span className="flex items-center gap-1 text-[13px] font-semibold text-navy">
+                <FlameIcon size={18} lit={streakDays > 0} />
+                Streak {streakDays} ngày
+              </span>
+              <span
+                className="mt-0.5 block h-1.5 w-[110px] overflow-hidden rounded-full bg-navy/15"
+                role="progressbar"
+                aria-label={`Kinh nghiệm cấp ${level}`}
+                aria-valuenow={into}
+                aria-valuemax={needed}
+              >
+                <span
+                  className="block h-full bg-success"
+                  style={{ width: `${(into / needed) * 100}%` }}
+                />
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPanel('settings')}
+            aria-label="Cài đặt"
+            className="ink-border grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-paper/95 shadow-pop"
+          >
+            <GearIcon size={30} />
+          </button>
         </div>
 
-        <Link to="/daily" className="block">
-          <Card tape className="flex items-center gap-3">
-            <span
-              aria-hidden
-              className="ink-border grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#fff1c2]"
+        {/* left: character with mission bubble */}
+        <div className="relative flex min-h-0 items-end justify-center">
+          <button
+            type="button"
+            onClick={() => setPanel('missions')}
+            className="absolute left-1/2 top-[4%] z-10 w-max max-w-[95%] -translate-x-1/2"
+            aria-label={`Nhiệm vụ hôm nay: ${doneCount}/${MISSIONS.length}. Bấm để xem`}
+          >
+            <motion.span
+              className="ink-border relative block rounded-[18px] bg-paper px-3 py-1.5 text-center shadow-pop"
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
             >
-              <FlameIcon lit={streakDays > 0} size={40} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-display text-xl text-navy">Daily Rescue Streak</h2>
-              <p className="text-sm text-muted">3 câu nhanh · 2 lượt thử · quà theo mốc</p>
-            </div>
-            <Badge tone={todayResult?.passed ? 'green' : triesLeft === 0 ? 'gray' : 'red'}>
-              {todayResult?.passed
-                ? '✓ Đã xong'
-                : triesLeft === 0
-                  ? 'Hết lượt'
-                  : `${triesLeft} lượt`}
-            </Badge>
-          </Card>
-        </Link>
+              <span className="block font-display text-[15px] leading-tight text-primary-dark">
+                {claimable > 0 ? '🎁 Có quà nhiệm vụ!' : 'Nhiệm vụ hôm nay'}
+              </span>
+              <span className="block text-[13px] font-semibold text-navy">
+                {doneCount}/{MISSIONS.length} hoàn thành · Bấm để xem
+              </span>
+              <span
+                aria-hidden
+                className="absolute -bottom-[9px] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b-[2.5px] border-r-[2.5px] border-navy bg-paper"
+              />
+            </motion.span>
+          </button>
+          <Mascot
+            interactive
+            title="Nhân vật của bạn"
+            className="h-[68%] max-h-64 w-auto aspect-[11/16]"
+          />
+        </div>
 
-        <Link
-          to="/team"
-          className="ink-border relative block overflow-hidden rounded-card bg-navy shadow-soft"
-        >
-          <div className="flex items-center justify-center gap-1 px-3 pt-4">
-            {TEAM_AVATARS.map((a) => (
-              <Avatar key={a} id={a} size={46} />
-            ))}
-            <TrophyIcon size={48} className="ml-1" />
-          </div>
-          <div className="p-4 pt-2 text-white">
-            <span className="ink-border rounded-full bg-accent px-2.5 py-0.5 font-display text-sm text-navy">
-              SỰ KIỆN 5 vs 5
-            </span>
-            <h2 className="mt-1.5 font-display text-2xl">{EVENT_NAME}</h2>
-            <p className="text-sm">Lập đội 5 người, cùng xử trí tình huống →</p>
-          </div>
-        </Link>
+        {/* center: main modes */}
+        <div className="flex min-h-0 flex-col justify-center gap-[clamp(6px,2.5dvh,14px)] py-2">
+          <BigButton
+            title="Core game"
+            subtitle={
+              next && nextScenario
+                ? `Tiếp: ${nextScenario.title} · Màn ${next.code} – ${next.title}`
+                : 'Chọn chủ đề và màn chơi'
+            }
+            icon={<PlayIcon size={34} />}
+            tone="#ec6a4c"
+            onClick={() => navigate('/core')}
+            delay={0.05}
+          />
+          <BigButton
+            title="Streak"
+            subtitle={
+              todayResult?.passed
+                ? `Chuỗi ${streakDays} ngày · Hôm nay đã xong ✓`
+                : `Chuỗi ${streakDays} ngày · còn ${triesLeft} lượt hôm nay`
+            }
+            icon={<FlameIcon size={38} lit={streakDays > 0} />}
+            tone="#ffd23f"
+            onClick={() => navigate('/daily')}
+            delay={0.12}
+          />
+          <BigButton
+            title="Hub"
+            subtitle="Tìm khoá học sơ cứu thực tế"
+            icon={<PinIcon size={36} />}
+            tone="#86c06c"
+            onClick={() => navigate('/hub')}
+            delay={0.19}
+          />
+        </div>
 
-        <Card className="flex items-center gap-3">
-          <Sticker name="signs" className="h-24 shrink-0" />
-          <div>
-            <h2 className="font-display text-xl text-navy">Learn – Practice – Be ready</h2>
-            <p className="text-sm text-muted">
-              Đọc tình huống, chọn cách xử lý đúng, dùng vật dụng và ghi nhớ bài học sau mỗi round.
-            </p>
-            <Link
-              to="/scenarios"
-              className="mt-1 inline-flex min-h-11 items-center font-semibold text-primary-dark underline"
-            >
-              Mở bản đồ tình huống
-            </Link>
-          </div>
-        </Card>
+        {/* right column: bandages on top, then the side menu */}
+        <div className="col-start-3 row-span-2 row-start-1 flex min-h-0 flex-col items-end">
+          <CurrencyPill onClick={() => setPanel('shop')} />
+          <nav
+            aria-label="Menu"
+            className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[clamp(2px,1.2dvh,10px)] self-stretch pb-1 pt-1"
+          >
+            <SideButton
+              label="Hướng dẫn"
+              icon={<HelpIcon size={32} />}
+              onClick={() => navigate('/tutorial')}
+            />
+            <SideButton
+              label="Nhiệm vụ"
+              icon={<ScrollIcon size={32} />}
+              onClick={() => setPanel('missions')}
+              badge={claimable}
+            />
+            <SideButton
+              label="Sự kiện"
+              icon={<PartyIcon size={32} />}
+              onClick={() => navigate('/team')}
+              glow
+            />
+            <SideButton
+              label="BXH"
+              icon={<TrophyIcon size={32} />}
+              onClick={() => navigate('/leaderboard')}
+            />
+            <SideButton
+              label="Cẩm nang"
+              icon={<BookIcon size={32} />}
+              onClick={() => navigate('/handbook')}
+            />
+          </nav>
+        </div>
       </div>
-    </div>
+
+      <NewsPopup open={!newsSeen && panel === null} onClose={markNewsSeen} />
+      <MissionsModal
+        open={panel === 'missions'}
+        onClose={() => setPanel(null)}
+        input={missionInput}
+      />
+      <SettingsModal open={panel === 'settings'} onClose={() => setPanel(null)} />
+      <Shop open={panel === 'shop'} onClose={() => setPanel(null)} />
+    </main>
   );
 }

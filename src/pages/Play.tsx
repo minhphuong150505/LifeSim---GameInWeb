@@ -18,15 +18,24 @@ import {
 import { ItemIcon } from '../features/sim/itemArt';
 import { getItem, type ItemId } from '../features/sim/items';
 import { NoseTap } from '../features/sim/NoseTap';
-import { ExplainPanel, Hud, IntroPanel, QuestionPanel } from '../features/sim/panels';
+import {
+  DialogueBox,
+  ExplainPanel,
+  Hud,
+  MissionPopup,
+  QuestionPanel,
+  SidePanel,
+  WrongPanel,
+} from '../features/sim/panels';
 import { PhoneDialer } from '../features/sim/PhoneDialer';
 import { Shop } from '../features/sim/Shop';
 import { Stage } from '../features/sim/Stage';
-import { NOSE_TARGET } from '../features/sim/stageLayout';
+import { NOSE_POINT } from '../features/sim/stageLayout';
 import type { OptionId, SimRound, StageState } from '../features/sim/types';
 import { isRoundUnlocked } from '../features/sim/unlock';
 import { toDateKey } from '../lib/date';
 import { playSound, vibrate } from '../lib/sound';
+import { useMissionStore } from '../store/missions';
 import { useProgressStore } from '../store/progress';
 import { useWalletStore } from '../store/wallet';
 
@@ -35,7 +44,7 @@ export function Play() {
   const round = getRound(id);
   const records = useProgressStore((s) => s.rounds);
   if (!round || !isRoundUnlocked(allRounds, records, round.id)) {
-    return <Navigate to="/scenarios" replace />;
+    return <Navigate to="/core" replace />;
   }
   // Keyed so moving on to the next round starts from a clean state.
   return <RoundSession key={round.id} round={round} />;
@@ -65,8 +74,10 @@ function RoundSession({ round }: { round: SimRound }) {
   const [carrying, setCarrying] = useState<ItemId | null>(null);
   const [iceApplied, setIceApplied] = useState(false);
   const [claimed, setClaimed] = useState<number | null>(null);
+  const [wrongPick, setWrongPick] = useState<OptionId | null>(null);
   const recordedAttempt = useRef(0);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const mapPath = `/core/${scenario?.id ?? ''}`;
 
   const question = round.questions[state.qIndex];
   const beat = state.phase === 'intro' ? round.intro[state.beat] : undefined;
@@ -79,10 +90,6 @@ function RoundSession({ round }: { round: SimRound }) {
   const nextId = nextRoundId(round.id);
   const bagCount = Object.values(items).reduce((n, c) => n + (c ?? 0), 0);
   const stage = iceApplied ? { ...state.stage, icePack: true } : state.stage;
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [state.phase, state.qIndex]);
 
   // Persist the result once per attempt, as soon as the round ends.
   useEffect(() => {
@@ -102,6 +109,7 @@ function RoundSession({ round }: { round: SimRound }) {
       total: state.firstTry.length + (won ? 0 : 1),
       date: toDateKey(),
     });
+    useMissionStore.getState().markActivity('played');
     playSound(won ? 'win' : 'wrong');
   }, [state.phase, state.attempt, state.firstTry, round.id, scenario, score, stars, recordRound]);
 
@@ -114,6 +122,7 @@ function RoundSession({ round }: { round: SimRound }) {
       playSound('wrong');
       vibrate(150);
       setFlash((f) => f + 1);
+      setWrongPick(id);
     }
   };
 
@@ -139,6 +148,7 @@ function RoundSession({ round }: { round: SimRound }) {
   const retry = (paid: boolean) => {
     if (paid && !useWalletStore.getState().spend(RETRY_COST)) return;
     setClaimed(null);
+    setWrongPick(null);
     dispatch({ type: 'RETRY' });
   };
 
@@ -149,14 +159,18 @@ function RoundSession({ round }: { round: SimRound }) {
   };
 
   const onDragEnd = (point: { x: number; y: number }) => {
-    const rect = stageRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const cx = rect.left + (rect.width * NOSE_TARGET.x) / 100;
-    const cy = rect.top + (rect.height * NOSE_TARGET.y) / 100;
-    const r = (rect.width * NOSE_TARGET.r * 1.6) / 100;
-    // framer-motion reports page coordinates; the rect is in viewport coordinates.
-    const dx = point.x - window.scrollX - cx;
-    const dy = point.y - window.scrollY - cy;
+    const svg = svgRef.current;
+    const ctm = svg?.getScreenCTM();
+    if (!svg || !ctm) return;
+    // Map the nose (room units) to viewport pixels through the zoomed viewBox.
+    const p = svg.createSVGPoint();
+    p.x = NOSE_POINT.x;
+    p.y = NOSE_POINT.y;
+    const nose = p.matrixTransform(ctm);
+    const r = NOSE_POINT.r * 1.8 * ctm.a;
+    // framer-motion reports page coordinates; the CTM is in viewport coordinates.
+    const dx = point.x - window.scrollX - nose.x;
+    const dy = point.y - window.scrollY - nose.y;
     if (dx * dx + dy * dy <= r * r) applyIce();
   };
 
@@ -167,99 +181,110 @@ function RoundSession({ round }: { round: SimRound }) {
         : 'shop'
       : null;
 
+  const sidePanel =
+    (state.phase === 'question' && question) ||
+    (state.phase === 'explain' && question) ||
+    state.phase === 'task';
+
   return (
-    <div className="paper flex min-h-dvh flex-col">
-      <header className="safe-top px-3 pb-2">
-        <Hud
-          hearts={state.hearts}
-          heartSlots={round.questions.length}
-          bolts={state.bolts}
-          onBack={() =>
-            state.phase === 'won' || state.phase === 'lost'
-              ? navigate('/scenarios')
-              : setDialog('exit')
-          }
-          onHelp={() => setDialog('help')}
+    <div className="relative h-dvh min-h-[320px] overflow-hidden">
+      <Stage
+        ref={svgRef}
+        cast={round.cast}
+        stage={stage}
+        speaker={beat?.kind === 'line' ? beat.speaker : null}
+        mode={state.phase === 'intro' ? 'wide' : 'focus'}
+        focusX={sidePanel ? 0.25 : 0.5}
+        showCloseup={state.phase !== 'intro'}
+        dropTarget={carrying === 'ice-pack'}
+        onTargetTap={applyIce}
+      >
+        {carrying === 'ice-pack' && (
+          <motion.div
+            drag
+            dragSnapToOrigin
+            dragMomentum={false}
+            onDragEnd={(_, info) => onDragEnd(info.point)}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileDrag={{ scale: 1.15 }}
+            className="absolute left-[36%] top-[50%] z-30 cursor-grab touch-none"
+            aria-label="Túi đá chườm lạnh – kéo lên mũi em trai"
+            role="img"
+          >
+            <ItemIcon id="ice-pack" size={64} />
+          </motion.div>
+        )}
+      </Stage>
+
+      <Hud
+        title={`Tình huống ${scenario?.number} · Màn ${round.code}: ${round.title}`}
+        hearts={state.hearts}
+        heartSlots={round.questions.length}
+        bolts={state.bolts}
+        clock={stage.clock}
+        bagCount={bagCount}
+        pointAt={pointAt}
+        onBack={() =>
+          state.phase === 'won' || state.phase === 'lost' ? navigate(mapPath) : setDialog('exit')
+        }
+        onHelp={() => setDialog('help')}
+        onBag={() => setBagOpen(true)}
+        onShop={() => setShopOpen(true)}
+      />
+
+      {beat && beat.kind !== 'mission' && (
+        <DialogueBox
+          beat={beat}
+          onNext={() => dispatch({ type: 'NEXT_BEAT' })}
+          onSkip={() => dispatch({ type: 'SKIP_INTRO' })}
+          showSkip={replay}
         />
-        <p className="mt-1 truncate text-center font-display text-base text-navy">
-          Tình huống {scenario?.number} · Round {round.code}: {round.title}
-        </p>
-      </header>
+      )}
+      {beat?.kind === 'mission' && (
+        <MissionPopup text={beat.text} onStart={() => dispatch({ type: 'NEXT_BEAT' })} />
+      )}
 
-      <div className="px-3">
-        <Stage
-          ref={stageRef}
-          cast={round.cast}
-          stage={stage}
-          speaker={beat?.kind === 'line' ? beat.speaker : null}
-          line={beat?.kind === 'line' ? beat.text : null}
-          caption={state.phase === 'explain' ? question?.caption : null}
-          showCloseup={state.phase !== 'intro'}
-          bandages={bandages}
-          bagCount={bagCount}
-          onOpenBag={() => setBagOpen(true)}
-          onOpenShop={() => setShopOpen(true)}
-          pointAt={pointAt}
-          dropTarget={carrying === 'ice-pack'}
-          onTargetTap={applyIce}
-        >
-          {carrying === 'ice-pack' && (
-            <motion.div
-              drag
-              dragSnapToOrigin
-              dragMomentum={false}
-              onDragEnd={(_, info) => onDragEnd(info.point)}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              whileDrag={{ scale: 1.15 }}
-              className="absolute right-[17%] top-[20%] z-20 cursor-grab touch-none"
-              aria-label="Túi đá chườm lạnh – kéo lên mũi em trai"
-              role="img"
-            >
-              <ItemIcon id="ice-pack" size={58} />
-            </motion.div>
+      {state.phase === 'question' && question && (
+        <SidePanel label="Câu hỏi">
+          {wrongPick ? (
+            <WrongPanel question={question} picked={wrongPick} onRetry={() => setWrongPick(null)} />
+          ) : (
+            <QuestionPanel
+              question={question}
+              index={state.qIndex}
+              total={round.questions.length}
+              wrongIds={state.wrongIds}
+              onAnswer={answer}
+            />
           )}
-        </Stage>
-      </div>
-
-      <main className="flex flex-1 flex-col px-4 pb-6 pt-3">
-        {beat && (
-          <IntroPanel
-            beat={beat}
-            onNext={() => dispatch({ type: 'NEXT_BEAT' })}
-            onSkip={() => dispatch({ type: 'SKIP_INTRO' })}
-            showSkip={replay}
-          />
-        )}
-        {state.phase === 'question' && question && (
-          <QuestionPanel
-            question={question}
-            index={state.qIndex}
-            total={round.questions.length}
-            wrongIds={state.wrongIds}
-            onAnswer={answer}
-          />
-        )}
-        {state.phase === 'explain' && question && (
+        </SidePanel>
+      )}
+      {state.phase === 'explain' && question && (
+        <SidePanel label="Giải thích">
           <ExplainPanel
             question={question}
             firstTry={state.firstTry[state.firstTry.length - 1] ?? false}
             onAck={() => dispatch({ type: 'ACK' })}
           />
-        )}
-        {task === 'nose-tap' && <NoseTap onDone={() => finishTask()} />}
-        {itemTask && taskItem && (
-          <ItemTaskPanel
-            task={itemTask}
-            item={taskItem}
-            owned={ownsTaskItem}
-            carrying={carrying === taskItem}
-            applied={iceApplied}
-            onSkip={() => finishTask()}
-            onContinue={() => finishTask({ icePack: true })}
-          />
-        )}
-      </main>
+        </SidePanel>
+      )}
+      {state.phase === 'task' && (
+        <SidePanel label="Nhiệm vụ tương tác">
+          {task === 'nose-tap' && <NoseTap onDone={() => finishTask()} />}
+          {itemTask && taskItem && (
+            <ItemTaskPanel
+              task={itemTask}
+              item={taskItem}
+              owned={ownsTaskItem}
+              carrying={carrying === taskItem}
+              applied={iceApplied}
+              onSkip={() => finishTask()}
+              onContinue={() => finishTask({ icePack: true })}
+            />
+          )}
+        </SidePanel>
+      )}
 
       {/* Lightning flash on a wrong answer */}
       <AnimatePresence>
@@ -376,15 +401,15 @@ function RoundSession({ round }: { round: SimRound }) {
             <div className="mt-4 flex flex-col gap-2">
               {nextId && (
                 <Button size="lg" block onClick={() => navigate(`/play/${nextId}`)}>
-                  Round tiếp theo ▸
+                  Màn tiếp theo ▸
                 </Button>
               )}
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="secondary" onClick={() => retry(false)}>
                   Chơi lại
                 </Button>
-                <Button variant="secondary" onClick={() => navigate('/scenarios')}>
-                  Về bản đồ
+                <Button variant="secondary" onClick={() => navigate(mapPath)}>
+                  Về bản đồ màn
                 </Button>
               </div>
             </div>
@@ -399,7 +424,7 @@ function RoundSession({ round }: { round: SimRound }) {
           ))}
         </div>
         <p className="mt-2 text-center text-[15px] leading-relaxed text-ink">
-          Bạn đã nhận đủ {MAX_BOLTS} tia sét nên thua round này. Dùng {RETRY_COST} băng gạc để chơi
+          Bạn đã nhận đủ {MAX_BOLTS} tia sét nên thua màn này. Dùng {RETRY_COST} băng gạc để chơi
           lại, hoặc xem quảng cáo để chơi lại miễn phí.
         </p>
         <div className="mt-4 flex flex-col gap-2">
@@ -409,38 +434,40 @@ function RoundSession({ round }: { round: SimRound }) {
           <Button size="lg" block variant="yellow" onClick={() => setAd('retry')}>
             ▶ Xem quảng cáo để chơi lại
           </Button>
-          <Button variant="secondary" block onClick={() => navigate('/scenarios')}>
-            Về bản đồ
+          <Button variant="secondary" block onClick={() => navigate(mapPath)}>
+            Về bản đồ màn
           </Button>
         </div>
       </Modal>
 
       <Modal
         open={dialog === 'exit'}
-        title="Thoát round?"
+        title="Thoát màn chơi?"
         tone="wood"
         onClose={() => setDialog(null)}
       >
-        <p className="text-center text-ink">Tiến trình của round này sẽ không được lưu.</p>
+        <p className="text-center text-ink">Tiến trình của màn này sẽ không được lưu.</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button variant="secondary" onClick={() => setDialog(null)}>
             Chơi tiếp
           </Button>
-          <Button onClick={() => navigate('/scenarios')}>Thoát</Button>
+          <Button onClick={() => navigate(mapPath)}>Thoát</Button>
         </div>
       </Modal>
 
       <Modal open={dialog === 'help'} title="Cách chơi" tone="wood" onClose={() => setDialog(null)}>
         <ul className="space-y-2 text-[15px] leading-relaxed text-ink">
-          <li>❤️ Trả lời đúng: nhận 1 trái tim, đọc giải thích rồi bấm “Đã hiểu”.</li>
-          <li>⚡ Trả lời sai: nhận 1 tia sét và chọn lại đến khi đúng.</li>
+          <li>💬 Chạm vào khung thoại để đọc tiếp câu chuyện.</li>
+          <li>❤️ Trả lời đúng: nhận 1 trái tim, chị sẽ giải thích lý do rồi bấm “Đã hiểu”.</li>
+          <li>⚡ Trả lời sai: nhận 1 tia sét, nghe gợi ý của chị rồi chọn lại.</li>
           <li>
             ⚡⚡⚡ Đủ {MAX_BOLTS} tia sét là thua – cần {RETRY_COST} băng gạc (hoặc xem quảng cáo)
             để chơi lại.
           </li>
-          <li>🩹 Hoàn thành round để nhận băng gạc và mở khoá round tiếp theo.</li>
+          <li>🩹 Hoàn thành màn để nhận băng gạc và mở khoá màn tiếp theo.</li>
           <li>
-            🏪 Dùng băng gạc mua vật dụng ở cửa hàng, rồi lấy từ túi vật dụng để dùng trong round.
+            🏪 Dùng băng gạc mua vật dụng ở cửa hàng (góc trên bên phải), rồi lấy từ túi vật dụng để
+            dùng trong màn chơi.
           </li>
         </ul>
       </Modal>

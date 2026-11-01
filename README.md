@@ -2,7 +2,18 @@
 
 > **Practice today, be ready tomorrow** · Learn – Practice – Be ready
 
-Bản demo chơi được của LifeSim: game web mô phỏng sơ cứu cho người trẻ Việt Nam. 100% frontend, không backend, không API key; dữ liệu người chơi lưu trong `localStorage`.
+Bản demo chơi được của LifeSim: game web mô phỏng sơ cứu cho người trẻ Việt Nam, chơi ở **màn hình ngang (landscape)**, phong cách casual 2D. 100% frontend, không backend, không API key; dữ liệu người chơi lưu trong `localStorage`.
+
+## Luồng màn hình
+
+1. **Login** (`/login`) – nền game + thanh tải, sau đó khung đăng nhập (tên + nhân vật). Mỗi lần mở link đều bắt đầu từ đây.
+2. **Hướng dẫn** (`/tutorial`) – 7 trang giới thiệu cách chơi, hiện trước khi vào game lần đầu (xem lại từ nút "?" hoặc Cài đặt).
+3. **Popup thông báo** – sự kiện, thông báo của NPH, quảng cáo (mô phỏng), hiện một lần sau mỗi lần đăng nhập.
+4. **Màn hình chính** (`/`) – góc trái: avatar, tên, cấp độ, streak, cài đặt; giữa: nhân vật + bong bóng nhiệm vụ và 3 nút **Core game / Streak / Hub**; cột phải: băng gạc, Hướng dẫn, Nhiệm vụ, Sự kiện, BXH, Cẩm nang.
+5. **Core game** (`/core`) – chọn chủ đề dạng thẻ có ảnh minh hoạ (chủ đề chưa mở hiện khoá) → bản đồ màn (`/core/:id`) → màn chơi (`/play/:id`).
+6. **Màn chơi** – hội thoại hiện thành khung thoại trên cảnh; câu hỏi, giải thích, nhiệm vụ tương tác hiện thành popup bên phải; cảnh zoom vào cậu bé và thay đổi theo câu trả lời; chọn sai thì "chị" nhắc lý do + gợi ý.
+
+Trên điện thoại cầm dọc, game hiện màn "Hãy xoay ngang điện thoại" (và thử bật toàn màn hình + khoá ngang khi đăng nhập).
 
 Nội dung và cơ chế theo tài liệu **"Nội dung game Lifesim_Dev"**.
 
@@ -11,10 +22,13 @@ Nội dung và cơ chế theo tài liệu **"Nội dung game Lifesim_Dev"**.
 | Core Emergency Simulation | Câu chuyện → câu hỏi A/B/C có hình minh hoạ → trái tim / tia sét → băng gạc → mở khoá round tiếp theo |
 | Daily Rescue Streak       | Mỗi ngày 3 câu nhanh, **2 lượt thử**, đúng ≥ 2 câu để giữ chuỗi; quà băng gạc ở mốc 3 / 7 / 14 ngày   |
 | Daily Leaderboard         | Xếp hạng theo điểm Core Simulation trong ngày (bot mô phỏng), có thêm tab tuần                        |
-| Practice Hub              | Lọc khóa học theo khu vực (khoảng cách), thời gian (ngày học), ngân sách và **nhu cầu** (chủ đề)      |
+| Practice Hub              | Danh sách khoá học (ảnh, tên, đơn vị) → bấm xem chi tiết; bộ lọc gộp lại, bấm "Bộ lọc" mới xổ ra      |
+| Nhiệm vụ ngày             | Chơi 1 màn · giữ Streak · đọc lại Cẩm nang → nhận băng gạc; nút "Đi tới" dẫn thẳng đến nơi làm        |
+| Hồ sơ & cấp độ            | Cấp độ/XP tính từ tiến độ (màn, sao, streak, 5v5, nhiệm vụ), tiến độ chơi, thành tựu                  |
+| Cẩm nang                  | Ôn lại kiến thức đã học (tổng hợp từ phần giải thích trong Core game)                                 |
 | 5v5 Event                 | Bản thử nghiệm đấu với bot – cơ chế chính thức chưa chốt                                              |
 
-**Stack:** Vite · React · TypeScript (strict) · Tailwind CSS · React Router · Zustand (persist) · Framer Motion · React-Leaflet + OpenStreetMap · Howler.js · vite-plugin-pwa · Vitest.
+**Stack:** Vite · React · TypeScript (strict) · Tailwind CSS · React Router · Zustand (persist) · Framer Motion · Howler.js · vite-plugin-pwa · Vitest.
 
 ## Core Emergency Simulation
 
@@ -45,7 +59,7 @@ npm run build      # typecheck + build ra dist/
 npm run preview    # xem thử bản build (có service worker / PWA)
 ```
 
-Mẹo: mở DevTools → chế độ thiết bị (360×740 hoặc 390×844). Trên desktop app hiển thị trong khung giữa màn hình, tối đa 480px.
+Mẹo: mở DevTools → chế độ thiết bị, xoay ngang (ví dụ 844×390). Trên desktop game hiển thị toàn màn hình (tối đa 1400px).
 
 ## Deploy lên Vercel
 
@@ -59,7 +73,7 @@ Mẹo: mở DevTools → chế độ thiết bị (360×740 hoặc 390×844). Tr
   vercel --prod   # deploy production
   ```
 
-Sau khi deploy, mở trên điện thoại → "Thêm vào màn hình chính" để cài như một app (PWA). Asset được cache để chơi offline; riêng ô bản đồ ở Practice Hub cần mạng.
+Sau khi deploy, mở trên điện thoại → "Thêm vào màn hình chính" để cài như một app (PWA, hướng ngang). Asset được cache để chơi offline.
 
 ## Thêm tình huống / round mới
 
@@ -85,11 +99,11 @@ Toàn bộ hình ảnh là **SVG vẽ tay trong code** theo một phong cách 2D
 src/
   app/         router, layout, bottom nav
   art/         đồ hoạ SVG 2D: phòng khách, nhân vật, mascot, avatar, icon
-  pages/       Home, Onboarding, Scenarios (bản đồ), Play, Daily, Team, Leaderboard, Hub, Profile
-  features/    sim (engine round, cảnh, câu hỏi, cửa hàng, túi đồ, điện thoại…), streak, leaderboard, team, hub
+  pages/       Login, Tutorial, Home (sảnh), CoreTopics, Scenarios (bản đồ màn), Play, Daily, Team, Leaderboard, Hub, Profile, Handbook
+  features/    sim (engine, cảnh, popup câu hỏi, cửa hàng, túi đồ, điện thoại…), lobby (thông báo, nhiệm vụ, cài đặt), missions, profile (cấp độ), streak, leaderboard, team, hub
   components/  Button, Card, Modal, BottomSheet, Badge, Timer…
-  store/       zustand: user, progress, wallet (băng gạc + vật dụng), streak, settings
-  data/        sim/*.ts (nội dung tình huống), dailyPool.json, bots.json, hubLocations.json
+  store/       zustand: user, session (đăng nhập), progress, wallet (băng gạc + vật dụng), streak, missions, settings
+  data/        sim/*.ts (nội dung tình huống), news.ts, handbook.ts, dailyPool.json, bots.json, hubLocations.json
   lib/         seededRandom, date, sound
   dev/         trang /dev/art (chỉ có khi chạy dev)
 public/assets/ audio/, ui/ (icon PWA)
@@ -98,5 +112,5 @@ public/assets/ audio/, ui/ (icon PWA)
 ## Ghi chú về bản demo
 
 - Bảng xếp hạng, đồng đội/đối thủ 5v5, quảng cáo và các địa điểm ở Practice Hub đều là **mô phỏng**, được dán nhãn trong UI.
-- Request ra ngoài duy nhất: ô bản đồ OpenStreetMap ở trang Hub (không cần key).
+- Không có request ra ngoài (bản đồ ở Hub đã được bỏ).
 - Nội dung mang tính giáo dục, tham khảo hướng dẫn sơ cứu của Hội Chữ thập đỏ; không thay thế khóa đào tạo thực tế. **Khi khẩn cấp hãy gọi 115.**

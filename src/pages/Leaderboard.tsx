@@ -58,7 +58,7 @@ export function Leaderboard() {
         subtitle="Theo thành tích Core Simulation · làm mới mỗi ngày."
         right={<Sticker name="trophy" className="h-14" />}
       />
-      <div className="px-4">
+      <div className="mx-auto max-w-3xl px-4">
         <div
           role="tablist"
           aria-label="Khoảng thời gian"

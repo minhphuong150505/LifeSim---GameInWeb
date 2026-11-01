@@ -110,8 +110,23 @@ button {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
-.leaflet-container {
-  font-family: var(--font-body);
+/* "Rotate your phone" overlay: the game is designed for landscape. */
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (pointer: coarse) and (max-width: 900px) {
+  .rotate-hint {
+    display: grid;
+  }
+}
+
+/* Thin scrollbars inside horizontally scrolling rows (topic cards, chips). */
+.scroll-row {
+  scrollbar-width: thin;
+  scroll-snap-type: x mandatory;
+}
+.scroll-row > * {
+  scroll-snap-align: start;
 }
 
 @media (prefers-reduced-motion: reduce) {

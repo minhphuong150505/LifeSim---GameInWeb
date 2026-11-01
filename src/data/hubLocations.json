@@ -2,6 +2,7 @@
   {
     "id": "loc-a",
     "name": "Khóa sơ cứu cơ bản – Điểm A (demo)",
+    "provider": "Trung tâm Sơ cứu Cộng đồng A (demo)",
     "lat": 10.8494,
     "lng": 106.7537,
     "address": "Khu trung tâm, TP. Thủ Đức",
@@ -14,6 +15,7 @@
   {
     "id": "loc-b",
     "name": "Thực hành ép tim & AED – Điểm B (demo)",
+    "provider": "Câu lạc bộ Hồi sức B (demo)",
     "lat": 10.87,
     "lng": 106.803,
     "address": "Khu đại học, TP. Thủ Đức",
@@ -26,6 +28,7 @@
   {
     "id": "loc-c",
     "name": "Sơ cứu bỏng và vết thương – Điểm C (demo)",
+    "provider": "Đội Tình nguyện Y tế C (demo)",
     "lat": 10.9068,
     "lng": 106.7694,
     "address": "Khu trung tâm, TP. Dĩ An",
@@ -38,6 +41,7 @@
   {
     "id": "loc-d",
     "name": "Xử trí hóc dị vật cho mọi lứa tuổi – Điểm D (demo)",
+    "provider": "Trung tâm Kỹ năng Gia đình D (demo)",
     "lat": 10.8231,
     "lng": 106.7297,
     "address": "Khu Thảo Điền, TP. Thủ Đức",
@@ -50,6 +54,7 @@
   {
     "id": "loc-e",
     "name": "Sơ cứu học đường nâng cao – Điểm E (demo)",
+    "provider": "Trường Kỹ năng Học đường E (demo)",
     "lat": 10.7769,
     "lng": 106.7009,
     "address": "Khu trung tâm, Quận 1",
@@ -62,6 +67,7 @@
   {
     "id": "loc-f",
     "name": "Workshop co giật – ngất – chảy máu cam – Điểm F (demo)",
+    "provider": "Nhóm Sơ cứu Thanh niên F (demo)",
     "lat": 10.8015,
     "lng": 106.712,
     "address": "Khu Bình Thạnh",
@@ -74,6 +80,7 @@
   {
     "id": "loc-g",
     "name": "Sơ cứu ngoài trời & dã ngoại – Điểm G (demo)",
+    "provider": "CLB Dã ngoại An toàn G (demo)",
     "lat": 10.894,
     "lng": 106.743,
     "address": "Khu Bình Thắng, TP. Dĩ An",
@@ -86,6 +93,7 @@
   {
     "id": "loc-h",
     "name": "CLB luyện tập sơ cứu hằng tuần – Điểm H (demo)",
+    "provider": "CLB Sơ cứu Cuối tuần H (demo)",
     "lat": 10.8411,
     "lng": 106.8098,
     "address": "Khu công nghệ cao, TP. Thủ Đức",

@@ -392,3 +392,85 @@ export function UsersIcon(p: IconProps) {
     </Svg>
   );
 }
+
+export function GearIcon(p: IconProps) {
+  const teeth = Array.from({ length: 8 }, (_, i) => i * 45);
+  return (
+    <Svg {...p}>
+      <g transform="translate(24 24)">
+        {teeth.map((a) => (
+          <rect
+            key={a}
+            x={-4.5}
+            y={-21}
+            width={9}
+            height={10}
+            rx={2}
+            fill={C.gray}
+            {...stroke(2.5)}
+            transform={`rotate(${a})`}
+          />
+        ))}
+        <circle r={14} fill={C.gray} {...stroke(3)} />
+        <circle r={5.5} fill={C.white} {...stroke(2.5)} />
+      </g>
+    </Svg>
+  );
+}
+
+export function BookIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M24 12 C18 8 11 8 5 10 V40 C11 38 18 38 24 42 Z" fill={C.white} {...stroke(3)} />
+      <path d="M24 12 C30 8 37 8 43 10 V40 C37 38 30 38 24 42 Z" fill={C.ice} {...stroke(3)} />
+      <path d="M11 19 h8 M11 25 h8 M30 19 h7 M30 25 h7" {...stroke(2)} />
+      <path d="M31.5 29 h4 v3 h3 v4 h-3 v3 h-4 v-3 h-3 v-4 h3 Z" fill={C.red} />
+    </Svg>
+  );
+}
+
+export function ScrollIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x={10} y={6} width={28} height={36} rx={4} fill="#fff1c2" {...stroke(3)} />
+      <rect x={17} y={3} width={14} height={7} rx={2} fill={C.wood} {...stroke(2.5)} />
+      <path
+        d="M16 19 l3 3 l5 -6 M16 30 l3 3 l5 -6"
+        fill="none"
+        stroke={C.green}
+        strokeWidth={3.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M28 20 h5 M28 31 h5" {...stroke(2.5)} />
+    </Svg>
+  );
+}
+
+export function PartyIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 42 L16 14 L34 32 Z" fill={C.yellow} {...stroke(3)} />
+      <path d="M11 28 L22 37 M14 20 L28 33" stroke={C.red} strokeWidth={3} />
+      <circle cx={34} cy={10} r={3} fill={C.red} {...stroke(2)} />
+      <circle cx={41} cy={22} r={2.5} fill={C.blue} {...stroke(2)} />
+      <path d="M26 6 l2 5 M38 30 l5 1 M30 18 C33 14 37 15 40 12" fill="none" {...stroke(2.5)} />
+    </Svg>
+  );
+}
+
+export function HelpIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx={24} cy={24} r={19} fill={C.blue} {...stroke(3)} />
+      <path
+        d="M18 19 C18 13 30 13 30 19 C30 24 24 24 24 29"
+        fill="none"
+        stroke={C.white}
+        strokeWidth={4.5}
+        strokeLinecap="round"
+      />
+      <circle cx={24} cy={35.5} r={2.8} fill={C.white} />
+    </Svg>
+  );
+}

@@ -171,22 +171,34 @@ export function Team() {
     return (
       <div>
         <PageHeader title="Team Rescue 5v5" subtitle={`Sự kiện: ${EVENT_NAME}`} />
-        <div className="space-y-4 px-4">
-          <div
-            role="img"
-            aria-label="Hai đội cứu hộ LifeSim đối đầu 5 vs 5"
-            className="ink-border relative flex items-center justify-around overflow-hidden rounded-card bg-navy px-3 pb-3 pt-10 shadow-soft"
-          >
-            <UsersIcon size={64} />
-            <TrophyIcon size={72} />
-            <UsersIcon size={64} />
-            <span className="ink-border absolute left-3 top-3 rounded-full bg-accent px-3 py-0.5 font-display text-sm text-navy">
-              {EVENT_NAME}
-            </span>
+        <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-start gap-4 px-4">
+          <div className="space-y-3">
+            <div
+              role="img"
+              aria-label="Hai đội cứu hộ LifeSim đối đầu 5 vs 5"
+              className="ink-border relative flex items-center justify-around overflow-hidden rounded-card bg-navy px-3 pb-3 pt-10 shadow-soft"
+            >
+              <UsersIcon size={64} />
+              <TrophyIcon size={72} />
+              <UsersIcon size={64} />
+              <span className="ink-border absolute left-3 top-3 rounded-full bg-accent px-3 py-0.5 font-display text-sm text-navy">
+                {EVENT_NAME}
+              </span>
+            </div>
+            <p className="ink-border rounded-2xl bg-[#fff1c2] p-2 text-center text-xs text-navy">
+              Sự kiện 5v5 đang thử nghiệm – cơ chế chính thức sẽ được cập nhật sau.
+            </p>
+            <Card className="text-sm text-ink">
+              {TEAM_ROUNDS} vòng · mỗi vòng 1 câu hỏi nhanh ({ROUND_TIME_SEC} giây). Trả lời đúng và
+              nhanh để ghi điểm cho đội. Điểm đội = tổng điểm 5 thành viên.
+            </Card>
+            <Button block size="lg" onClick={() => setPhase('question')}>
+              Vào trận
+            </Button>
+            <p className="text-center text-xs text-muted">
+              Bản demo – đồng đội và đối thủ là máy. Chế độ online sẽ có ở phiên bản sau.
+            </p>
           </div>
-          <p className="ink-border rounded-2xl bg-[#fff1c2] p-2 text-center text-xs text-navy">
-            Sự kiện 5v5 đang thử nghiệm – cơ chế chính thức sẽ được cập nhật sau.
-          </p>
 
           <div className="relative flex items-start gap-3">
             <TeamColumn members={members} team="ally" label="Đội của bạn" />
@@ -199,17 +211,6 @@ export function Team() {
             </motion.span>
             <TeamColumn members={members} team="rival" label="Đội đối thủ" />
           </div>
-
-          <Card className="text-sm text-ink">
-            {TEAM_ROUNDS} vòng · mỗi vòng 1 câu hỏi nhanh ({ROUND_TIME_SEC} giây). Trả lời đúng và
-            nhanh để ghi điểm cho đội. Điểm đội = tổng điểm 5 thành viên.
-          </Card>
-          <Button block size="lg" onClick={() => setPhase('question')}>
-            Vào trận
-          </Button>
-          <p className="text-center text-xs text-muted">
-            Bản demo – đồng đội và đối thủ là máy. Chế độ online sẽ có ở phiên bản sau.
-          </p>
         </div>
       </div>
     );
@@ -218,7 +219,7 @@ export function Team() {
   if (phase === 'end') {
     const won = winner === 'ally';
     return (
-      <div className="safe-top space-y-4 px-4">
+      <div className="mx-auto max-w-3xl space-y-4 px-4 py-[max(12px,env(safe-area-inset-top))]">
         <Card tape className="text-center">
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
@@ -298,7 +299,7 @@ export function Team() {
   }
 
   return (
-    <div className="safe-top space-y-3 px-4">
+    <div className="mx-auto max-w-3xl space-y-3 px-4 py-[max(12px,env(safe-area-inset-top))]">
       <div className="flex items-center justify-between">
         <p className="font-display text-lg font-bold text-navy">
           Vòng {round + 1}/{TEAM_ROUNDS}

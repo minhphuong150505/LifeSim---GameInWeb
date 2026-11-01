@@ -33,6 +33,8 @@ export type SimQuestion = {
   options: SimOption[];
   correctId: OptionId;
   explanation: string;
+  /** What the guide character says after a wrong pick (nudges without giving the answer away). */
+  hint?: string;
   /** Stage change revealed once the right answer is picked. */
   effect?: Partial<StageState>;
   /** Short caption describing the new illustration. */

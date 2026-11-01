@@ -1,4 +1,4 @@
-import { ROOM_H, ROOM_W, SOFA_SEAT_Y } from '../../art/LivingRoom';
+import { SOFA_SEAT_Y } from '../../art/LivingRoom';
 import type { CastMember } from './types';
 
 export const CAST_NAMES: Record<CastMember, string> = {
@@ -19,5 +19,5 @@ export const SPOTS: Record<CastMember, { x: number; y: number; headTop: number }
 };
 export const COMFORT_MOM = { x: 252, y: SOFA_SEAT_Y, headTop: 86 };
 
-/** Brother's nose in % of the stage – the drop target for items. */
-export const NOSE_TARGET = { x: (200 / ROOM_W) * 100, y: (130 / ROOM_H) * 100, r: 11 };
+/** Brother's nose in room units – the drop target for items (radius in room units). */
+export const NOSE_POINT = { x: 200, y: 130, r: 16 };
