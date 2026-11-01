@@ -187,7 +187,7 @@ function RoundSession({ round }: { round: SimRound }) {
     state.phase === 'task';
 
   return (
-    <div className="relative h-dvh min-h-[320px] overflow-hidden">
+    <div className="relative h-dvh overflow-hidden">
       <Stage
         ref={svgRef}
         cast={round.cast}
@@ -522,18 +522,18 @@ function ItemTaskPanel({
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="flex flex-1 flex-col gap-3"
+      className="flex flex-col gap-3 short:gap-1.5"
     >
-      <div className="ink-border rounded-card bg-[#fff1c2] p-4 shadow-soft">
-        <div className="flex items-center gap-2">
+      <div className="ink-border rounded-card bg-[#fff1c2] p-4 shadow-soft short:rounded-xl short:p-2">
+        <div className="flex items-center gap-2 short:[&>svg]:h-7 short:[&>svg]:w-7">
           {task === 'call-115' ? <PhoneIcon size={40} /> : <ItemIcon id="ice-pack" size={40} />}
-          <p className="font-display text-xl leading-snug text-navy">
+          <p className="font-display text-xl leading-snug text-navy short:text-[15px] short:leading-tight">
             {task === 'call-115'
               ? 'Hãy sử dụng điện thoại để gọi cấp cứu!'
               : 'Tương tác vật dụng: thử dùng túi chườm lạnh như bố gợi ý.'}
           </p>
         </div>
-        <ol className="mt-3 space-y-1.5">
+        <ol className="mt-3 space-y-1.5 short:mt-1 short:space-y-0.5 short:[&>li]:text-[12px] short:[&>li]:leading-snug">
           {steps.map((s, i) => (
             <li
               key={s}
@@ -551,11 +551,14 @@ function ItemTaskPanel({
         </ol>
       </div>
       {applied && (
-        <p role="status" className="ink-border rounded-2xl bg-[#eef7e6] p-3 text-[15px] text-navy">
+        <p
+          role="status"
+          className="ink-border rounded-2xl bg-[#eef7e6] p-3 text-[15px] text-navy short:p-1.5 short:text-[12px]"
+        >
           Túi chườm lạnh chỉ là hỗ trợ tuỳ chọn – em trai vẫn tiếp tục bóp giữ phần mềm mũi.
         </p>
       )}
-      <div className="mt-auto flex flex-col gap-2">
+      <div className="flex flex-col gap-2 short:gap-1">
         {applied && (
           <Button size="lg" block variant="green" onClick={onContinue}>
             Tiếp tục ▸

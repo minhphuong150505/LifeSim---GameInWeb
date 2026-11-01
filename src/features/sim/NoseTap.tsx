@@ -43,14 +43,14 @@ export function NoseTap({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-2">
-      <div className="ink-border rounded-2xl bg-[#fff1c2] px-3 py-2">
-        <p className="font-display text-[17px] leading-snug text-navy">
+    <div className="flex flex-col gap-2 short:gap-1.5">
+      <div className="ink-border rounded-2xl bg-[#fff1c2] px-3 py-2 short:px-2 short:py-1">
+        <p className="font-display text-[17px] leading-snug text-navy short:text-[14px] short:leading-tight">
           Nhiệm vụ: Chạm vào đúng vị trí cần bóp giữ trên hình cận cảnh mũi của em trai.
         </p>
       </div>
-      <div className="flex flex-1 items-start gap-3">
-        <div className="ink-border relative aspect-[5/4] w-[52%] max-w-[300px] shrink-0 overflow-hidden rounded-[22px]">
+      <div className="flex items-stretch gap-3 short:gap-2">
+        <div className="ink-border relative aspect-[5/4] w-[52%] max-w-[300px] shrink-0 overflow-hidden rounded-[22px] short:w-[38%] short:rounded-xl">
           <svg viewBox="0 0 200 160" className="absolute inset-0 h-full w-full" aria-hidden>
             <rect width={200} height={160} fill={C.skin} />
             <ellipse cx={34} cy={96} rx={22} ry={12} fill={C.blush} opacity={0.6} />
@@ -107,14 +107,14 @@ export function NoseTap({ onDone }: { onDone: () => void }) {
             />
           ))}
         </div>
-        <div className="flex min-h-full flex-1 flex-col gap-2">
+        <div className="flex flex-1 flex-col gap-2">
           <motion.p
             key={done ? 'ok' : (miss ?? 'idle')}
             role="status"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(
-              'font-semibold',
+              'font-semibold short:text-[13px] short:leading-snug',
               done ? 'text-success-dark' : miss ? 'text-primary-dark' : 'text-muted',
             )}
           >

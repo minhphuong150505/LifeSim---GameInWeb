@@ -60,7 +60,7 @@ function SideButton({
     >
       <span
         className={cn(
-          'ink-border relative grid h-[clamp(34px,10dvh,48px)] w-[clamp(34px,10dvh,48px)] place-items-center rounded-2xl shadow-pop transition-transform group-active:translate-y-0.5 [&>svg]:h-[72%] [&>svg]:w-[72%]',
+          'ink-border relative grid h-[clamp(28px,10dvh,48px)] w-[clamp(28px,10dvh,48px)] place-items-center rounded-2xl shadow-pop transition-transform group-active:translate-y-0.5 [&>svg]:h-[72%] [&>svg]:w-[72%]',
           glow ? 'animate-pulse bg-[#bfe3a6] ring-4 ring-success/60' : 'bg-paper',
         )}
       >
@@ -71,7 +71,7 @@ function SideButton({
           </span>
         ) : null}
       </span>
-      <span className="mt-0.5 rounded-md bg-paper/85 px-1 font-display text-[12px] leading-[14px] text-navy">
+      <span className="mt-0.5 rounded-md bg-paper/85 px-1 font-display text-[12px] leading-[14px] text-navy short:text-[10px] short:leading-3 tiny:sr-only">
         {label}
       </span>
     </button>
@@ -104,7 +104,7 @@ function BigButton({
       className="ink-border flex w-full items-center gap-3 rounded-[20px] px-3 py-[clamp(4px,1.4dvh,10px)] text-left shadow-pop"
       style={{ backgroundColor: tone }}
     >
-      <span className="ink-border grid h-[clamp(40px,11dvh,56px)] w-[clamp(40px,11dvh,56px)] shrink-0 place-items-center rounded-2xl bg-paper">
+      <span className="ink-border grid h-[clamp(30px,11dvh,56px)] w-[clamp(30px,11dvh,56px)] [&>svg]:h-[70%] [&>svg]:w-[70%] shrink-0 place-items-center rounded-2xl bg-paper">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
@@ -148,7 +148,7 @@ export function Home() {
   const claimable = claimableCount(missionInput);
 
   return (
-    <main className="relative h-dvh min-h-[320px] overflow-hidden">
+    <main className="relative h-dvh overflow-hidden">
       <svg
         viewBox={`0 0 ${ROOM_W} ${ROOM_H}`}
         preserveAspectRatio="xMidYMid slice"
@@ -172,7 +172,7 @@ export function Home() {
             className="ink-border flex min-w-0 items-center gap-2 rounded-2xl bg-paper/95 py-1 pl-1 pr-3 shadow-pop"
           >
             <span className="relative">
-              <Avatar id={avatar} size={46} ring="red" />
+              <Avatar id={avatar} size={46} ring="red" className="short:!h-9 short:!w-9" />
               <span className="ink-border absolute -bottom-1 -right-2 rounded-full bg-accent px-1 font-display text-[11px] leading-4 text-navy">
                 Lv{level}
               </span>
@@ -181,7 +181,7 @@ export function Home() {
               <span className="block max-w-[150px] truncate font-display text-lg leading-tight text-navy">
                 {nickname}
               </span>
-              <span className="flex items-center gap-1 text-[13px] font-semibold text-navy">
+              <span className="flex items-center gap-1 text-[13px] font-semibold text-navy short:text-[11px]">
                 <FlameIcon size={18} lit={streakDays > 0} />
                 Streak {streakDays} ngày
               </span>
@@ -222,10 +222,10 @@ export function Home() {
               animate={{ y: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              <span className="block font-display text-[15px] leading-tight text-primary-dark">
+              <span className="block font-display text-[15px] leading-tight text-primary-dark short:text-[13px]">
                 {claimable > 0 ? '🎁 Có quà nhiệm vụ!' : 'Nhiệm vụ hôm nay'}
               </span>
-              <span className="block text-[13px] font-semibold text-navy">
+              <span className="block text-[13px] font-semibold text-navy short:text-[11px]">
                 {doneCount}/{MISSIONS.length} hoàn thành · Bấm để xem
               </span>
               <span
@@ -242,7 +242,7 @@ export function Home() {
         </div>
 
         {/* center: main modes */}
-        <div className="flex min-h-0 flex-col justify-center gap-[clamp(6px,2.5dvh,14px)] py-2">
+        <div className="flex min-h-0 flex-col justify-center gap-[clamp(4px,2.5dvh,14px)] py-2 short:py-1">
           <BigButton
             title="Core game"
             subtitle={

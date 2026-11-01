@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Short landscape screens (phone browsers with toolbars visible): components shrink to fit. */
+@custom-variant short (@media (max-height: 440px));
+@custom-variant tiny (@media (max-height: 300px));
+
 /*
  * One art direction for the whole game: hand-drawn 2D, thick dark-brown outlines,
  * cream paper, wooden boards (see src/art for the matching illustrations).

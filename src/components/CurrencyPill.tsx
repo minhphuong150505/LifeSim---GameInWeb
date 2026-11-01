@@ -20,7 +20,7 @@ export function CurrencyPill({ onClick, className }: { onClick?: () => void; cla
     </>
   );
   const cls = cn(
-    'ink-border flex h-11 items-center gap-1 rounded-xl bg-paper pl-1 pr-2 font-display text-xl text-navy shadow-pop',
+    'ink-border flex h-11 items-center gap-1 rounded-xl bg-paper pl-1 pr-2 font-display text-xl text-navy shadow-pop short:h-9 short:text-lg tiny:h-8 short:[&>svg]:h-6 short:[&>svg]:w-6',
     className,
   );
   return onClick ? (

@@ -89,7 +89,7 @@ export function Modal({
           >
             <div
               className={cn(
-                'relative shrink-0 border-b-[2.5px] border-navy px-12 py-2.5 text-center',
+                'relative shrink-0 border-b-[2.5px] border-navy px-12 py-2.5 text-center short:py-1',
                 TONES[tone],
               )}
             >
@@ -101,19 +101,19 @@ export function Modal({
                   <Sparkle className="bottom-2 right-14 h-4 w-4" />
                 </>
               )}
-              <h2 className="font-display text-[26px] leading-tight">{title}</h2>
+              <h2 className="font-display text-[26px] leading-tight short:text-xl">{title}</h2>
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Đóng"
-                  className="ink-border absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl bg-paper text-xl leading-none text-navy"
+                  className="ink-border absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 short:h-7 short:w-7 place-items-center rounded-xl bg-paper text-xl leading-none text-navy"
                 >
                   ×
                 </button>
               )}
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 short:p-2.5">{children}</div>
           </motion.div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { FullscreenKeeper } from '../components/FullscreenKeeper';
 import { RotateHint } from '../components/RotateHint';
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
@@ -73,6 +74,7 @@ export function App() {
           </Routes>
         </Suspense>
         <RotateHint />
+        <FullscreenKeeper />
       </div>
     </BrowserRouter>
   );

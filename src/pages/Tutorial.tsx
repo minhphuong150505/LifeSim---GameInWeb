@@ -268,7 +268,7 @@ export function Tutorial() {
   };
 
   return (
-    <main className="paper flex h-dvh min-h-[320px] flex-col px-[max(16px,env(safe-area-inset-left))] py-[max(10px,env(safe-area-inset-top))]">
+    <main className="paper flex h-dvh flex-col px-[max(16px,env(safe-area-inset-left))] py-[max(10px,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between gap-2">
         <p className="ink-border wood rounded-xl px-3 py-1 font-display text-lg text-navy">
           📖 Hướng dẫn chơi · {index + 1}/{SLIDES.length}
@@ -286,16 +286,16 @@ export function Tutorial() {
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.25 }}
           aria-live="polite"
-          className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center gap-5 py-3"
+          className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center gap-5 overflow-hidden py-3 short:gap-3 short:py-1.5"
         >
-          <div className="flex h-full max-h-72 min-h-0 items-center justify-center">
+          <div className="flex h-full max-h-72 min-h-0 items-center justify-center short:[&_svg]:max-h-full">
             {slide.art}
           </div>
           <div>
-            <h1 className="font-display text-[clamp(24px,4vw,40px)] leading-tight text-navy">
+            <h1 className="font-display text-[clamp(24px,4vw,40px)] leading-tight short:text-[20px] text-navy">
               {slide.title}
             </h1>
-            <p className="mt-2 text-[clamp(15px,1.9vw,19px)] leading-relaxed text-ink">
+            <p className="mt-2 text-[clamp(15px,1.9vw,19px)] leading-relaxed short:text-[13px] short:leading-snug text-ink">
               {slide.body}
             </p>
           </div>

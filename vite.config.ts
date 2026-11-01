@@ -19,7 +19,8 @@ export default defineConfig({
         lang: 'vi',
         theme_color: '#d9a866',
         background_color: '#fbf6e6',
-        display: 'standalone',
+        display: 'fullscreen',
+        display_override: ['fullscreen', 'standalone'],
         orientation: 'landscape',
         start_url: '/',
         icons: [

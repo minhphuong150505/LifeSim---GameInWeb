@@ -13,7 +13,11 @@ Bản demo chơi được của LifeSim: game web mô phỏng sơ cứu cho ngư
 5. **Core game** (`/core`) – chọn chủ đề dạng thẻ có ảnh minh hoạ (chủ đề chưa mở hiện khoá) → bản đồ màn (`/core/:id`) → màn chơi (`/play/:id`).
 6. **Màn chơi** – hội thoại hiện thành khung thoại trên cảnh; câu hỏi, giải thích, nhiệm vụ tương tác hiện thành popup bên phải; cảnh zoom vào cậu bé và thay đổi theo câu trả lời; chọn sai thì "chị" nhắc lý do + gợi ý.
 
-Trên điện thoại cầm dọc, game hiện màn "Hãy xoay ngang điện thoại" (và thử bật toàn màn hình + khoá ngang khi đăng nhập).
+Trên điện thoại cầm dọc, game hiện màn "Hãy xoay ngang điện thoại".
+
+**Toàn màn hình:** trên Android/iPad game tự bật toàn màn hình + khoá ngang khi đăng nhập, và tự bật lại ở lần chạm kế tiếp nếu người chơi thoát ra (tắt được trong Cài đặt). Safari trên **iPhone** không cho trang web bật toàn màn hình – cách duy nhất là **Chia sẻ → Thêm vào MH chính** rồi mở game từ biểu tượng (game hiện hướng dẫn này ở màn Login và Cài đặt).
+
+**Màn hình thấp** (trình duyệt còn hiện thanh công cụ): giao diện dùng biến thể `short:` (≤ 440px) / `tiny:` (≤ 300px) để thu gọn, và popup trong màn chơi được bọc bằng `FitContent` – tự co nhỏ cho vừa, không cuộn, không mất chữ.
 
 Nội dung và cơ chế theo tài liệu **"Nội dung game Lifesim_Dev"**.
 

@@ -171,7 +171,7 @@ export const Stage = forwardRef<SVGSVGElement, StageProps>(function Stage(
       </motion.svg>
 
       {showCloseup && !stage.ambulance && (
-        <div className="ink-border absolute left-[max(10px,env(safe-area-inset-left))] top-[62px] z-10 aspect-square h-[30%] max-h-40 overflow-hidden rounded-2xl bg-paper shadow-soft">
+        <div className="ink-border absolute left-[max(10px,env(safe-area-inset-left))] top-[62px] z-10 aspect-square h-[30%] max-h-40 short:top-[46px] tiny:top-[40px] overflow-hidden rounded-2xl bg-paper shadow-soft">
           <ProfileArt
             key={`${stage.posture}-${stage.pinch}-${stage.mouthOpen}-${stage.icePack}-${stage.dizzy}`}
             className="h-[calc(100%-18px)] w-full"

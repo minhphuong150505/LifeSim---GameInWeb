@@ -5,6 +5,7 @@ import { BandageIcon } from '../art/icons';
 import { TOWN_H, TOWN_W, TownScene } from '../art/TownScene';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
+import { InstallTip } from '../components/InstallTip';
 import { Logo } from '../components/Logo';
 import { AVATAR_IDS, type AvatarId } from '../data/assets';
 import { DISCLAIMER, SLOGAN } from '../data/copy';
@@ -57,7 +58,7 @@ export function Login() {
   };
 
   return (
-    <main className="relative h-dvh min-h-[320px] overflow-hidden">
+    <main className="relative h-dvh overflow-hidden">
       <svg
         viewBox={`0 0 ${TOWN_W} ${TOWN_H}`}
         preserveAspectRatio="xMidYMax slice"
@@ -68,12 +69,17 @@ export function Login() {
       </svg>
 
       <div className="absolute left-0 right-0 top-0 flex items-start justify-between p-[max(12px,env(safe-area-inset-top))] px-[max(16px,env(safe-area-inset-left))]">
-        <motion.div initial={{ y: -30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+        <motion.div
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="short:[&>svg]:h-11 short:[&>svg]:w-auto"
+        >
           <Logo height={64} />
-          <p className="ink-border mt-1 w-fit rounded-full bg-paper/90 px-3 py-0.5 font-display text-sm uppercase text-navy">
+          <p className="ink-border mt-1 w-fit rounded-full bg-paper/90 px-3 py-0.5 font-display text-sm uppercase text-navy tiny:hidden">
             {SLOGAN}
           </p>
         </motion.div>
+        <InstallTip className="ml-3 max-w-[300px]" />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex justify-center px-4 pb-[max(10px,env(safe-area-inset-bottom))]">
@@ -108,7 +114,7 @@ export function Login() {
               key="form"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="ink-border mb-1 w-full max-w-xl rounded-[22px] bg-paper/95 p-3 shadow-pop"
+              className="ink-border mb-1 w-full max-w-xl rounded-[22px] bg-paper/95 p-3 shadow-pop short:p-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!valid) return;
@@ -118,7 +124,10 @@ export function Login() {
             >
               <div className="flex items-end gap-2">
                 <div className="min-w-0 flex-1">
-                  <label htmlFor="nickname" className="font-display text-lg text-navy">
+                  <label
+                    htmlFor="nickname"
+                    className="font-display text-lg text-navy short:text-base"
+                  >
                     Tên người chơi
                   </label>
                   <input
@@ -128,15 +137,17 @@ export function Login() {
                     maxLength={MAX_NAME}
                     autoComplete="nickname"
                     placeholder="Ví dụ: Minh Anh"
-                    className="ink-border h-12 w-full rounded-2xl bg-cream px-4 text-base font-semibold text-navy placeholder:font-normal placeholder:text-muted"
+                    className="ink-border h-12 w-full rounded-2xl bg-cream px-4 short:h-10 text-base font-semibold text-navy placeholder:font-normal placeholder:text-muted"
                   />
                 </div>
                 <Button type="submit" size="lg" disabled={!valid} className="shrink-0">
                   Đăng nhập
                 </Button>
               </div>
-              <fieldset className="mt-2">
-                <legend className="font-display text-base text-navy">Chọn nhân vật</legend>
+              <fieldset className="mt-2 short:mt-1">
+                <legend className="font-display text-base text-navy tiny:sr-only">
+                  Chọn nhân vật
+                </legend>
                 <div className="scroll-row flex gap-1 overflow-x-auto pb-1">
                   {AVATAR_IDS.map((id, i) => (
                     <label key={id} className="shrink-0 cursor-pointer">
@@ -165,7 +176,7 @@ export function Login() {
                 </div>
               </fieldset>
               {!user.onboarded && (
-                <p className="mt-1 flex items-center gap-1 text-[13px] text-navy">
+                <p className="mt-1 flex items-center gap-1 text-[13px] text-navy tiny:hidden">
                   <BandageIcon size={22} />
                   <b>Quà chào mừng: {STARTING_BANDAGES} băng gạc!</b>
                   <span className="text-muted">· Dữ liệu chỉ lưu trên thiết bị này.</span>

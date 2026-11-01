@@ -45,7 +45,7 @@ export function Scenarios() {
   const totalStars = scenario.rounds.reduce((s, r) => s + (records[r.id]?.bestStars ?? 0), 0);
 
   return (
-    <div className="flex h-dvh min-h-[320px] flex-col">
+    <div className="flex h-[calc(100dvh-max(16px,env(safe-area-inset-bottom)))] flex-col">
       <PageHeader
         title={`${scenario.title}`}
         subtitle={`Tình huống ${scenario.number} · ${scenario.location} · ⭐ ${totalStars}/${n * 3}`}

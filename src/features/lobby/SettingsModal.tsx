@@ -3,7 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Modal } from '../../components/Modal';
 import { SoundToggle } from '../../components/SoundToggle';
+import { InstallSteps } from '../../components/InstallTip';
 import { DISCLAIMER } from '../../data/copy';
+import {
+  enterLandscape,
+  fullscreenSupported,
+  isStandalone,
+  isTouchDevice,
+  needsInstallForFullscreen,
+} from '../../lib/landscape';
 import { resetAllData } from '../../store/resetAll';
 import { useSessionStore } from '../../store/session';
 import { useSettingsStore } from '../../store/settings';
@@ -11,6 +19,9 @@ import { useSettingsStore } from '../../store/settings';
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
   const muted = useSettingsStore((s) => s.muted);
+  const fullscreen = useSettingsStore((s) => s.fullscreen);
+  const setFullscreen = useSettingsStore((s) => s.setFullscreen);
+  const canToggleFs = isTouchDevice() && fullscreenSupported() && !isStandalone();
   const logout = useSessionStore((s) => s.logout);
   const [confirming, setConfirming] = useState(false);
 
@@ -49,6 +60,29 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             </span>
             <SoundToggle />
           </div>
+          {canToggleFs && (
+            <div className="ink-border flex items-center justify-between rounded-2xl bg-cream px-3 py-2">
+              <span className="font-display text-lg text-navy">
+                Khoá toàn màn hình: {fullscreen ? 'Bật' : 'Tắt'}
+              </span>
+              <Button
+                variant={fullscreen ? 'green' : 'secondary'}
+                onClick={() => {
+                  setFullscreen(!fullscreen);
+                  if (!fullscreen) void enterLandscape();
+                  else if (document.fullscreenElement) void document.exitFullscreen();
+                }}
+              >
+                {fullscreen ? 'Tắt' : 'Bật'}
+              </Button>
+            </div>
+          )}
+          {needsInstallForFullscreen() && (
+            <div className="ink-border rounded-2xl bg-[#fff1c2] px-3 py-2">
+              <p className="font-display text-lg text-navy">📱 Toàn màn hình trên iPhone</p>
+              <InstallSteps />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="secondary" onClick={() => navigate('/tutorial')}>
               📖 Xem lại hướng dẫn
