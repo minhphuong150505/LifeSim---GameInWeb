@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { FullscreenKeeper } from '../components/FullscreenKeeper';
+import { GameScale } from '../components/GameScale';
 import { RotateHint } from '../components/RotateHint';
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
@@ -36,9 +38,18 @@ function RequireLogin() {
   return <Navigate to="/login" replace state={{ from: location.pathname }} />;
 }
 
+/** The game frame is the scroll container: start every screen at the top. */
+function ScrollReset() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    document.getElementById('game-frame')?.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function Loading() {
   return (
-    <div role="status" className="grid min-h-dvh place-items-center text-muted">
+    <div role="status" className="grid min-h-app place-items-center text-muted">
       Đang tải…
     </div>
   );
@@ -47,8 +58,9 @@ function Loading() {
 export function App() {
   return (
     <BrowserRouter>
-      {/* Landscape game frame: full screen on phones, centred on large desktops. */}
-      <div className="relative mx-auto min-h-dvh w-full max-w-[1400px] bg-cream shadow-soft">
+      {/* Landscape game frame, scaled uniformly to fit any screen. */}
+      <GameScale>
+        <ScrollReset />
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -75,7 +87,7 @@ export function App() {
         </Suspense>
         <RotateHint />
         <FullscreenKeeper />
-      </div>
+      </GameScale>
     </BrowserRouter>
   );
 }

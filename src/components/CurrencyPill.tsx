@@ -27,7 +27,7 @@ export function CurrencyPill({ onClick, className }: { onClick?: () => void; cla
     <button
       type="button"
       onClick={onClick}
-      aria-label={`${bandages} băng gạc. Mở cửa hàng`}
+      aria-label={`${bandages} băng gạc. Kiếm thêm băng gạc`}
       className={cls}
     >
       {content}

@@ -26,7 +26,7 @@ export function Handbook() {
   return (
     <div>
       <PageHeader title="Cẩm nang sơ cứu" subtitle="Ôn lại kiến thức đã học trong Core game." />
-      <div className="mx-auto grid max-w-6xl gap-3 px-4 grid-cols-[180px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-6xl gap-3 px-4 grid-cols-[180px_minmax(0,1fr)] @3xl:grid-cols-[220px_minmax(0,1fr)]">
         <nav aria-label="Bài viết" className="space-y-2">
           <div className="ink-border overflow-hidden rounded-2xl bg-paper shadow-soft">
             <div className="relative h-20 border-b-[2.5px] border-navy">

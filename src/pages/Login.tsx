@@ -58,7 +58,7 @@ export function Login() {
   };
 
   return (
-    <main className="relative h-dvh overflow-hidden">
+    <main className="relative h-app overflow-hidden">
       <svg
         viewBox={`0 0 ${TOWN_W} ${TOWN_H}`}
         preserveAspectRatio="xMidYMax slice"
@@ -210,7 +210,7 @@ export function Login() {
         </AnimatePresence>
       </div>
 
-      <p className="absolute bottom-1 right-2 hidden max-w-[260px] text-right text-[10px] leading-tight text-navy/70 lg:block">
+      <p className="absolute bottom-1 right-2 hidden max-w-[260px] text-right text-[10px] leading-tight text-navy/70 @5xl:block">
         {DISCLAIMER}
       </p>
     </main>

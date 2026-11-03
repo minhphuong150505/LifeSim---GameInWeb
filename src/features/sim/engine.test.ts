@@ -1,9 +1,10 @@
 import { allRounds, getRound, nextRoundId, simScenarios } from '../../data/sim';
-import { useWalletStore } from '../../store/wallet';
+import { ADS_PER_DAY, AD_BONUS, useWalletStore } from '../../store/wallet';
 import {
   createRoundReducer,
   initialRoundState,
   MAX_BOLTS,
+  roundReward,
   roundScore,
   starsFor,
   STARTING_BANDAGES,
@@ -105,6 +106,9 @@ describe('round engine', () => {
     );
     expect(s).toMatchObject({ phase: 'lost', bolts: 3 });
     expect(reducer(s, { type: 'ANSWER', optionId: rightOf(round, 1) }).phase).toBe('lost');
+    // 3 mistakes = no bandages; only a cleared round pays out.
+    expect(roundReward(round, s.phase)).toBe(0);
+    expect(roundReward(round, 'won')).toBe(round.reward);
     s = reducer(s, { type: 'RETRY' });
     expect(s).toMatchObject({
       phase: 'question',
@@ -184,5 +188,14 @@ describe('wallet', () => {
     expect(w.use('ice-pack')).toBe(false);
     expect(w.use('phone')).toBe(true);
     expect(useWalletStore.getState().items).toEqual({ 'ice-pack': 0, phone: 1 });
+  });
+  it('limits rewarded ads in the bandage bank per day', () => {
+    const w = useWalletStore.getState();
+    let total = 0;
+    for (let i = 0; i < ADS_PER_DAY + 2; i += 1) total += useWalletStore.getState().watchAd();
+    expect(total).toBe(ADS_PER_DAY * AD_BONUS);
+    expect(useWalletStore.getState().adsLeft()).toBe(0);
+    expect(useWalletStore.getState().bandages).toBe(STARTING_BANDAGES + ADS_PER_DAY * AD_BONUS);
+    expect(w.adsLeft).toBeTypeOf('function');
   });
 });

@@ -25,7 +25,7 @@ const LETTERS: Record<OptionId, string> = { a: 'A', b: 'B', c: 'C' };
 const GUIDE_NAME = 'Chị';
 
 const hudBtn =
-  'ink-border relative grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-paper shadow-pop active:translate-y-0.5 short:h-9 short:w-9 tiny:h-8 tiny:w-8 [&>svg]:h-[68%] [&>svg]:w-[68%]';
+  'ink-border relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper shadow-pop active:translate-y-0.5 [&>svg]:h-[70%] [&>svg]:w-[70%]';
 
 function PointArrow() {
   return (
@@ -35,10 +35,10 @@ function PointArrow() {
       animate={{ y: [0, 6, 0] }}
       transition={{ repeat: Infinity, duration: 0.9 }}
     >
-      <svg viewBox="0 0 30 40" width={24} height={32}>
+      <svg viewBox="0 0 30 40" width={30} height={40}>
         <path
           d="M10 38 V18 H3 L15 2 L27 18 H20 V38 Z"
-          fill="#fffdf6"
+          fill="#ffd23f"
           stroke="#3b2d26"
           strokeWidth={3}
           strokeLinejoin="round"
@@ -60,6 +60,7 @@ export function Hud({
   onHelp,
   onBag,
   onShop,
+  onBank,
 }: {
   title: string;
   hearts: number;
@@ -72,9 +73,10 @@ export function Hud({
   onHelp: () => void;
   onBag: () => void;
   onShop: () => void;
+  onBank: () => void;
 }) {
   return (
-    <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-1.5 px-[max(8px,env(safe-area-inset-left))] pr-[max(8px,env(safe-area-inset-right))] pt-[max(6px,env(safe-area-inset-top))] short:gap-1 short:pt-1">
+    <div className="absolute inset-x-0 top-0 z-30 flex items-center gap-1.5 px-[max(8px,env(safe-area-inset-left))] pr-[max(8px,env(safe-area-inset-right))] pt-[max(6px,env(safe-area-inset-top))] short:gap-1 short:pt-1">
       <button type="button" onClick={onBack} aria-label="Thoát màn chơi" className={hudBtn}>
         <BackIcon size={26} />
       </button>
@@ -105,14 +107,14 @@ export function Hud({
         <motion.span
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="ink-border hidden shrink-0 items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-display text-sm text-navy sm:flex"
+          className="ink-border hidden shrink-0 items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-display text-sm text-navy @xl:flex"
         >
           <ClockIcon minutes={15} size={20} />
           {clock}
         </motion.span>
       )}
       <span className="flex-1" />
-      <CurrencyPill className="shrink-0" />
+      <CurrencyPill className="shrink-0" onClick={onBank} />
       <div className="relative">
         <button
           type="button"
@@ -147,7 +149,10 @@ export function Hud({
   );
 }
 
-/** Visual-novel style dialogue box popping up over the scene (tap to continue). */
+/**
+ * Visual-novel style dialogue box over the scene. The whole screen (below the HUD) is the
+ * "next" button, so the player can tap anywhere to continue.
+ */
 export function DialogueBox({
   beat,
   onNext,
@@ -160,49 +165,53 @@ export function DialogueBox({
   showSkip: boolean;
 }) {
   const narration = beat.kind === 'narration';
+  const name = narration ? 'Bối cảnh' : CAST_NAMES[beat.speaker];
   return (
-    <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-[max(10px,env(safe-area-inset-bottom))] short:pb-1.5">
-      <motion.button
+    <div className="absolute inset-0 z-20">
+      <button
         type="button"
-        key={beat.text}
         onClick={onNext}
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="ink-border relative flex w-full max-w-4xl items-start gap-3 rounded-[22px] bg-paper/97 p-3 pr-10 text-left shadow-pop short:gap-2 short:p-2 short:pr-8"
-        aria-label={`${narration ? 'Bối cảnh' : CAST_NAMES[beat.speaker]}: ${beat.text}. Chạm để tiếp tục`}
-      >
-        <span className="ink-border grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#fff1c2] short:h-11 short:w-11 [&>svg]:h-full [&>svg]:w-full">
-          {narration ? <BookIcon size={44} /> : <CastFace kind={beat.speaker} size={64} />}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="ink-border -mt-6 mb-1 inline-block rounded-full bg-primary px-3 font-display text-white short:-mt-5 short:mb-0 short:text-sm">
-            {narration ? 'Bối cảnh' : CAST_NAMES[beat.speaker]}
-          </span>
-          <span
-            className={cn(
-              'block leading-relaxed text-navy',
-              narration
-                ? 'text-[16px] italic short:text-[13px] short:leading-snug'
-                : 'text-[18px] font-semibold short:text-[14px] short:leading-snug',
-            )}
-          >
-            “{beat.text}”
-          </span>
-        </span>
-        <motion.span
+        className="absolute inset-0 h-full w-full cursor-pointer"
+        aria-label={`${name}: ${beat.text}. Chạm để tiếp tục`}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-4 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <motion.div
+          key={beat.text}
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           aria-hidden
-          className="absolute bottom-2 right-3 font-display text-xl text-primary-dark"
-          animate={{ x: [0, 5, 0] }}
-          transition={{ repeat: Infinity, duration: 0.9 }}
+          className="ink-border relative flex min-h-[150px] w-full max-w-[1000px] items-center gap-4 rounded-[28px] bg-paper/97 p-4 pr-6 pt-6 text-left shadow-[0_6px_0_0_#3b2d26]"
         >
-          ▸
-        </motion.span>
-      </motion.button>
+          <span className="ink-border grid h-[104px] w-[104px] shrink-0 place-items-center overflow-hidden rounded-[22px] bg-[#fff1c2] [&>svg]:h-full [&>svg]:w-full">
+            {narration ? <BookIcon size={70} /> : <CastFace kind={beat.speaker} size={104} />}
+          </span>
+          <span className="min-w-0 flex-1 self-stretch">
+            <span className="ink-border absolute -top-5 left-[136px] inline-block rounded-full bg-primary px-4 py-0.5 font-display text-xl text-white">
+              {name}
+            </span>
+            <span
+              className={cn(
+                'block leading-relaxed text-navy',
+                narration ? 'text-[21px] italic' : 'text-[24px] font-semibold',
+              )}
+            >
+              “{beat.text}”
+            </span>
+          </span>
+          <motion.span
+            className="absolute bottom-2 right-4 flex items-center gap-1 font-display text-[15px] text-primary-dark"
+            animate={{ x: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 0.9 }}
+          >
+            Chạm để tiếp tục ▸
+          </motion.span>
+        </motion.div>
+      </div>
       {showSkip && (
         <button
           type="button"
           onClick={onSkip}
-          className="ink-border absolute -top-11 right-4 rounded-xl bg-paper px-3 py-1.5 font-semibold text-navy shadow-pop short:-top-8 short:py-0.5 short:text-sm"
+          className="ink-border absolute right-4 top-[72px] rounded-2xl bg-paper px-4 py-2 font-display text-lg text-navy shadow-pop"
         >
           Bỏ qua ⏭
         </button>
@@ -239,7 +248,7 @@ export function SidePanel({ children, label }: { children: React.ReactNode; labe
       aria-label={label}
       initial={{ x: 60, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="ink-border absolute bottom-[max(8px,env(safe-area-inset-bottom))] right-[max(8px,env(safe-area-inset-right))] top-[60px] z-20 flex w-[min(54%,580px)] flex-col overflow-hidden rounded-[22px] bg-paper p-3 pb-2 shadow-pop short:bottom-1 short:top-[46px] short:rounded-2xl short:p-2 short:pb-1.5 tiny:top-[40px]"
+      className="ink-border absolute right-[max(8px,env(safe-area-inset-right))] top-[70px] z-20 flex max-h-[calc(100%-80px)] w-[min(54%,620px)] flex-col overflow-hidden rounded-[22px] bg-paper p-3 pb-2 shadow-pop short:bottom-1 short:top-[46px] short:rounded-2xl short:p-2 short:pb-1.5 tiny:top-[40px]"
     >
       <FitContent innerClassName="flex flex-col">{children}</FitContent>
     </motion.section>
@@ -266,7 +275,7 @@ export function QuestionPanel({
       animate={{ opacity: 1 }}
       className="flex flex-col gap-2 short:gap-1"
     >
-      <h2 className="shrink-0 font-display text-[19px] leading-snug text-navy short:text-[15px] short:leading-tight tiny:text-[13px]">
+      <h2 className="shrink-0 font-display text-[22px] leading-snug text-navy short:text-[15px] short:leading-tight tiny:text-[13px]">
         <span className="mr-1.5 inline-block rounded-full bg-primary px-2 align-[2px] font-display text-[12px] leading-5 text-white short:text-[11px] short:leading-4">
           Câu {index + 1}/{total}
         </span>
@@ -293,16 +302,16 @@ export function QuestionPanel({
                 <OptionArt
                   art={o.art}
                   className={cn(
-                    'aspect-square w-[clamp(26px,13dvh,56px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg',
+                    'aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg',
                     wrong && 'opacity-45 grayscale',
                   )}
                 />
-                <span className="ink-border grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent font-display text-base text-navy short:h-5 short:w-5 short:text-xs">
+                <span className="ink-border grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent font-display text-lg text-navy short:h-5 short:w-5 short:text-xs">
                   {LETTERS[o.id]}
                 </span>
                 <span
                   className={cn(
-                    'flex-1 text-[15px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]',
+                    'flex-1 text-[17px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]',
                     wrong && 'text-muted line-through',
                   )}
                 >
@@ -372,7 +381,7 @@ function GuideSays({
         <p className="mt-0.5 shrink-0 font-display text-sm text-navy/70 short:hidden">
           {GUIDE_NAME} nói:
         </p>
-        <div className="text-[15px] leading-relaxed text-ink short:text-[12.5px] short:leading-snug tiny:text-[11.5px]">
+        <div className="text-[17px] leading-relaxed text-ink short:text-[12.5px] short:leading-snug tiny:text-[11.5px]">
           {children}
         </div>
       </div>

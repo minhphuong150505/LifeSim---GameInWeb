@@ -51,7 +51,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                 ×
               </button>
             </div>
-            <div className="max-h-[68dvh] overflow-y-auto pb-2">{children}</div>
+            <div className="max-h-[calc(var(--app-h)*0.68)] overflow-y-auto pb-2">{children}</div>
           </motion.div>
         </div>
       )}

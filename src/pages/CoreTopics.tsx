@@ -56,7 +56,7 @@ export function CoreTopics() {
   ];
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-app flex-col">
       <PageHeader title="Core game" subtitle="Chọn một chủ đề để xem các màn chơi." />
       <ul
         className="scroll-row mx-auto flex w-full max-w-6xl flex-1 items-stretch gap-3 overflow-x-auto px-4 pb-3"

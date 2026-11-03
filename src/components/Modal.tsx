@@ -78,7 +78,7 @@ export function Modal({
             aria-modal="true"
             aria-label={title}
             className={cn(
-              'ink-border relative flex max-h-[94dvh] w-full flex-col overflow-hidden rounded-[24px] bg-paper shadow-pop',
+              'ink-border relative flex max-h-[calc(var(--app-h)*0.94)] w-full flex-col overflow-hidden rounded-[24px] bg-paper shadow-pop',
               size === 'lg' ? 'max-w-[700px]' : 'max-w-[460px]',
               className,
             )}

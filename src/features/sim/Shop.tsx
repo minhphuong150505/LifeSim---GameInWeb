@@ -1,16 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { BackIcon, BagIcon, BandageIcon, LockIcon } from '../../art/icons';
+import { BackIcon, BandageIcon, LockIcon } from '../../art/icons';
 import { Button } from '../../components/Button';
 import { cn } from '../../lib/cn';
 import { playSound } from '../../lib/sound';
 import { useWalletStore } from '../../store/wallet';
-import { AdOverlay } from './AdOverlay';
 import { ItemIcon } from './itemArt';
 import { SHOP_ITEMS, UPCOMING_ITEMS, getItem, type ItemId } from './items';
-
-/** Bandages granted by watching an ad from the shop when the player is short. */
-export const SHOP_AD_BONUS = 30;
 
 type ShopProps = {
   open: boolean;
@@ -18,15 +14,15 @@ type ShopProps = {
   /** Item the current task needs; gets an arrow and a glow. */
   highlight?: ItemId | null;
   onBought?: (id: ItemId) => void;
+  /** Opens the bandage bank (earn more bandages). */
+  onOpenBank?: () => void;
 };
 
 /** Cửa hàng vật dụng – full-screen sheet with a wooden header, like the reference art. */
-export function Shop({ open, onClose, highlight, onBought }: ShopProps) {
+export function Shop({ open, onClose, highlight, onBought, onOpenBank }: ShopProps) {
   const bandages = useWalletStore((s) => s.bandages);
   const items = useWalletStore((s) => s.items);
   const buy = useWalletStore((s) => s.buy);
-  const earn = useWalletStore((s) => s.earn);
-  const [adOpen, setAdOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const purchase = (id: ItemId) => {
@@ -44,7 +40,7 @@ export function Shop({ open, onClose, highlight, onBought }: ShopProps) {
           role="dialog"
           aria-modal="true"
           aria-label="Cửa hàng vật dụng"
-          className="paper fixed inset-0 z-[1150] mx-auto flex max-w-[480px] flex-col"
+          className="paper ink-border fixed inset-x-0 bottom-0 top-0 z-[1150] mx-auto flex max-w-[860px] flex-col"
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
@@ -71,7 +67,7 @@ export function Shop({ open, onClose, highlight, onBought }: ShopProps) {
               Dùng băng gạc tích luỹ để mua vật dụng, rồi dùng ngay trong round bằng cách chạm hoặc
               kéo/thả.
             </p>
-            <ul className="grid grid-cols-2 gap-3">
+            <ul className="grid grid-cols-4 gap-3">
               {SHOP_ITEMS.map((item) => {
                 const owned = items[item.id] ?? 0;
                 const soldOut = !item.consumable && owned > 0;
@@ -139,19 +135,17 @@ export function Shop({ open, onClose, highlight, onBought }: ShopProps) {
               ))}
             </ul>
 
-            <div className="ink-border mt-4 flex items-center gap-3 rounded-2xl bg-[#fff1c2] p-3">
-              <BagIcon size={36} />
-              <p className="flex-1 text-sm text-navy">
-                Thiếu băng gạc? Xem quảng cáo để nhận thêm {SHOP_AD_BONUS}.
-              </p>
-              <Button
-                variant="yellow"
-                onClick={() => setAdOpen(true)}
-                aria-label={`Xem quảng cáo nhận ${SHOP_AD_BONUS} băng gạc`}
-              >
-                ▶ +{SHOP_AD_BONUS}
-              </Button>
-            </div>
+            {onOpenBank && (
+              <div className="ink-border mt-4 flex items-center gap-3 rounded-2xl bg-[#eef7e6] p-3">
+                <BandageIcon size={36} />
+                <p className="flex-1 text-sm text-navy">
+                  Thiếu băng gạc? Xem quảng cáo, làm nhiệm vụ hoặc giữ streak để kiếm thêm.
+                </p>
+                <Button variant="green" onClick={onOpenBank}>
+                  Kiếm thêm
+                </Button>
+              </div>
+            )}
           </div>
 
           <AnimatePresence>
@@ -167,17 +161,6 @@ export function Shop({ open, onClose, highlight, onBought }: ShopProps) {
               </motion.p>
             )}
           </AnimatePresence>
-
-          <AdOverlay
-            open={adOpen}
-            reward={`+${SHOP_AD_BONUS} băng gạc`}
-            onCancel={() => setAdOpen(false)}
-            onFinish={() => {
-              earn(SHOP_AD_BONUS);
-              playSound('win');
-              setAdOpen(false);
-            }}
-          />
         </motion.div>
       )}
     </AnimatePresence>

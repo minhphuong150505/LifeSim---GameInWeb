@@ -1,8 +1,18 @@
 @import 'tailwindcss';
 
-/* Short landscape screens (phone browsers with toolbars visible): components shrink to fit. */
-@custom-variant short (@media (max-height: 440px));
-@custom-variant tiny (@media (max-height: 300px));
+/*
+ * The whole game is laid out in a scaled design space (see GameScale), so these "short screen"
+ * variants only apply if the design frame itself is short (flagged by data attributes).
+ */
+@custom-variant short (&:where([data-ui-short] *));
+@custom-variant tiny (&:where([data-ui-tiny] *));
+
+@utility h-app {
+  height: var(--app-h, 100dvh);
+}
+@utility min-h-app {
+  min-height: var(--app-h, 100dvh);
+}
 
 /*
  * One art direction for the whole game: hand-drawn 2D, thick dark-brown outlines,
@@ -46,8 +56,8 @@ body {
   background-color: #efe4c9;
   background-image: radial-gradient(rgb(168 116 63 / 0.18) 1.2px, transparent 1.4px);
   background-size: 18px 18px;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 h1,

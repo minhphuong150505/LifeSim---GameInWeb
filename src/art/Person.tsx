@@ -179,11 +179,23 @@ export function Face({ eyes = 'open', mouth = 'smile', tilt = 'normal', blood }:
           />
         );
       case 'wide':
-        return <circle key={x} cx={x} cy={y} r={3.6} fill={INK} />;
-      default:
         return (
-          <ellipse key={x} cx={x} cy={y + (tilt === 'down' ? 2 : 0)} rx={2.5} ry={3.2} fill={INK} />
+          <g key={x}>
+            <circle cx={x} cy={y} r={4.4} fill={INK} />
+            <circle cx={x + 1.4} cy={y - 1.7} r={1.6} fill={C.white} />
+            <circle cx={x - 1.2} cy={y + 1.8} r={0.7} fill={C.white} />
+          </g>
         );
+      default: {
+        const cy = y + (tilt === 'down' ? 2 : 0);
+        return (
+          <g key={x}>
+            <ellipse cx={x} cy={cy} rx={3.3} ry={4.3} fill={INK} />
+            <circle cx={x + 1.2} cy={cy - 1.6} r={1.35} fill={C.white} />
+            <circle cx={x - 1.1} cy={cy + 1.6} r={0.65} fill={C.white} opacity={0.85} />
+          </g>
+        );
+      }
     }
   };
   const my = 15 + dy;
@@ -197,8 +209,15 @@ export function Face({ eyes = 'open', mouth = 'smile', tilt = 'normal', blood }:
       )}
       {eye(-8)}
       {eye(8)}
-      <ellipse cx={-15} cy={10 + dy} rx={4.5} ry={3} fill={C.blush} opacity={0.75} />
-      <ellipse cx={15} cy={10 + dy} rx={4.5} ry={3} fill={C.blush} opacity={0.75} />
+      <ellipse cx={-15} cy={10 + dy} rx={5.5} ry={3.4} fill={C.blush} opacity={0.6} />
+      <ellipse cx={15} cy={10 + dy} rx={5.5} ry={3.4} fill={C.blush} opacity={0.6} />
+      <path
+        d={`M-17 ${9 + dy} l1.5 -1.5 M-14 ${9 + dy} l1.5 -1.5 M13 ${9 + dy} l1.5 -1.5 M16 ${9 + dy} l1.5 -1.5`}
+        stroke={C.white}
+        strokeWidth={1}
+        strokeLinecap="round"
+        opacity={0.8}
+      />
       {tilt === 'up' ? (
         <>
           <circle cx={-2} cy={8 + dy} r={1.2} fill={INK} />
@@ -208,7 +227,13 @@ export function Face({ eyes = 'open', mouth = 'smile', tilt = 'normal', blood }:
       ) : (
         <path d={`M-1.5 ${8 + dy} Q0 ${10 + dy} 1.5 ${8 + dy}`} fill="none" {...stroke(1.8)} />
       )}
-      {mouth === 'smile' && <path d={`M-5 ${my} Q0 ${my + 4} 5 ${my}`} fill="none" {...s} />}
+      {mouth === 'smile' && (
+        <path
+          d={`M-5 ${my - 1} Q-2.5 ${my + 3} 0 ${my} Q2.5 ${my + 3} 5 ${my - 1}`}
+          fill="none"
+          {...s}
+        />
+      )}
       {mouth === 'grin' && (
         <path d={`M-6 ${my - 1} Q0 ${my + 7} 6 ${my - 1} Z`} fill="#b5473a" {...s} />
       )}
@@ -239,8 +264,23 @@ export function Head({ look, face }: { look: Look; face?: FaceProps }) {
       <ellipse cx={-24} cy={4} rx={4} ry={5.5} fill={look.skin} {...stroke(2)} />
       <ellipse cx={24} cy={4} rx={4} ry={5.5} fill={look.skin} {...stroke(2)} />
       <circle cx={0} cy={0} r={24} fill={look.skin} {...stroke()} />
+      <path
+        d="M-20 13 Q0 26 20 13 Q14 22 0 23.5 Q-14 22 -20 13 Z"
+        fill={C.skinShade}
+        opacity={0.55}
+      />
       <Face {...face} />
       <HairFront look={look} />
+      {look.hairStyle !== 'cap' && look.hairStyle !== 'buzz' && (
+        <path
+          d="M-15 -21 Q-8 -27 1 -26.5"
+          fill="none"
+          stroke={C.white}
+          strokeWidth={2.6}
+          strokeLinecap="round"
+          opacity={0.45}
+        />
+      )}
       {look.glasses && (
         <g fill="none" {...stroke(1.8)}>
           <circle
@@ -285,7 +325,15 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
   const sx = 15 * side;
   switch (pose) {
     case 'nose':
-      return { hand: { x: 2 * side, y: headY + 10 }, elbow: { x: 24 * side, y: -20 } };
+      // Elbow tucked in front of the chest, hand pinching the soft part of the nose.
+      // The nose follows the head tilt (face is drawn 1.12× and shifted by the tilt).
+      return {
+        hand: {
+          x: 0.5 * side,
+          y: headY + 1.12 * (9.5 + (headY === -58 ? 5 : headY === -66 ? -6 : 0)),
+        },
+        elbow: { x: 9 * side, y: -16 },
+      };
     case 'wave':
       return { hand: { x: 30 * side, y: -76 }, elbow: { x: 30 * side, y: -48 } };
     case 'phone':
@@ -340,14 +388,18 @@ export function Person({
     return (
       <g key={side}>
         <Limb
-          d={`M${shoulder.x} ${shoulder.y} L${elbow.x} ${elbow.y} L${hand.x} ${hand.y}`}
+          d={
+            p === 'nose'
+              ? `M${shoulder.x} ${shoulder.y} L${elbow.x} ${elbow.y} L${hand.x - 3.4 * side} ${hand.y + 3.5}`
+              : `M${shoulder.x} ${shoulder.y} L${elbow.x} ${elbow.y} L${hand.x} ${hand.y}`
+          }
           color={look.skin}
-          width={6.5}
+          width={7}
         />
         <Limb
           d={`M${shoulder.x} ${shoulder.y} L${sleeveEnd.x} ${sleeveEnd.y}`}
           color={look.shirt}
-          width={8}
+          width={9}
         />
         {p === 'phone' && (
           <rect
@@ -360,7 +412,32 @@ export function Person({
             {...stroke(2)}
           />
         )}
-        <circle cx={hand.x} cy={hand.y} r={4.6} fill={look.skin} {...stroke(2)} />
+        {p === 'nose' ? (
+          <g>
+            {/* thumb on one side of the nose, fingers on the other: a small pinch */}
+            <ellipse
+              cx={hand.x - 3.4 * side}
+              cy={hand.y + 0.5}
+              rx={3.2}
+              ry={3.6}
+              fill={look.skin}
+              {...stroke(1.8)}
+            />
+            <ellipse
+              cx={hand.x + 3.2 * side}
+              cy={hand.y + 0.5}
+              rx={2.2}
+              ry={2.9}
+              fill={look.skin}
+              {...stroke(1.8)}
+            />
+          </g>
+        ) : (
+          <g>
+            <circle cx={hand.x} cy={hand.y} r={5.2} fill={look.skin} {...stroke(2)} />
+            <circle cx={hand.x - 1.6} cy={hand.y - 1.8} r={1.3} fill={C.white} opacity={0.6} />
+          </g>
+        )}
       </g>
     );
   };
@@ -381,8 +458,8 @@ export function Person({
               <Limb d="M8 0 L9 8" color={look.pants} width={10} />
             </>
           )}
-          <ellipse cx={-10} cy={30} rx={7} ry={4} fill="#5b4a42" {...stroke(2)} />
-          <ellipse cx={10} cy={30} rx={7} ry={4} fill="#5b4a42" {...stroke(2)} />
+          <ellipse cx={-10} cy={30} rx={7.5} ry={4.6} fill="#8a5a44" {...stroke(2)} />
+          <ellipse cx={10} cy={30} rx={7.5} ry={4.6} fill="#8a5a44" {...stroke(2)} />
         </>
       ) : (
         <>
@@ -394,8 +471,15 @@ export function Person({
               <Limb d="M7 0 L7.5 11" color={look.pants} width={10} />
             </>
           )}
-          <ellipse cx={-10} cy={30} rx={7.5} ry={4} fill="#5b4a42" {...stroke(2)} />
-          <ellipse cx={10} cy={30} rx={7.5} ry={4} fill="#5b4a42" {...stroke(2)} />
+          <ellipse cx={-10} cy={30} rx={8} ry={4.6} fill="#8a5a44" {...stroke(2)} />
+          <ellipse cx={10} cy={30} rx={8} ry={4.6} fill="#8a5a44" {...stroke(2)} />
+          <path
+            d="M-14 28.5 q3 -2 6 -1 M6 28.5 q3 -2 6 -1"
+            stroke={C.white}
+            strokeWidth={1.3}
+            strokeLinecap="round"
+            opacity={0.6}
+          />
         </>
       )}
       {!front(armR) && arm(armR, -1)}
@@ -405,10 +489,12 @@ export function Person({
         <rect x={-19} y={-34} width={38} height={30} rx={8} fill={C.red} {...stroke()} />
       )}
       <path
-        d="M-16 -34 Q-18 -16 -15 2 L15 2 Q18 -16 16 -34 Q0 -40 -16 -34 Z"
+        d="M-15 -35 Q-20 -16 -16 0 Q0 5 16 0 Q20 -16 15 -35 Q0 -40 -15 -35 Z"
         fill={look.shirt}
         {...stroke()}
       />
+      <path d="M9 -33 Q16 -16 12 -1 Q15 -1 16 -1 Q19 -16 14 -34 Z" fill={INK} opacity={0.1} />
+      <path d="M-11 -35 Q0 -28 11 -35" fill="none" stroke={INK} strokeWidth={6} opacity={0.12} />
       {look.backpack && (
         <>
           <path d="M-11 -35 L-9 -6" stroke={C.redDark} strokeWidth={4} strokeLinecap="round" />
@@ -418,7 +504,7 @@ export function Person({
       {kind === 'grandma' && (
         <path d="M-15 -8 L15 -8" stroke={INK} strokeWidth={1.6} opacity={0.4} />
       )}
-      <g transform={`translate(0 ${headY})`}>
+      <g transform={`translate(0 ${headY}) scale(1.12)`}>
         <Head look={look} face={{ eyes: dizzy ? 'dizzy' : eyes, mouth, tilt, blood }} />
         {sweat && (
           <path

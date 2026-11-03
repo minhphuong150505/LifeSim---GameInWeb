@@ -113,3 +113,8 @@ export function roundScore(round: SimRound, bolts: number): number {
   const base = round.questions.length * 100 + Math.max(0, MAX_BOLTS - bolts) * 50;
   return Math.round(base * (1 + (round.difficulty - 1) * 0.25));
 }
+
+/** Bandages for finishing a round: only a cleared round pays out, a lost one (3 bolts) gives 0. */
+export function roundReward(round: SimRound, phase: RoundPhase): number {
+  return phase === 'won' ? round.reward : 0;
+}

@@ -268,7 +268,7 @@ export function Tutorial() {
   };
 
   return (
-    <main className="paper flex h-dvh flex-col px-[max(16px,env(safe-area-inset-left))] py-[max(10px,env(safe-area-inset-top))]">
+    <main className="paper flex h-app flex-col px-[max(16px,env(safe-area-inset-left))] py-[max(10px,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between gap-2">
         <p className="ink-border wood rounded-xl px-3 py-1 font-display text-lg text-navy">
           📖 Hướng dẫn chơi · {index + 1}/{SLIDES.length}

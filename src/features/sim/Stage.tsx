@@ -27,7 +27,7 @@ type StageProps = {
   children?: React.ReactNode;
 };
 
-const WIDE = { y: -6, h: 312 };
+const WIDE = { y: 24, h: 334 };
 const FOCUS = { y: 58, h: 172, x: 200 };
 
 /** The living-room scene filling the whole screen; forwards a ref to the <svg>. */
@@ -137,7 +137,7 @@ export const Stage = forwardRef<SVGSVGElement, StageProps>(function Stage(
           <Person
             kind="dad"
             {...SPOTS.dad}
-            armR={speaker === 'dad' ? 'point' : 'down'}
+            armL={speaker === 'dad' ? 'point' : 'down'}
             mouth={speaker === 'dad' ? 'open' : 'flat'}
           />
         )}
@@ -171,7 +171,7 @@ export const Stage = forwardRef<SVGSVGElement, StageProps>(function Stage(
       </motion.svg>
 
       {showCloseup && !stage.ambulance && (
-        <div className="ink-border absolute left-[max(10px,env(safe-area-inset-left))] top-[62px] z-10 aspect-square h-[30%] max-h-40 short:top-[46px] tiny:top-[40px] overflow-hidden rounded-2xl bg-paper shadow-soft">
+        <div className="ink-border absolute left-[max(10px,env(safe-area-inset-left))] top-[70px] z-10 aspect-square h-[30%] max-h-44 short:top-[46px] tiny:top-[40px] overflow-hidden rounded-2xl bg-paper shadow-soft">
           <ProfileArt
             key={`${stage.posture}-${stage.pinch}-${stage.mouthOpen}-${stage.icePack}-${stage.dizzy}`}
             className="h-[calc(100%-18px)] w-full"

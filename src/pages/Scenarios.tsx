@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CastFace } from '../art/CastFace';
-import { BandageIcon, HeartIcon, LockIcon, StarIcon } from '../art/icons';
+import { BandageIcon, BoltIcon, LockIcon, StarIcon } from '../art/icons';
 import { TopicArt } from '../art/TopicArt';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
@@ -45,7 +45,7 @@ export function Scenarios() {
   const totalStars = scenario.rounds.reduce((s, r) => s + (records[r.id]?.bestStars ?? 0), 0);
 
   return (
-    <div className="flex h-[calc(100dvh-max(16px,env(safe-area-inset-bottom)))] flex-col">
+    <div className="flex h-[calc(var(--app-h)-max(16px,env(safe-area-inset-bottom)))] flex-col">
       <PageHeader
         title={`${scenario.title}`}
         subtitle={`Tình huống ${scenario.number} · ${scenario.location} · ⭐ ${totalStars}/${n * 3}`}
@@ -106,7 +106,7 @@ export function Scenarios() {
           />
         </svg>
 
-        <div className="ink-border absolute right-3 top-3 hidden h-[34%] w-[16%] min-w-[110px] overflow-hidden rounded-2xl bg-paper shadow-pop sm:block">
+        <div className="ink-border absolute right-3 top-3 hidden h-[34%] w-[16%] min-w-[110px] overflow-hidden rounded-2xl bg-paper shadow-pop @xl:block">
           <TopicArt topic={scenario.topic} className="h-full w-full" />
         </div>
 
@@ -188,7 +188,7 @@ function RoundDetails({
 }) {
   const record = useProgressStore((s) => s.rounds[round.id]);
   return (
-    <div className="grid gap-3 sm:grid-cols-[1.3fr_1fr]">
+    <div className="grid gap-3 @xl:grid-cols-[1.3fr_1fr]">
       <div className="space-y-2">
         <p className="text-[15px] leading-relaxed text-ink">{round.summary}</p>
         <div className="flex flex-wrap gap-1.5">
@@ -206,13 +206,19 @@ function RoundDetails({
         </ul>
       </div>
       <div className="flex flex-col gap-2">
-        <div className="ink-border flex items-center justify-between rounded-2xl bg-cream px-3 py-2">
-          <span className="flex items-center gap-1 text-sm text-navy">
-            <HeartIcon size={22} /> Sai 3 lần là thua
-          </span>
-          <span className="flex items-center gap-1 font-display text-lg text-navy">
-            +{round.reward} <BandageIcon size={26} />
-          </span>
+        <div className="ink-border overflow-hidden rounded-2xl bg-cream">
+          <div className="flex items-center justify-between gap-2 border-b-2 border-navy/15 bg-[#eef7e6] px-3 py-2">
+            <span className="text-sm font-semibold text-navy">🏆 Thắng màn nhận</span>
+            <span className="flex items-center gap-1 font-display text-xl text-success-dark">
+              +{round.reward} <BandageIcon size={26} />
+            </span>
+          </div>
+          <p className="flex items-start gap-1.5 px-3 py-2 text-[13px] leading-snug text-navy">
+            <span className="flex shrink-0 [&>svg]:h-5 [&>svg]:w-5">
+              <BoltIcon size={20} />
+            </span>
+            Mỗi lần chọn sai nhận 1 tia sét. Đủ 3 tia sét là thua màn và không nhận băng gạc.
+          </p>
         </div>
         {record && (
           <p className="text-sm text-muted">

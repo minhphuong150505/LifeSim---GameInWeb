@@ -7,11 +7,13 @@ import { Modal } from '../components/Modal';
 import { allRounds, getRound, nextRoundId, scenarioOf } from '../data/sim';
 import { AdOverlay } from '../features/sim/AdOverlay';
 import { BagSheet } from '../features/sim/BagSheet';
+import { BandageBank } from '../features/sim/BandageBank';
 import {
   createRoundReducer,
   initialRoundState,
   MAX_BOLTS,
   RETRY_COST,
+  roundReward,
   roundScore,
   starsFor,
 } from '../features/sim/engine';
@@ -68,6 +70,7 @@ function RoundSession({ round }: { round: SimRound }) {
   const [flash, setFlash] = useState(0);
   const [dialog, setDialog] = useState<'exit' | 'help' | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
+  const [bankOpen, setBankOpen] = useState(false);
   const [bagOpen, setBagOpen] = useState(false);
   const [ad, setAd] = useState<'double' | 'retry' | null>(null);
   const [dialing, setDialing] = useState(false);
@@ -153,6 +156,8 @@ function RoundSession({ round }: { round: SimRound }) {
   };
 
   const claim = (amount: number) => {
+    // Bandages are only for a cleared round: losing (3 bolts) never pays out.
+    if (roundReward(round, state.phase) === 0 || claimed !== null) return;
     useWalletStore.getState().earn(amount);
     setClaimed(amount);
     playSound('found');
@@ -175,7 +180,7 @@ function RoundSession({ round }: { round: SimRound }) {
   };
 
   const pointAt =
-    itemTask && !iceApplied && !carrying && !dialing && !bagOpen && !shopOpen
+    itemTask && !iceApplied && !carrying && !dialing && !bagOpen && !shopOpen && !bankOpen
       ? ownsTaskItem
         ? 'bag'
         : 'shop'
@@ -187,7 +192,7 @@ function RoundSession({ round }: { round: SimRound }) {
     state.phase === 'task';
 
   return (
-    <div className="relative h-dvh overflow-hidden">
+    <div className="relative h-app overflow-hidden">
       <Stage
         ref={svgRef}
         cast={round.cast}
@@ -231,6 +236,7 @@ function RoundSession({ round }: { round: SimRound }) {
         onHelp={() => setDialog('help')}
         onBag={() => setBagOpen(true)}
         onShop={() => setShopOpen(true)}
+        onBank={() => setBankOpen(true)}
       />
 
       {beat && beat.kind !== 'mission' && (
@@ -311,6 +317,10 @@ function RoundSession({ round }: { round: SimRound }) {
       <Shop
         open={shopOpen}
         onClose={() => setShopOpen(false)}
+        onOpenBank={() => {
+          setShopOpen(false);
+          setBankOpen(true);
+        }}
         highlight={taskItem && !ownsTaskItem ? taskItem : null}
         onBought={(id) => {
           if (id === taskItem) {
@@ -319,6 +329,7 @@ function RoundSession({ round }: { round: SimRound }) {
           }
         }}
       />
+      <BandageBank inGame open={bankOpen} onClose={() => setBankOpen(false)} />
       <BagSheet
         open={bagOpen}
         onClose={() => setBagOpen(false)}
@@ -424,8 +435,8 @@ function RoundSession({ round }: { round: SimRound }) {
           ))}
         </div>
         <p className="mt-2 text-center text-[15px] leading-relaxed text-ink">
-          Bạn đã nhận đủ {MAX_BOLTS} tia sét nên thua màn này. Dùng {RETRY_COST} băng gạc để chơi
-          lại, hoặc xem quảng cáo để chơi lại miễn phí.
+          Bạn đã chọn sai {MAX_BOLTS} lần ({MAX_BOLTS} tia sét) nên thua màn này và không nhận được
+          băng gạc. Dùng {RETRY_COST} băng gạc để chơi lại, hoặc xem quảng cáo để chơi lại miễn phí.
         </p>
         <div className="mt-4 flex flex-col gap-2">
           <Button size="lg" block disabled={bandages < RETRY_COST} onClick={() => retry(true)}>
@@ -461,13 +472,13 @@ function RoundSession({ round }: { round: SimRound }) {
           <li>❤️ Trả lời đúng: nhận 1 trái tim, chị sẽ giải thích lý do rồi bấm “Đã hiểu”.</li>
           <li>⚡ Trả lời sai: nhận 1 tia sét, nghe gợi ý của chị rồi chọn lại.</li>
           <li>
-            ⚡⚡⚡ Đủ {MAX_BOLTS} tia sét là thua – cần {RETRY_COST} băng gạc (hoặc xem quảng cáo)
-            để chơi lại.
+            ⚡⚡⚡ Sai đủ {MAX_BOLTS} lần là thua màn – không nhận băng gạc; cần {RETRY_COST} băng
+            gạc (hoặc xem quảng cáo) để chơi lại.
           </li>
-          <li>🩹 Hoàn thành màn để nhận băng gạc và mở khoá màn tiếp theo.</li>
+          <li>🩹 Chỉ khi thắng màn mới nhận băng gạc và mở khoá màn tiếp theo.</li>
           <li>
-            🏪 Dùng băng gạc mua vật dụng ở cửa hàng (góc trên bên phải), rồi lấy từ túi vật dụng để
-            dùng trong màn chơi.
+            🏪 Dùng băng gạc mua vật dụng ở Cửa hàng, rồi lấy từ Túi vật dụng để dùng trong màn
+            chơi. Bấm dấu + cạnh số băng gạc để kiếm thêm.
           </li>
         </ul>
       </Modal>

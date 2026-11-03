@@ -138,7 +138,7 @@ export function Hub() {
           <h2 className="ml-auto font-display text-xl text-navy" aria-live="polite">
             {ranked.length} khoá học
           </h2>
-          <span className="w-full text-xs font-semibold text-muted sm:w-auto">
+          <span className="w-full text-xs font-semibold text-muted @xl:w-auto">
             ⚠️ Dữ liệu demo, không phải cơ sở thật.
           </span>
         </div>
@@ -236,7 +236,7 @@ export function Hub() {
             Không có khoá nào khớp bộ lọc. Hãy nới khoảng cách, ngày học hoặc ngân sách.
           </Card>
         )}
-        <ul className="grid grid-cols-2 gap-3 pb-2 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-3 pb-2 @xl:grid-cols-3 @5xl:grid-cols-4">
           {ranked.map((loc) => (
             <li key={loc.id}>
               <button
@@ -278,7 +278,7 @@ export function Hub() {
         size="lg"
       >
         {selected && (
-          <div className="grid gap-3 sm:grid-cols-[1fr_1.3fr]">
+          <div className="grid gap-3 @xl:grid-cols-[1fr_1.3fr]">
             <div className="ink-border relative aspect-[4/3] overflow-hidden rounded-2xl">
               <TopicArt
                 topic={coverTopic(selected, focusTopic)}

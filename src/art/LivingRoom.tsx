@@ -16,7 +16,6 @@ type LivingRoomProps = {
 
 /** Living room background in the hand-drawn style (viewBox 400×300). */
 export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: LivingRoomProps) {
-  const thin = { stroke: INK, strokeWidth: 1.3, opacity: 0.4, strokeLinecap: 'round' } as const;
   const handAngle = (clockMinutes / 60) * 2 * Math.PI;
   return (
     <g>
@@ -24,24 +23,33 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
         <clipPath id="lr-window">
           <rect x={20} y={30} width={80} height={116} />
         </clipPath>
+        <pattern id="lr-paper" width={22} height={22} patternUnits="userSpaceOnUse">
+          <path
+            d="M11 6 l1.6 3 3 0.6 -2.2 2 0.6 3 -3 -1.4 -3 1.4 0.6 -3 -2.2 -2 3 -0.6 Z"
+            fill="#f2c9a8"
+            opacity={0.55}
+          />
+          <circle cx={0} cy={18} r={1.3} fill="#cfe0b0" />
+          <circle cx={22} cy={18} r={1.3} fill="#cfe0b0" />
+        </pattern>
+        <pattern id="lr-planks" width={60} height={24} patternUnits="userSpaceOnUse">
+          <path d="M0 23.5 H60" stroke="#b9875a" strokeWidth={1.2} opacity={0.5} />
+          <path d="M18 0 V24" stroke="#b9875a" strokeWidth={1.2} opacity={0.45} />
+          <path d="M28 8 q8 -3 16 0" fill="none" stroke="#c99a6c" strokeWidth={1} opacity={0.6} />
+        </pattern>
       </defs>
-      {/* wall + floor */}
+      {/* wall (cosy wallpaper + wainscot) and wooden floor */}
       <rect x={0} y={0} width={400} height={192} fill={C.wall} />
-      <path d="M0 150 H400" {...thin} opacity={0.15} />
+      <rect x={0} y={0} width={400} height={150} fill="url(#lr-paper)" />
+      <rect x={0} y={150} width={400} height={42} fill="#efe1bf" />
+      <path d="M0 150 H400" stroke={INK} strokeWidth={1.6} opacity={0.35} />
+      {Array.from({ length: 20 }, (_, i) => (
+        <path key={i} d={`M${10 + i * 20} 154 V188`} stroke={INK} strokeWidth={1} opacity={0.12} />
+      ))}
       <rect x={0} y={192} width={400} height={108} fill={C.floor} />
+      <rect x={0} y={192} width={400} height={108} fill="url(#lr-planks)" />
       <path d="M0 192 H400" {...stroke(2.5)} />
       <rect x={0} y={186} width={400} height={6} fill={C.wallShade} />
-      {[214, 238, 264, 292].map((y, i) => (
-        <g key={y}>
-          <path d={`M0 ${y} H400`} {...thin} />
-          {[0, 1, 2, 3, 4].map((j) => {
-            const x = ((j * 97 + i * 53) % 400) + 20;
-            const prev = i === 0 ? 192 : [214, 238, 264][i - 1];
-            return <path key={j} d={`M${x} ${prev} V${y}`} {...thin} />;
-          })}
-        </g>
-      ))}
-
       {/* window */}
       <g clipPath="url(#lr-window)">
         <rect x={20} y={30} width={80} height={116} fill={C.sky} />
@@ -84,6 +92,27 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
       <path d="M60 30 V146 M20 88 H100" stroke={C.white} strokeWidth={5} />
       <path d="M60 30 V146 M20 88 H100" fill="none" {...stroke(1.6)} />
       <rect x={8} y={150} width={104} height={8} rx={2} fill={C.white} {...stroke(2.2)} />
+      {/* curtains */}
+      <path d="M4 16 H120" {...stroke(3)} />
+      <path
+        d="M2 18 C10 40 6 90 14 132 C18 140 26 138 26 130 C22 92 26 44 22 18 Z"
+        fill="#f6b8a6"
+        {...stroke(2)}
+      />
+      <path
+        d="M118 18 C110 40 114 90 106 132 C102 140 94 138 94 130 C98 92 94 44 98 18 Z"
+        fill="#f6b8a6"
+        {...stroke(2)}
+      />
+      <path
+        d="M10 30 C12 60 12 96 18 124 M110 30 C108 60 108 96 102 124"
+        fill="none"
+        stroke={C.white}
+        strokeWidth={1.6}
+        opacity={0.6}
+      />
+      <circle cx={4} cy={16} r={3.5} fill={C.wood} {...stroke(1.6)} />
+      <circle cx={120} cy={16} r={3.5} fill={C.wood} {...stroke(1.6)} />
 
       {/* frames above the sofa */}
       <rect x={150} y={44} width={44} height={34} fill={C.white} {...stroke(2.2)} />
@@ -112,6 +141,27 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
         <circle r={2} fill={INK} />
       </g>
 
+      {/* little shelf with books and a sprout */}
+      <rect x={330} y={86} width={56} height={5} rx={2} fill={C.woodDark} {...stroke(1.8)} />
+      <rect x={336} y={68} width={7} height={18} rx={1.5} fill={C.red} {...stroke(1.5)} />
+      <rect x={344} y={71} width={7} height={15} rx={1.5} fill={C.blue} {...stroke(1.5)} />
+      <rect
+        x={352}
+        y={66}
+        width={7}
+        height={20}
+        rx={1.5}
+        fill={C.yellow}
+        transform="rotate(8 355 76)"
+        {...stroke(1.5)}
+      />
+      <path d="M368 86 h14 l-2 -10 h-10 Z" fill="#e9a07a" {...stroke(1.5)} />
+      <path
+        d="M375 76 C372 68 366 66 364 67 C366 72 370 75 375 76 Z M375 76 C377 67 383 64 386 65 C384 71 380 75 375 76 Z"
+        fill={C.green}
+        {...stroke(1.4)}
+      />
+
       {/* TV cabinet + TV */}
       <rect x={318} y={152} width={74} height={50} rx={3} fill={C.wood} {...stroke(2.5)} />
       <path d="M343 152 V202 M367 152 V202" {...stroke(2)} />
@@ -129,7 +179,11 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
       />
       <path d="M350 144 V152 M344 152 H362" {...stroke(2.5)} />
 
-      {/* plant */}
+      {/* plant in a smiling pot */}
+      <path d="M116 186 h26 l-3 -20 h-20 Z" fill="#e9a07a" {...stroke(2)} />
+      <circle cx={124} cy={176} r={1.2} fill={INK} />
+      <circle cx={134} cy={176} r={1.2} fill={INK} />
+      <path d="M127 179 q2 2 4 0" fill="none" {...stroke(1.2)} />
       <path
         d="M128 168 C120 150 112 146 106 148 C112 154 118 160 128 168 Z"
         fill={C.green}
@@ -154,6 +208,40 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
         opacity={0.6}
       />
 
+      {/* sleeping kitty on the rug */}
+      <g transform="translate(116 262)">
+        <ellipse cx={0} cy={6} rx={20} ry={4} fill={INK} opacity={0.12} />
+        <path d="M-18 4 C-20 -8 -6 -14 6 -12 C16 -10 20 -2 18 4 Z" fill="#f6c27a" {...stroke(2)} />
+        <path
+          d="M14 2 C24 2 26 -6 20 -8"
+          fill="none"
+          stroke={INK}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <path
+          d="M14 2 C24 2 26 -6 20 -8"
+          fill="none"
+          stroke="#f6c27a"
+          strokeWidth={2.4}
+          strokeLinecap="round"
+        />
+        <path
+          d="M-6 -12 q4 -1 6 2 M4 -12 q3 2 3 6"
+          fill="none"
+          stroke="#d8924a"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+        />
+        <circle cx={-12} cy={-5} r={8} fill="#f6c27a" {...stroke(2)} />
+        <path d="M-19 -9 l-1 -7 5 4 Z M-10 -12 l3 -6 2 6 Z" fill="#f6c27a" {...stroke(1.6)} />
+        <path d="M-16 -5 q1.5 1.5 3 0 M-11 -5 q1.5 1.5 3 0" fill="none" {...stroke(1.2)} />
+        <ellipse cx={-17} cy={-2} rx={1.8} ry={1.1} fill={C.blush} />
+        <text x={-4} y={-18} fontSize={7} fill={INK} opacity={0.55} fontFamily="Itim, sans-serif">
+          z z
+        </text>
+      </g>
+
       {/* sofa */}
       <rect x={114} y={112} width={172} height={64} rx={14} fill={C.sofa} {...stroke(2.5)} />
       <path d="M200 116 V170" {...stroke(1.8)} opacity={0.5} />
@@ -163,6 +251,16 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
       <rect x={98} y={140} width={26} height={68} rx={11} fill={C.sofa} {...stroke(2.5)} />
       <rect x={276} y={140} width={26} height={68} rx={11} fill={C.sofa} {...stroke(2.5)} />
       <path d="M108 208 v6 M292 208 v6" {...stroke(3)} />
+      <rect
+        x={126}
+        y={138}
+        width={22}
+        height={20}
+        rx={6}
+        fill="#ffd98a"
+        {...stroke(2)}
+        transform="rotate(-8 137 148)"
+      />
       <rect
         x={250}
         y={136}

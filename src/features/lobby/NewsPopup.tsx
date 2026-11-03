@@ -75,7 +75,7 @@ export function NewsPopup({ open, onClose }: { open: boolean; onClose: () => voi
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="ink-border relative flex h-[min(88dvh,420px)] w-full max-w-3xl overflow-hidden rounded-[24px] bg-paper shadow-pop"
+            className="ink-border relative flex h-[min(calc(var(--app-h)*0.88),420px)] w-full max-w-3xl overflow-hidden rounded-[24px] bg-paper shadow-pop"
           >
             <nav
               aria-label="Danh sách thông báo"
@@ -123,7 +123,7 @@ export function NewsPopup({ open, onClose }: { open: boolean; onClose: () => voi
                   {item.body}
                 </p>
                 <div className="mt-2 flex items-center justify-end gap-2">
-                  <Mascot className="mr-auto hidden h-14 w-12 sm:block" />
+                  <Mascot className="mr-auto hidden h-14 w-12 @xl:block" />
                   {item.cta && (
                     <Button
                       variant="green"

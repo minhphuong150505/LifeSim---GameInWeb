@@ -10,6 +10,7 @@ import {
   PinIcon,
   PlayIcon,
   ScrollIcon,
+  ShopIcon,
   TrophyIcon,
 } from '../art/icons';
 import { LivingRoom, ROOM_H, ROOM_W } from '../art/LivingRoom';
@@ -27,6 +28,7 @@ import {
   type MissionInput,
 } from '../features/missions/missionLogic';
 import { usePlayerLevel } from '../features/profile/usePlayerLevel';
+import { BandageBank } from '../features/sim/BandageBank';
 import { Shop } from '../features/sim/Shop';
 import { nextRoundToPlay } from '../features/sim/unlock';
 import { activeStreak } from '../features/streak/streakLogic';
@@ -55,12 +57,12 @@ function SideButton({
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex flex-col items-center"
+      className="group relative flex w-[78px] flex-col items-center"
       aria-label={badge ? `${label} (${badge} mới)` : label}
     >
       <span
         className={cn(
-          'ink-border relative grid h-[clamp(28px,10dvh,48px)] w-[clamp(28px,10dvh,48px)] place-items-center rounded-2xl shadow-pop transition-transform group-active:translate-y-0.5 [&>svg]:h-[72%] [&>svg]:w-[72%]',
+          'ink-border relative grid h-[52px] w-[52px] place-items-center rounded-[18px] shadow-pop transition-transform group-active:translate-y-0.5 [&>svg]:h-[74%] [&>svg]:w-[74%]',
           glow ? 'animate-pulse bg-[#bfe3a6] ring-4 ring-success/60' : 'bg-paper',
         )}
       >
@@ -71,7 +73,7 @@ function SideButton({
           </span>
         ) : null}
       </span>
-      <span className="mt-0.5 rounded-md bg-paper/85 px-1 font-display text-[12px] leading-[14px] text-navy short:text-[10px] short:leading-3 tiny:sr-only">
+      <span className="ink-border mt-1 rounded-lg bg-paper px-1.5 font-display text-[13px] leading-[18px] whitespace-nowrap text-navy">
         {label}
       </span>
     </button>
@@ -101,19 +103,21 @@ function BigButton({
       animate={{ x: 0, opacity: 1 }}
       transition={{ delay }}
       whileTap={{ scale: 0.97, y: 2 }}
-      className="ink-border flex w-full items-center gap-3 rounded-[20px] px-3 py-[clamp(4px,1.4dvh,10px)] text-left shadow-pop"
+      className="ink-border flex min-h-0 w-full max-h-[118px] flex-1 items-center gap-4 rounded-[26px] px-4 text-left shadow-[0_6px_0_0_#3b2d26]"
       style={{ backgroundColor: tone }}
     >
-      <span className="ink-border grid h-[clamp(30px,11dvh,56px)] w-[clamp(30px,11dvh,56px)] [&>svg]:h-[70%] [&>svg]:w-[70%] shrink-0 place-items-center rounded-2xl bg-paper">
+      <span className="ink-border grid aspect-square h-[min(72px,70%)] shrink-0 place-items-center rounded-[20px] bg-paper [&>svg]:h-[70%] [&>svg]:w-[70%]">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-display text-[clamp(22px,6dvh,32px)] leading-tight text-navy">
-          {title}
+        <span className="block font-display text-[36px] leading-[1.05] text-navy">{title}</span>
+        <span className="mt-0.5 line-clamp-2 block text-[15px] font-semibold leading-snug text-navy/85">
+          {subtitle}
         </span>
-        <span className="block truncate text-[13px] font-semibold text-navy/80">{subtitle}</span>
       </span>
-      <PlayIcon size={30} />
+      <span className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-full bg-paper/90 [&>svg]:h-7 [&>svg]:w-7">
+        <PlayIcon size={28} />
+      </span>
     </motion.button>
   );
 }
@@ -129,7 +133,7 @@ export function Home() {
   const newsSeen = useSessionStore((s) => s.newsSeen);
   const markNewsSeen = useSessionStore((s) => s.markNewsSeen);
   const { level, into, needed } = usePlayerLevel();
-  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | null>(null);
+  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | 'bank' | null>(null);
 
   const today = toDateKey();
   const streakDays = activeStreak(streak, today);
@@ -148,7 +152,7 @@ export function Home() {
   const claimable = claimableCount(missionInput);
 
   return (
-    <main className="relative h-dvh overflow-hidden">
+    <main className="relative h-app overflow-hidden">
       <svg
         viewBox={`0 0 ${ROOM_W} ${ROOM_H}`}
         preserveAspectRatio="xMidYMid slice"
@@ -159,34 +163,34 @@ export function Home() {
       </svg>
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-cream/10 via-cream/40 to-cream/70"
+        className="absolute inset-0 bg-gradient-to-r from-cream/0 via-cream/35 to-cream/75"
       />
 
-      <div className="relative grid h-full grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)_auto] grid-rows-[auto_minmax(0,1fr)] gap-x-3 px-[max(12px,env(safe-area-inset-left))] pb-[max(8px,env(safe-area-inset-bottom))] pr-[max(12px,env(safe-area-inset-right))] pt-[max(8px,env(safe-area-inset-top))]">
-        {/* top-left: profile */}
-        <div className="col-span-2 flex items-start gap-2">
+      <div className="relative flex h-full flex-col px-[max(14px,env(safe-area-inset-left))] pb-[max(10px,env(safe-area-inset-bottom))] pr-[max(14px,env(safe-area-inset-right))] pt-[max(10px,env(safe-area-inset-top))]">
+        {/* top bar: profile + settings | bandages + shop */}
+        <div className="flex shrink-0 items-start gap-2.5">
           <button
             type="button"
             onClick={() => navigate('/profile')}
             aria-label="Hồ sơ nhân vật"
-            className="ink-border flex min-w-0 items-center gap-2 rounded-2xl bg-paper/95 py-1 pl-1 pr-3 shadow-pop"
+            className="ink-border flex min-w-0 items-center gap-2.5 rounded-[20px] bg-paper py-1.5 pl-1.5 pr-4 shadow-pop"
           >
             <span className="relative">
-              <Avatar id={avatar} size={46} ring="red" className="short:!h-9 short:!w-9" />
-              <span className="ink-border absolute -bottom-1 -right-2 rounded-full bg-accent px-1 font-display text-[11px] leading-4 text-navy">
+              <Avatar id={avatar} size={50} ring="red" />
+              <span className="ink-border absolute -bottom-1 -right-2 rounded-full bg-accent px-1.5 font-display text-[12px] leading-4 text-navy">
                 Lv{level}
               </span>
             </span>
             <span className="min-w-0 text-left">
-              <span className="block max-w-[150px] truncate font-display text-lg leading-tight text-navy">
+              <span className="block max-w-[170px] truncate font-display text-xl leading-tight text-navy">
                 {nickname}
               </span>
-              <span className="flex items-center gap-1 text-[13px] font-semibold text-navy short:text-[11px]">
+              <span className="flex items-center gap-1 text-[14px] font-semibold text-navy">
                 <FlameIcon size={18} lit={streakDays > 0} />
                 Streak {streakDays} ngày
               </span>
               <span
-                className="mt-0.5 block h-1.5 w-[110px] overflow-hidden rounded-full bg-navy/15"
+                className="mt-0.5 block h-2 w-[130px] overflow-hidden rounded-full bg-navy/15"
                 role="progressbar"
                 aria-label={`Kinh nghiệm cấp ${level}`}
                 aria-valuenow={into}
@@ -203,86 +207,101 @@ export function Home() {
             type="button"
             onClick={() => setPanel('settings')}
             aria-label="Cài đặt"
-            className="ink-border grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-paper/95 shadow-pop"
+            className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper shadow-pop"
           >
-            <GearIcon size={30} />
+            <GearIcon size={32} />
           </button>
-        </div>
-
-        {/* left: character with mission bubble */}
-        <div className="relative flex min-h-0 items-end justify-center">
+          <span className="flex-1" />
+          <CurrencyPill onClick={() => setPanel('bank')} />
           <button
             type="button"
-            onClick={() => setPanel('missions')}
-            className="absolute left-1/2 top-[4%] z-10 w-max max-w-[95%] -translate-x-1/2"
-            aria-label={`Nhiệm vụ hôm nay: ${doneCount}/${MISSIONS.length}. Bấm để xem`}
+            onClick={() => setPanel('shop')}
+            aria-label="Cửa hàng vật dụng"
+            className="ink-border flex h-12 shrink-0 items-center gap-1.5 rounded-2xl bg-paper pl-1.5 pr-3 font-display text-lg text-navy shadow-pop"
           >
-            <motion.span
-              className="ink-border relative block rounded-[18px] bg-paper px-3 py-1.5 text-center shadow-pop"
-              animate={{ y: [0, -4, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <span className="block font-display text-[15px] leading-tight text-primary-dark short:text-[13px]">
-                {claimable > 0 ? '🎁 Có quà nhiệm vụ!' : 'Nhiệm vụ hôm nay'}
-              </span>
-              <span className="block text-[13px] font-semibold text-navy short:text-[11px]">
-                {doneCount}/{MISSIONS.length} hoàn thành · Bấm để xem
-              </span>
-              <span
-                aria-hidden
-                className="absolute -bottom-[9px] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b-[2.5px] border-r-[2.5px] border-navy bg-paper"
-              />
-            </motion.span>
+            <ShopIcon size={34} />
+            Cửa hàng
           </button>
-          <Mascot
-            interactive
-            title="Nhân vật của bạn"
-            className="h-[68%] max-h-64 w-auto aspect-[11/16]"
-          />
         </div>
 
-        {/* center: main modes */}
-        <div className="flex min-h-0 flex-col justify-center gap-[clamp(4px,2.5dvh,14px)] py-2 short:py-1">
-          <BigButton
-            title="Core game"
-            subtitle={
-              next && nextScenario
-                ? `Tiếp: ${nextScenario.title} · Màn ${next.code} – ${next.title}`
-                : 'Chọn chủ đề và màn chơi'
-            }
-            icon={<PlayIcon size={34} />}
-            tone="#ec6a4c"
-            onClick={() => navigate('/core')}
-            delay={0.05}
-          />
-          <BigButton
-            title="Streak"
-            subtitle={
-              todayResult?.passed
-                ? `Chuỗi ${streakDays} ngày · Hôm nay đã xong ✓`
-                : `Chuỗi ${streakDays} ngày · còn ${triesLeft} lượt hôm nay`
-            }
-            icon={<FlameIcon size={38} lit={streakDays > 0} />}
-            tone="#ffd23f"
-            onClick={() => navigate('/daily')}
-            delay={0.12}
-          />
-          <BigButton
-            title="Hub"
-            subtitle="Tìm khoá học sơ cứu thực tế"
-            icon={<PinIcon size={36} />}
-            tone="#86c06c"
-            onClick={() => navigate('/hub')}
-            delay={0.19}
-          />
-        </div>
+        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,0.78fr)_minmax(0,1.5fr)_auto] gap-x-4 pt-2">
+          {/* left: the player's character with today's missions in a speech bubble */}
+          <div className="relative flex min-h-0 flex-col items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setPanel('missions')}
+              className="relative z-10 mb-1 shrink-0"
+              aria-label={`Nhiệm vụ hôm nay: ${doneCount}/${MISSIONS.length}. Bấm để xem`}
+            >
+              <motion.span
+                className="ink-border relative flex items-center gap-2 rounded-[20px] bg-paper px-3 py-2 text-left shadow-pop"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                <span className="[&>svg]:h-9 [&>svg]:w-9">
+                  <ScrollIcon size={36} />
+                </span>
+                <span>
+                  <span className="block font-display text-[17px] leading-tight text-primary-dark">
+                    {claimable > 0 ? '🎁 Có quà nhiệm vụ!' : 'Nhiệm vụ hôm nay'}
+                  </span>
+                  <span className="block whitespace-nowrap text-[14px] font-semibold text-navy">
+                    {doneCount}/{MISSIONS.length} hoàn thành · Xem ▸
+                  </span>
+                </span>
+                <span
+                  aria-hidden
+                  className="absolute -bottom-[10px] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b-[2.5px] border-r-[2.5px] border-navy bg-paper"
+                />
+              </motion.span>
+            </button>
+            <Mascot
+              interactive
+              title="Nhân vật của bạn"
+              className="min-h-0 w-auto flex-1 aspect-[11/16] max-w-full"
+            />
+          </div>
 
-        {/* right column: bandages on top, then the side menu */}
-        <div className="col-start-3 row-span-2 row-start-1 flex min-h-0 flex-col items-end">
-          <CurrencyPill onClick={() => setPanel('shop')} />
+          {/* center: main modes */}
+          <div className="flex min-h-0 flex-col justify-center gap-4 py-3">
+            <BigButton
+              title="Core game"
+              subtitle={
+                next && nextScenario
+                  ? `Tiếp: ${nextScenario.title} · Màn ${next.code} – ${next.title}`
+                  : 'Chọn chủ đề và màn chơi'
+              }
+              icon={<PlayIcon size={34} />}
+              tone="#ec6a4c"
+              onClick={() => navigate('/core')}
+              delay={0.05}
+            />
+            <BigButton
+              title="Streak"
+              subtitle={
+                todayResult?.passed
+                  ? `Chuỗi ${streakDays} ngày · Hôm nay đã xong ✓`
+                  : `Chuỗi ${streakDays} ngày · còn ${triesLeft} lượt hôm nay`
+              }
+              icon={<FlameIcon size={38} lit={streakDays > 0} />}
+              tone="#ffd23f"
+              onClick={() => navigate('/daily')}
+              delay={0.12}
+            />
+            <BigButton
+              title="Hub"
+              subtitle="Tìm khoá học sơ cứu thực tế gần bạn"
+              icon={<PinIcon size={36} />}
+              tone="#86c06c"
+              onClick={() => navigate('/hub')}
+              delay={0.19}
+            />
+          </div>
+
+          {/* right: side menu */}
           <nav
             aria-label="Menu"
-            className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[clamp(2px,1.2dvh,10px)] self-stretch pb-1 pt-1"
+            className="flex min-h-0 flex-col items-center justify-center gap-2 py-1"
           >
             <SideButton
               label="Hướng dẫn"
@@ -322,7 +341,16 @@ export function Home() {
         input={missionInput}
       />
       <SettingsModal open={panel === 'settings'} onClose={() => setPanel(null)} />
-      <Shop open={panel === 'shop'} onClose={() => setPanel(null)} />
+      <Shop
+        open={panel === 'shop'}
+        onClose={() => setPanel(null)}
+        onOpenBank={() => setPanel('bank')}
+      />
+      <BandageBank
+        open={panel === 'bank'}
+        onClose={() => setPanel(null)}
+        onOpenMissions={() => setPanel('missions')}
+      />
     </main>
   );
 }

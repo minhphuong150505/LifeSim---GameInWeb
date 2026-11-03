@@ -25,7 +25,8 @@ export function FitContent({
     const inner = innerRef.current;
     if (!outer || !inner) return;
     const fit = () => {
-      const available = outer.clientHeight;
+      // Both heights are measured on screen so the game frame's scale cancels out.
+      const available = outer.getBoundingClientRect().height;
       if (available <= 0) return;
       let zoom = 1;
       inner.style.zoom = '1';
