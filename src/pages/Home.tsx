@@ -7,6 +7,7 @@ import {
   GearIcon,
   HelpIcon,
   CapIcon,
+  PartyIcon,
   StationIcon,
   PinIcon,
   PlayIcon,
@@ -214,6 +215,17 @@ export function Home() {
           >
             <GearIcon size={32} />
           </button>
+          <motion.button
+            type="button"
+            onClick={() => navigate('/team')}
+            aria-label="Sự kiện 5v5"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 1.8 }}
+            className="ink-border flex h-12 shrink-0 items-center gap-1.5 rounded-2xl bg-[#bfe3a6] pl-1.5 pr-3 font-display text-lg text-navy shadow-pop"
+          >
+            <PartyIcon size={34} />
+            Sự kiện 5v5
+          </motion.button>
           <span className="flex-1" />
           <CurrencyPill onClick={() => setPanel('bank')} />
           <button
