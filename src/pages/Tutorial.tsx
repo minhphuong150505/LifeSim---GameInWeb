@@ -17,6 +17,8 @@ import {
 import { LivingRoom } from '../art/LivingRoom';
 import { Mascot } from '../art/Mascot';
 import { Person } from '../art/Person';
+import { STATION_H, STATION_W, StationRoom } from '../art/StationRoom';
+import { DEFAULT_VARIANT, getVariant } from '../data/station';
 import { Button } from '../components/Button';
 import { cn } from '../lib/cn';
 import { useUserStore } from '../store/user';
@@ -50,12 +52,13 @@ function LobbyArt() {
         <div className="flex flex-1 flex-col gap-2">
           <span className={btn}>Core game</span>
           <span className={btn}>Streak</span>
+          <span className={btn}>Trạm cứu hộ</span>
           <span className={btn}>Hub</span>
         </div>
         <div className="flex flex-col gap-1.5">
           <span className={side}>?</span>
           <span className={side}>📋</span>
-          <span className={cn(side, 'bg-success/60')}>🎉</span>
+          <span className={cn(side, 'bg-success/60')}>🎓</span>
           <span className={side}>🏆</span>
           <span className={side}>📖</span>
         </div>
@@ -154,6 +157,31 @@ function ItemsArt() {
   );
 }
 
+function StationArt() {
+  const placed = {
+    theme: getVariant(DEFAULT_VARIANT),
+    cabinet: getVariant('cabinet-kinh'),
+    bed: getVariant('bed-xanh'),
+    poster: getVariant('poster-115'),
+    plant: getVariant('plant-hoa'),
+    rug: getVariant('rug-do'),
+    chair: getVariant('chair-banh'),
+    lamp: getVariant('lamp-vom'),
+  };
+  return (
+    <div className="ink-border h-full w-full overflow-hidden rounded-[20px]">
+      <svg
+        viewBox={`0 0 ${STATION_W} ${STATION_H}`}
+        preserveAspectRatio="xMidYMid slice"
+        className="h-full w-full"
+        aria-hidden
+      >
+        <StationRoom placed={placed} />
+      </svg>
+    </div>
+  );
+}
+
 function DailyArt() {
   return (
     <div className="grid h-full w-full grid-cols-2 gap-2">
@@ -169,7 +197,7 @@ function DailyArt() {
       </div>
       <div className={cn(tile, 'flex-col justify-center text-center')}>
         <TrophyIcon size={48} />
-        <span className="font-display text-base text-navy">BXH & Sự kiện 5v5</span>
+        <span className="font-display text-base text-navy">Bảng xếp hạng</span>
       </div>
       <div className={cn(tile, 'flex-col justify-center text-center')}>
         <PinIcon size={48} />
@@ -184,8 +212,8 @@ const SLIDES: Slide[] = [
     title: 'Chào mừng đến với LifeSim!',
     body: (
       <>
-        Bạn sẽ vào vai người sơ cứu, xử lý các tình huống thường gặp trong đời sống. Mỗi màn chơi
-        chỉ vài phút – <b>học, luyện tập và sẵn sàng</b> khi cần.
+        Bạn vào vai người sơ cứu, xử lý các tình huống hay gặp trong đời sống. Mỗi màn chỉ vài phút:{' '}
+        <b>học – luyện – sẵn sàng</b>.
       </>
     ),
     art: <Mascot mood="happy" className="mx-auto h-full max-h-56 w-44" />,
@@ -194,9 +222,8 @@ const SLIDES: Slide[] = [
     title: 'Màn hình chính',
     body: (
       <>
-        Ở giữa là <b>Core game</b>, <b>Streak</b> và <b>Hub</b>. Cột bên phải có <b>Hướng dẫn</b>,{' '}
-        <b>Nhiệm vụ</b>, <b>Sự kiện</b>, <b>Bảng xếp hạng</b> và <b>Cẩm nang</b>. Bấm vào ảnh đại
-        diện để xem hồ sơ, cấp độ và thành tựu.
+        Giữa màn hình: <b>Core game</b>, <b>Streak</b>, <b>Trạm cứu hộ</b> và <b>Hub</b>. Cột phải:
+        Hướng dẫn, Nhiệm vụ, <b>Khoá học</b>, Bảng xếp hạng, Cẩm nang.
       </>
     ),
     art: <LobbyArt />,
@@ -205,8 +232,8 @@ const SLIDES: Slide[] = [
     title: 'Vào tình huống',
     body: (
       <>
-        Chọn một chủ đề trong Core game rồi chọn màn. Câu chuyện mở đầu bằng <b>hội thoại</b> – chạm
-        vào khung thoại để đọc tiếp, sau đó bạn nhận <b>nhiệm vụ</b>.
+        Chọn chủ đề rồi chọn màn. Bấm <b>Hướng dẫn</b> trong bảng màn để xem luật. Chạm vào{' '}
+        <b>bất kỳ đâu</b> để đọc tiếp lời thoại.
       </>
     ),
     art: <StoryArt />,
@@ -215,8 +242,8 @@ const SLIDES: Slide[] = [
     title: 'Chọn cách xử lý',
     body: (
       <>
-        Mỗi câu hỏi có 3 đáp án A, B, C kèm hình minh hoạ. Sau khi chọn, nhân vật sẽ cho bạn biết
-        <b> đúng hay sai và giải thích lý do</b>. Cậu bé trong cảnh sẽ thay đổi theo cách bạn xử lý.
+        Mỗi câu có 3 đáp án A, B, C. Chọn đúng: nhận <b>1 trái tim</b> và lời giải thích. Chọn sai:{' '}
+        <b>tia sét đánh xuống</b>, nghe gợi ý rồi chọn lại.
       </>
     ),
     art: <AnswerArt />,
@@ -225,29 +252,38 @@ const SLIDES: Slide[] = [
     title: 'Trái tim & tia sét',
     body: (
       <>
-        Trả lời đúng được <b>1 trái tim</b>. Trả lời sai nhận <b>1 tia sét</b> và chọn lại. Đủ{' '}
-        <b>3 tia sét là thua</b> – dùng 10 băng gạc hoặc xem quảng cáo để chơi lại. Ít tia sét thì
-        được nhiều sao.
+        Đủ <b>3 tia sét là thua</b> – chơi lại bằng 10 băng gạc hoặc xem quảng cáo. Càng ít tia sét
+        càng nhiều sao.
       </>
     ),
     art: <RulesArt />,
   },
   {
-    title: 'Băng gạc & vật dụng',
+    title: 'Vật dụng',
     body: (
       <>
-        Qua màn để nhận <b>băng gạc</b>. Dùng băng gạc mua vật dụng (túi chườm, điện thoại…) ở{' '}
-        <b>Cửa hàng</b>, rồi mở <b>Túi đồ</b> để dùng khi nhiệm vụ yêu cầu.
+        Mua vật dụng ở <b>Cửa hàng</b>, lấy ra từ <b>Túi đồ</b> rồi <b>kéo thả</b> lên người bị nạn
+        (hoặc chạm vào vòng tròn nhấp nháy).
       </>
     ),
     art: <ItemsArt />,
   },
   {
+    title: 'Trạm cứu hộ của bạn',
+    body: (
+      <>
+        Thắng màn, giữ streak, làm nhiệm vụ để nhận <b>băng gạc</b>. Dùng băng gạc mua tủ thuốc,
+        giường, poster… – mỗi món có <b>nhiều mẫu</b>. Thiếu thì mua thêm <b>gói băng gạc</b>.
+      </>
+    ),
+    art: <StationArt />,
+  },
+  {
     title: 'Mỗi ngày một chút',
     body: (
       <>
-        Giữ <b>Streak</b> bằng thử thách 3 câu mỗi ngày, làm <b>Nhiệm vụ</b> để nhận quà, leo{' '}
-        <b>Bảng xếp hạng</b> và tìm khoá học sơ cứu thật ở <b>Hub</b>. Sẵn sàng chưa?
+        Giữ <b>Streak</b> mỗi ngày, leo <b>Bảng xếp hạng</b> và xem <b>Khoá học</b> sơ cứu thật từ
+        đối tác. Sẵn sàng chưa?
       </>
     ),
     art: <DailyArt />,

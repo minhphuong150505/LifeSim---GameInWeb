@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { BandageIcon, BoltIcon, PhoneIcon, StarIcon } from '../art/icons';
@@ -8,6 +8,7 @@ import { allRounds, getRound, nextRoundId, scenarioOf } from '../data/sim';
 import { AdOverlay } from '../features/sim/AdOverlay';
 import { BagSheet } from '../features/sim/BagSheet';
 import { BandageBank } from '../features/sim/BandageBank';
+import { DragItem } from '../features/sim/DragItem';
 import {
   createRoundReducer,
   initialRoundState,
@@ -29,7 +30,9 @@ import {
   SidePanel,
   WrongPanel,
 } from '../features/sim/panels';
+import { LightningStrike } from '../features/sim/LightningStrike';
 import { PhoneDialer } from '../features/sim/PhoneDialer';
+import { RoundGuide } from '../features/sim/RoundGuide';
 import { Shop } from '../features/sim/Shop';
 import { Stage } from '../features/sim/Stage';
 import { NOSE_POINT } from '../features/sim/stageLayout';
@@ -163,20 +166,20 @@ function RoundSession({ round }: { round: SimRound }) {
     playSound('found');
   };
 
-  const onDragEnd = (point: { x: number; y: number }) => {
+  /** Is a screen point (viewport px) over the brother's nose? Generous radius for fingers. */
+  const isOverNose = (point: { x: number; y: number }) => {
     const svg = svgRef.current;
     const ctm = svg?.getScreenCTM();
-    if (!svg || !ctm) return;
+    if (!svg || !ctm) return false;
     // Map the nose (room units) to viewport pixels through the zoomed viewBox.
     const p = svg.createSVGPoint();
     p.x = NOSE_POINT.x;
     p.y = NOSE_POINT.y;
     const nose = p.matrixTransform(ctm);
-    const r = NOSE_POINT.r * 1.8 * ctm.a;
-    // framer-motion reports page coordinates; the CTM is in viewport coordinates.
-    const dx = point.x - window.scrollX - nose.x;
-    const dy = point.y - window.scrollY - nose.y;
-    if (dx * dx + dy * dy <= r * r) applyIce();
+    const r = NOSE_POINT.r * 2.4 * Math.hypot(ctm.a, ctm.b);
+    const dx = point.x - nose.x;
+    const dy = point.y - nose.y;
+    return dx * dx + dy * dy <= r * r;
   };
 
   const pointAt =
@@ -205,20 +208,14 @@ function RoundSession({ round }: { round: SimRound }) {
         onTargetTap={applyIce}
       >
         {carrying === 'ice-pack' && (
-          <motion.div
-            drag
-            dragSnapToOrigin
-            dragMomentum={false}
-            onDragEnd={(_, info) => onDragEnd(info.point)}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            whileDrag={{ scale: 1.15 }}
-            className="absolute left-[36%] top-[50%] z-30 cursor-grab touch-none"
-            aria-label="Túi đá chườm lạnh – kéo lên mũi em trai"
-            role="img"
+          <DragItem
+            isOverTarget={isOverNose}
+            onDrop={applyIce}
+            className="absolute left-[36%] top-[50%] z-30"
+            label="Túi đá chườm lạnh – kéo lên mũi em trai"
           >
-            <ItemIcon id="ice-pack" size={64} />
-          </motion.div>
+            <ItemIcon id="ice-pack" size={72} />
+          </DragItem>
         )}
       </Stage>
 
@@ -292,27 +289,8 @@ function RoundSession({ round }: { round: SimRound }) {
         </SidePanel>
       )}
 
-      {/* Lightning flash on a wrong answer */}
-      <AnimatePresence>
-        {flash > 0 && (
-          <motion.div
-            key={flash}
-            aria-hidden
-            className="pointer-events-none fixed inset-0 z-[1400] grid place-items-center bg-accent/40"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
-          >
-            <motion.span
-              initial={{ scale: 0.3, rotate: -20 }}
-              animate={{ scale: 1.4, rotate: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BoltIcon size={140} />
-            </motion.span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* A big lightning bolt strikes down on a wrong answer */}
+      <LightningStrike strike={flash} />
 
       <Shop
         open={shopOpen}
@@ -361,9 +339,7 @@ function RoundSession({ round }: { round: SimRound }) {
             </motion.span>
           ))}
         </div>
-        <p className="mt-1 text-center font-display text-xl text-navy">
-          +{score} điểm xếp hạng · {state.bolts} tia sét
-        </p>
+        <p className="mt-1 text-center font-display text-xl text-navy">+{score} điểm xếp hạng</p>
         {claimed === null ? (
           <>
             <p className="mt-2 text-center text-[15px] leading-relaxed text-ink">
@@ -434,10 +410,7 @@ function RoundSession({ round }: { round: SimRound }) {
             <BoltIcon key={i} size={44} />
           ))}
         </div>
-        <p className="mt-2 text-center text-[15px] leading-relaxed text-ink">
-          Bạn đã chọn sai {MAX_BOLTS} lần ({MAX_BOLTS} tia sét) nên thua màn này và không nhận được
-          băng gạc. Dùng {RETRY_COST} băng gạc để chơi lại, hoặc xem quảng cáo để chơi lại miễn phí.
-        </p>
+
         <div className="mt-4 flex flex-col gap-2">
           <Button size="lg" block disabled={bandages < RETRY_COST} onClick={() => retry(true)}>
             Chơi lại · <BandageIcon size={28} /> {RETRY_COST}
@@ -446,7 +419,7 @@ function RoundSession({ round }: { round: SimRound }) {
             ▶ Xem quảng cáo để chơi lại
           </Button>
           <Button variant="secondary" block onClick={() => navigate(mapPath)}>
-            Về bản đồ màn
+            Thoát
           </Button>
         </div>
       </Modal>
@@ -466,22 +439,7 @@ function RoundSession({ round }: { round: SimRound }) {
         </div>
       </Modal>
 
-      <Modal open={dialog === 'help'} title="Cách chơi" tone="wood" onClose={() => setDialog(null)}>
-        <ul className="space-y-2 text-[15px] leading-relaxed text-ink">
-          <li>💬 Chạm vào khung thoại để đọc tiếp câu chuyện.</li>
-          <li>❤️ Trả lời đúng: nhận 1 trái tim, chị sẽ giải thích lý do rồi bấm “Đã hiểu”.</li>
-          <li>⚡ Trả lời sai: nhận 1 tia sét, nghe gợi ý của chị rồi chọn lại.</li>
-          <li>
-            ⚡⚡⚡ Sai đủ {MAX_BOLTS} lần là thua màn – không nhận băng gạc; cần {RETRY_COST} băng
-            gạc (hoặc xem quảng cáo) để chơi lại.
-          </li>
-          <li>🩹 Chỉ khi thắng màn mới nhận băng gạc và mở khoá màn tiếp theo.</li>
-          <li>
-            🏪 Dùng băng gạc mua vật dụng ở Cửa hàng, rồi lấy từ Túi vật dụng để dùng trong màn
-            chơi. Bấm dấu + cạnh số băng gạc để kiếm thêm.
-          </li>
-        </ul>
-      </Modal>
+      <RoundGuide open={dialog === 'help'} onClose={() => setDialog(null)} />
 
       <AdOverlay
         open={ad !== null}
@@ -518,14 +476,14 @@ function ItemTaskPanel({
   const steps =
     task === 'ice-pack'
       ? [
-          `Mở Cửa hàng 🏪 và mua ${info.name} (${info.price} băng gạc).`,
-          'Mở Túi vật dụng 🎒 và chọn túi đá.',
-          'Kéo túi đá thả lên mũi em trai (hoặc chạm vào vòng tròn nhấp nháy).',
+          `Mua túi chườm ở Cửa hàng 🏪 (${info.price} băng gạc).`,
+          'Lấy túi chườm trong Túi đồ 🎒.',
+          'Kéo túi chườm lên mũi em trai.',
         ]
       : [
-          `Mở Cửa hàng 🏪 và mua ${info.name} (${info.price} băng gạc).`,
-          'Mở Túi vật dụng 🎒 và chọn điện thoại.',
-          'Nhập số 115 trên bàn phím và bấm gọi.',
+          `Mua điện thoại ở Cửa hàng 🏪 (${info.price} băng gạc).`,
+          'Lấy điện thoại trong Túi đồ 🎒.',
+          'Bấm 115 và gọi.',
         ];
   const current = applied ? 3 : carrying ? 2 : owned ? 1 : 0;
 
@@ -540,8 +498,8 @@ function ItemTaskPanel({
           {task === 'call-115' ? <PhoneIcon size={40} /> : <ItemIcon id="ice-pack" size={40} />}
           <p className="font-display text-xl leading-snug text-navy short:text-[15px] short:leading-tight">
             {task === 'call-115'
-              ? 'Hãy sử dụng điện thoại để gọi cấp cứu!'
-              : 'Tương tác vật dụng: thử dùng túi chườm lạnh như bố gợi ý.'}
+              ? 'Hãy gọi cấp cứu 115 cho em trai của bạn!'
+              : 'Hãy dùng túi chườm lạnh cho em trai của bạn!'}
           </p>
         </div>
         <ol className="mt-3 space-y-1.5 short:mt-1 short:space-y-0.5 short:[&>li]:text-[12px] short:[&>li]:leading-snug">
@@ -566,7 +524,7 @@ function ItemTaskPanel({
           role="status"
           className="ink-border rounded-2xl bg-[#eef7e6] p-3 text-[15px] text-navy short:p-1.5 short:text-[12px]"
         >
-          Túi chườm lạnh chỉ là hỗ trợ tuỳ chọn – em trai vẫn tiếp tục bóp giữ phần mềm mũi.
+          Tốt lắm! Em trai vẫn tiếp tục bóp giữ mũi nhé.
         </p>
       )}
       <div className="flex flex-col gap-2 short:gap-1">

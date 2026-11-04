@@ -2,13 +2,14 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CastFace } from '../art/CastFace';
-import { BandageIcon, BoltIcon, LockIcon, StarIcon } from '../art/icons';
+import { BandageIcon, HelpIcon, LockIcon, StarIcon } from '../art/icons';
 import { TopicArt } from '../art/TopicArt';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
 import { allRounds, simScenarios } from '../data/sim';
+import { RoundGuide } from '../features/sim/RoundGuide';
 import { CAST_NAMES } from '../features/sim/stageLayout';
 import type { SimRound } from '../features/sim/types';
 import { isRoundUnlocked, nextRoundToPlay } from '../features/sim/unlock';
@@ -25,6 +26,7 @@ export function Scenarios() {
   const navigate = useNavigate();
   const records = useProgressStore((s) => s.rounds);
   const [selected, setSelected] = useState<SimRound | null>(null);
+  const [guide, setGuide] = useState(false);
   const scenario = simScenarios.find((s) => s.id === scenarioId);
   if (!scenario) return <Navigate to="/core" replace />;
 
@@ -170,9 +172,11 @@ export function Scenarios() {
             round={selected}
             unlocked={isRoundUnlocked(allRounds, records, selected.id)}
             onPlay={() => navigate(`/play/${selected.id}`)}
+            onGuide={() => setGuide(true)}
           />
         )}
       </Modal>
+      <RoundGuide open={guide} onClose={() => setGuide(false)} />
     </div>
   );
 }
@@ -181,10 +185,12 @@ function RoundDetails({
   round,
   unlocked,
   onPlay,
+  onGuide,
 }: {
   round: SimRound;
   unlocked: boolean;
   onPlay: () => void;
+  onGuide: () => void;
 }) {
   const record = useProgressStore((s) => s.rounds[round.id]);
   return (
@@ -207,25 +213,22 @@ function RoundDetails({
       </div>
       <div className="flex flex-col gap-2">
         <div className="ink-border overflow-hidden rounded-2xl bg-cream">
-          <div className="flex items-center justify-between gap-2 border-b-2 border-navy/15 bg-[#eef7e6] px-3 py-2">
+          <div className="flex items-center justify-between gap-2 bg-[#eef7e6] px-3 py-2">
             <span className="text-sm font-semibold text-navy">🏆 Thắng màn nhận</span>
             <span className="flex items-center gap-1 font-display text-xl text-success-dark">
               +{round.reward} <BandageIcon size={26} />
             </span>
           </div>
-          <p className="flex items-start gap-1.5 px-3 py-2 text-[13px] leading-snug text-navy">
-            <span className="flex shrink-0 [&>svg]:h-5 [&>svg]:w-5">
-              <BoltIcon size={20} />
-            </span>
-            Mỗi lần chọn sai nhận 1 tia sét. Đủ 3 tia sét là thua màn và không nhận băng gạc.
-          </p>
         </div>
         {record && (
           <p className="text-sm text-muted">
             Đã chơi {record.plays} lần · Kỷ lục {record.bestScore} điểm · {record.bestStars}/3 sao
           </p>
         )}
-        <Button size="lg" block disabled={!unlocked} onClick={onPlay} className="mt-auto">
+        <Button variant="secondary" block onClick={onGuide} className="mt-auto">
+          <HelpIcon size={26} /> Hướng dẫn
+        </Button>
+        <Button size="lg" block disabled={!unlocked} onClick={onPlay}>
           {unlocked ? (record ? 'Chơi lại' : 'Bắt đầu') : 'Hoàn thành màn trước để mở khoá'}
         </Button>
       </div>

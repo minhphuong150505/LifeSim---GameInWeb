@@ -474,3 +474,25 @@ export function HelpIcon(p: IconProps) {
     </Svg>
   );
 }
+
+export function CapIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M4 18 L24 9 L44 18 L24 27 Z" fill={C.blue} {...stroke(3)} />
+      <path d="M12 22 V32 C12 36 36 36 36 32 V22 L24 27 Z" fill={C.blueDark} {...stroke(3)} />
+      <path d="M40 20 V32" {...stroke(2.5)} />
+      <circle cx={40} cy={34} r={3} fill={C.yellow} {...stroke(2)} />
+    </Svg>
+  );
+}
+
+export function StationIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 22 L24 8 L42 22" fill="none" {...stroke(3)} />
+      <path d="M10 20 V42 H38 V20 L24 10 Z" fill={C.white} {...stroke(3)} />
+      <rect x={20} y={30} width={8} height={12} fill={C.wood} {...stroke(2.2)} />
+      <path d="M21.5 16 h5 v4 h4 v5 h-4 v4 h-5 v-4 h-4 v-5 h4 Z" fill={C.red} {...stroke(1.8)} />
+    </Svg>
+  );
+}

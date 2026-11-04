@@ -6,13 +6,9 @@ import { Modal } from '../../components/Modal';
 import { playSound } from '../../lib/sound';
 import { ADS_PER_DAY, AD_BONUS, useWalletStore } from '../../store/wallet';
 import { AdOverlay } from './AdOverlay';
-
-/** Bandage packs shown for the future in-app store (no payments in the demo). */
-const PACKS = [
-  { amount: 100, label: 'Túi nhỏ' },
-  { amount: 300, label: 'Hộp vừa' },
-  { amount: 800, label: 'Rương lớn' },
-];
+import type { BandagePack } from '../../data/packs';
+import { Checkout } from '../store/Checkout';
+import { PackList } from '../store/PackList';
 
 type BankProps = {
   open: boolean;
@@ -21,6 +17,8 @@ type BankProps = {
   onOpenMissions?: () => void;
   /** Inside a round: only offer what doesn't leave the round. */
   inGame?: boolean;
+  /** Pack to highlight (covers what the player is missing). */
+  suggestPack?: string;
 };
 
 /**
@@ -28,7 +26,7 @@ type BankProps = {
  * Kept separate from the item shop: here the player earns/gets bandages (ads, missions,
  * streak, packs); the item shop is where bandages are spent.
  */
-export function BandageBank({ open, onClose, onOpenMissions, inGame }: BankProps) {
+export function BandageBank({ open, onClose, onOpenMissions, inGame, suggestPack }: BankProps) {
   const navigate = useNavigate();
   const bandages = useWalletStore((s) => s.bandages);
   // Subscribing to these keeps "ads left" fresh after watching.
@@ -37,6 +35,7 @@ export function BandageBank({ open, onClose, onOpenMissions, inGame }: BankProps
   const adsLeft = useWalletStore.getState().adsLeft();
   const [adOpen, setAdOpen] = useState(false);
   const [gained, setGained] = useState<number | null>(null);
+  const [buying, setBuying] = useState<BandagePack | null>(null);
 
   const ways = [
     {
@@ -66,95 +65,84 @@ export function BandageBank({ open, onClose, onOpenMissions, inGame }: BankProps
   ].filter((w) => !inGame && w.onClick);
 
   return (
-    <Modal open={open} onClose={onClose} title="Kiếm băng gạc" tone="green" size="lg">
-      <div className="flex flex-col gap-3">
-        <div className="ink-border flex items-center gap-3 rounded-2xl bg-[#fff1c2] p-2.5 shadow-soft">
-          <span className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent font-display text-2xl text-navy">
-            ▶
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="font-display text-xl leading-tight text-navy">Xem quảng cáo</p>
-            <p className="text-sm text-muted">
-              Nhận +{AD_BONUS} băng gạc mỗi lần · còn {adsLeft}/{ADS_PER_DAY} lượt hôm nay
-            </p>
+    <>
+      <Modal open={open} onClose={onClose} title="Băng gạc" tone="green" size="lg">
+        <div className="flex flex-col gap-3">
+          <div className="ink-border flex items-center gap-3 rounded-2xl bg-[#fff1c2] p-2.5 shadow-soft">
+            <span className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent font-display text-2xl text-navy">
+              ▶
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-xl leading-tight text-navy">Xem quảng cáo</p>
+              <p className="text-sm text-muted">
+                Nhận +{AD_BONUS} băng gạc mỗi lần · còn {adsLeft}/{ADS_PER_DAY} lượt hôm nay
+              </p>
+            </div>
+            <span className="flex shrink-0 items-center gap-1 rounded-xl bg-paper/80 px-2 font-display text-lg text-navy">
+              Đang có <BandageIcon size={26} /> {bandages}
+            </span>
+            <Button
+              variant="yellow"
+              disabled={adsLeft <= 0}
+              onClick={() => setAdOpen(true)}
+              aria-label={`Xem quảng cáo nhận ${AD_BONUS} băng gạc`}
+            >
+              +{AD_BONUS} <BandageIcon size={24} />
+            </Button>
           </div>
-          <span className="flex shrink-0 items-center gap-1 rounded-xl bg-paper/80 px-2 font-display text-lg text-navy">
-            Đang có <BandageIcon size={26} /> {bandages}
-          </span>
-          <Button
-            variant="yellow"
-            disabled={adsLeft <= 0}
-            onClick={() => setAdOpen(true)}
-            aria-label={`Xem quảng cáo nhận ${AD_BONUS} băng gạc`}
-          >
-            +{AD_BONUS} <BandageIcon size={24} />
-          </Button>
-        </div>
-        {gained !== null && (
-          <p role="status" className="-my-1 text-center font-display text-lg text-success-dark">
-            Đã nhận +{gained} băng gạc!
-          </p>
-        )}
+          {gained !== null && (
+            <p role="status" className="-my-1 text-center font-display text-lg text-success-dark">
+              Đã nhận +{gained} băng gạc!
+            </p>
+          )}
 
-        {inGame ? (
-          <p className="text-center text-sm text-muted">
-            Ngoài màn chơi, bạn còn kiếm băng gạc từ nhiệm vụ hằng ngày, streak và thắng màn.
-          </p>
-        ) : (
-          <ul className="grid grid-cols-3 gap-2">
-            {ways.map((w) => (
-              <li
-                key={w.key}
-                className="ink-border flex flex-col items-center gap-1 rounded-2xl bg-paper p-2 text-center"
-              >
-                <span className="flex items-center gap-1.5 [&>svg]:h-7 [&>svg]:w-7">
-                  {w.icon}
-                  <span className="font-display text-[17px] leading-tight text-navy">
-                    {w.title}
-                  </span>
-                </span>
-                <p className="flex-1 text-[13px] leading-snug text-muted">{w.text}</p>
-                <Button
-                  variant="secondary"
-                  block
-                  onClick={() => {
-                    onClose();
-                    w.onClick?.();
-                  }}
+          {inGame ? (
+            <p className="text-center text-sm text-muted">
+              Ngoài màn chơi, bạn còn kiếm băng gạc từ nhiệm vụ hằng ngày, streak và thắng màn.
+            </p>
+          ) : (
+            <ul
+              className="grid gap-2"
+              style={{ gridTemplateColumns: `repeat(${ways.length}, minmax(0, 1fr))` }}
+            >
+              {ways.map((w) => (
+                <li
+                  key={w.key}
+                  className="ink-border flex flex-col items-center gap-1 rounded-2xl bg-paper p-2 text-center"
                 >
-                  {w.action}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="ink-border flex items-center gap-3 rounded-2xl bg-cream p-2.5">
-          <div className="w-[150px] shrink-0">
-            <p className="font-display text-lg leading-tight text-navy">Gói băng gạc</p>
-            <p className="text-[12px] leading-snug text-muted">
-              Mua bằng tiền thật – mở trong bản chính thức.
-            </p>
-          </div>
-          <ul className="grid flex-1 grid-cols-3 gap-2">
-            {PACKS.map((p) => (
-              <li
-                key={p.amount}
-                className="ink-border flex items-center gap-1.5 rounded-xl bg-paper px-2 py-1 opacity-80"
-              >
-                <BandageIcon size={30} />
-                <span className="min-w-0">
-                  <span className="block font-display text-lg leading-none text-navy">
-                    {p.amount}
+                  <span className="flex items-center gap-1.5 [&>svg]:h-7 [&>svg]:w-7">
+                    {w.icon}
+                    <span className="font-display text-[17px] leading-tight text-navy">
+                      {w.title}
+                    </span>
                   </span>
-                  <span className="block text-[11px] text-muted">{p.label} · sắp có</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+                  <p className="flex-1 text-[12px] leading-tight text-muted">{w.text}</p>
+                  <Button
+                    variant="secondary"
+                    block
+                    onClick={() => {
+                      onClose();
+                      w.onClick?.();
+                    }}
+                  >
+                    {w.action}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
 
+          <div className="ink-border rounded-2xl bg-cream p-2.5 pt-2">
+            <p className="mb-2.5 font-display text-lg leading-tight text-navy">
+              Gói băng gạc{' '}
+              <span className="font-body text-[12px] font-normal text-muted">
+                · mua bằng tiền thật để trang trí nhanh hơn
+              </span>
+            </p>
+            <PackList onBuy={setBuying} suggested={suggestPack} />
+          </div>
+        </div>
+      </Modal>
       <AdOverlay
         open={adOpen}
         reward={`+${AD_BONUS} băng gạc`}
@@ -168,6 +156,7 @@ export function BandageBank({ open, onClose, onOpenMissions, inGame }: BankProps
           setAdOpen(false);
         }}
       />
-    </Modal>
+      <Checkout pack={buying} onClose={() => setBuying(null)} />
+    </>
   );
 }

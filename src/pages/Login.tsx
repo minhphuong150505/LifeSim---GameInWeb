@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BandageIcon } from '../art/icons';
 import { TOWN_H, TOWN_W, TownScene } from '../art/TownScene';
@@ -19,6 +19,64 @@ import { useUserStore } from '../store/user';
 const MIN_NAME = 2;
 const MAX_NAME = 16;
 const LOAD_MS = 1600;
+/** Loading screen between pressing "Đăng nhập" and the lobby. */
+const ENTER_MS = 2500;
+const TIPS = [
+  'Mẹo: chảy máu cam thì ngồi thẳng, hơi cúi đầu về trước.',
+  'Mẹo: thắng màn để nhận băng gạc và trang trí Trạm cứu hộ.',
+  'Mẹo: cấp cứu ở Việt Nam gọi 115.',
+];
+
+function LoadBar({ progress, label }: { progress: number; label: string }) {
+  return (
+    <div
+      className="w-full"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(progress * 100)}
+    >
+      <p className="mb-1 text-center font-display text-lg text-navy drop-shadow-[0_1px_0_#fffaf0]">
+        {label} {Math.round(progress * 100)}%
+      </p>
+      <div className="ink-border h-6 overflow-hidden rounded-full bg-paper">
+        <div
+          className="h-full rounded-full bg-success"
+          style={{
+            width: `${progress * 100}%`,
+            backgroundImage:
+              'repeating-linear-gradient(120deg, rgb(255 255 255 / 0.35) 0 8px, transparent 8px 16px)',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Fills 0 → 1 over `ms` once `active` turns true, then calls `onDone`. */
+function useFill(active: boolean, ms: number, onDone?: () => void) {
+  const [progress, setProgress] = useState(0);
+  const done = useRef(onDone);
+  useEffect(() => {
+    done.current = onDone;
+  });
+  useEffect(() => {
+    if (!active) return;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      // Ease-out so the bar feels like real loading (fast start, slower finish).
+      const t = Math.min(1, (now - start) / ms);
+      setProgress(1 - (1 - t) * (1 - t));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else done.current?.();
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, ms]);
+  return progress;
+}
 
 /** Step 1 – login screen: game backdrop + loading bar, then the login panel. */
 export function Login() {
@@ -26,35 +84,34 @@ export function Login() {
   const location = useLocation();
   const user = useUserStore();
   const login = useSessionStore((s) => s.login);
-  const [progress, setProgress] = useState(0);
+  const [entering, setEntering] = useState(false);
   const [editing, setEditing] = useState(!user.onboarded);
   const [nickname, setNickname] = useState(user.nickname);
   const [avatar, setAvatar] = useState<AvatarId>(user.avatar);
 
   // Fake asset loading: fills the bar, then reveals the login panel.
-  useEffect(() => {
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / LOAD_MS);
-      setProgress(p);
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
+  const progress = useFill(true, LOAD_MS);
   const loaded = progress >= 1;
   const valid = nickname.trim().length >= MIN_NAME;
   const from = (location.state as { from?: string } | null)?.from;
 
-  const enter = () => {
-    void enterLandscape();
+  const go = () => {
     login();
     const tutorialDone = useUserStore.getState().tutorialDone;
     navigate(tutorialDone ? (from && from !== '/login' ? from : '/') : '/tutorial', {
       replace: true,
     });
+  };
+  const enterProgress = useFill(entering, ENTER_MS, go);
+  const tip = TIPS[Math.floor(enterProgress * TIPS.length * 0.999)] ?? TIPS[0];
+
+  /** "Đăng nhập": a 2–3 s loading bar while the game (lobby screens) loads, then the lobby. */
+  const enter = () => {
+    void enterLandscape();
+    // Warm up the screens opened right after logging in.
+    void import('./Tutorial');
+    void import('./CoreTopics');
+    setEntering(true);
   };
 
   return (
@@ -85,29 +142,18 @@ export function Login() {
       <div className="absolute inset-x-0 bottom-0 flex justify-center px-4 pb-[max(10px,env(safe-area-inset-bottom))]">
         <AnimatePresence mode="wait">
           {!loaded ? (
+            <motion.div key="loading" exit={{ opacity: 0, y: 10 }} className="mb-6 w-full max-w-md">
+              <LoadBar progress={progress} label="Đang tải…" />
+            </motion.div>
+          ) : entering ? (
             <motion.div
-              key="loading"
-              exit={{ opacity: 0, y: 10 }}
-              className="mb-6 w-full max-w-md"
-              role="progressbar"
-              aria-label="Đang tải trò chơi"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={Math.round(progress * 100)}
+              key="entering"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="ink-border mb-4 w-full max-w-lg rounded-[22px] bg-paper/95 p-3 shadow-pop"
             >
-              <p className="mb-1 text-center font-display text-lg text-navy drop-shadow-[0_1px_0_#fffaf0]">
-                Đang tải… {Math.round(progress * 100)}%
-              </p>
-              <div className="ink-border h-6 overflow-hidden rounded-full bg-paper">
-                <div
-                  className="h-full rounded-full bg-success"
-                  style={{
-                    width: `${progress * 100}%`,
-                    backgroundImage:
-                      'repeating-linear-gradient(120deg, rgb(255 255 255 / 0.35) 0 8px, transparent 8px 16px)',
-                  }}
-                />
-              </div>
+              <LoadBar progress={enterProgress} label="Đang vào game…" />
+              <p className="mt-1.5 text-center text-sm font-semibold text-navy/80">{tip}</p>
             </motion.div>
           ) : editing ? (
             <motion.form

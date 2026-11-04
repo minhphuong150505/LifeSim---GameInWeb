@@ -294,34 +294,18 @@ export function QuestionPanel({
                 animate={wrong ? { x: [0, -10, 10, -7, 7, 0] } : { x: 0 }}
                 transition={{ duration: 0.4 }}
                 aria-label={`${LETTERS[o.id]}. ${o.text}${wrong ? ' (đã chọn sai)' : ''}`}
-                className={cn(
-                  'ink-border relative flex w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl',
-                  wrong && 'bg-[#efe9dc] shadow-none',
-                )}
+                className="ink-border relative flex w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl"
               >
                 <OptionArt
                   art={o.art}
-                  className={cn(
-                    'aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg',
-                    wrong && 'opacity-45 grayscale',
-                  )}
+                  className="aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg"
                 />
                 <span className="ink-border grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent font-display text-lg text-navy short:h-5 short:w-5 short:text-xs">
                   {LETTERS[o.id]}
                 </span>
-                <span
-                  className={cn(
-                    'flex-1 text-[17px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]',
-                    wrong && 'text-muted line-through',
-                  )}
-                >
+                <span className="flex-1 text-[17px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]">
                   {o.text}
                 </span>
-                {wrong && (
-                  <span className="absolute right-0.5 top-0.5 [&>svg]:h-5 [&>svg]:w-5">
-                    <BoltIcon size={26} />
-                  </span>
-                )}
               </motion.button>
             </li>
           );

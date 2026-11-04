@@ -24,6 +24,10 @@ const Leaderboard = lazy(() =>
 );
 const Hub = lazy(() => import('../pages/Hub').then((m) => ({ default: m.Hub })));
 const Profile = lazy(() => import('../pages/Profile').then((m) => ({ default: m.Profile })));
+const Station = lazy(() => import('../pages/Station').then((m) => ({ default: m.Station })));
+const CourseDetail = lazy(() =>
+  import('../pages/CourseDetail').then((m) => ({ default: m.CourseDetail })),
+);
 const Handbook = lazy(() => import('../pages/Handbook').then((m) => ({ default: m.Handbook })));
 const ArtGallery = import.meta.env.DEV
   ? lazy(() => import('../dev/ArtGallery').then((m) => ({ default: m.ArtGallery })))
@@ -80,6 +84,8 @@ export function App() {
                 <Route path="/hub" element={<Hub />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/handbook" element={<Handbook />} />
+                <Route path="/station" element={<Station />} />
+                <Route path="/course/:id" element={<CourseDetail />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

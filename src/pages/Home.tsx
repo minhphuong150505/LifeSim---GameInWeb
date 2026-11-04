@@ -6,7 +6,8 @@ import {
   FlameIcon,
   GearIcon,
   HelpIcon,
-  PartyIcon,
+  CapIcon,
+  StationIcon,
   PinIcon,
   PlayIcon,
   ScrollIcon,
@@ -18,7 +19,7 @@ import { Mascot } from '../art/Mascot';
 import { Avatar } from '../components/Avatar';
 import { CurrencyPill } from '../components/CurrencyPill';
 import { allRounds, scenarioOf } from '../data/sim';
-import { NewsPopup } from '../features/lobby/NewsPopup';
+import { CoursesPopup } from '../features/courses/CoursesPopup';
 import { MissionsModal } from '../features/lobby/MissionsModal';
 import { SettingsModal } from '../features/lobby/SettingsModal';
 import {
@@ -133,7 +134,9 @@ export function Home() {
   const newsSeen = useSessionStore((s) => s.newsSeen);
   const markNewsSeen = useSessionStore((s) => s.markNewsSeen);
   const { level, into, needed } = usePlayerLevel();
-  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | 'bank' | null>(null);
+  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | 'bank' | 'courses' | null>(
+    null,
+  );
 
   const today = toDateKey();
   const streakDays = activeStreak(streak, today);
@@ -289,12 +292,20 @@ export function Home() {
               delay={0.12}
             />
             <BigButton
+              title="Trạm cứu hộ"
+              subtitle="Dùng băng gạc trang trí trạm của riêng bạn"
+              icon={<StationIcon size={36} />}
+              tone="#7cb8e4"
+              onClick={() => navigate('/station')}
+              delay={0.19}
+            />
+            <BigButton
               title="Hub"
               subtitle="Tìm khoá học sơ cứu thực tế gần bạn"
               icon={<PinIcon size={36} />}
               tone="#86c06c"
               onClick={() => navigate('/hub')}
-              delay={0.19}
+              delay={0.26}
             />
           </div>
 
@@ -315,9 +326,9 @@ export function Home() {
               badge={claimable}
             />
             <SideButton
-              label="Sự kiện"
-              icon={<PartyIcon size={32} />}
-              onClick={() => navigate('/team')}
+              label="Khoá học"
+              icon={<CapIcon size={32} />}
+              onClick={() => setPanel('courses')}
               glow
             />
             <SideButton
@@ -334,7 +345,13 @@ export function Home() {
         </div>
       </div>
 
-      <NewsPopup open={!newsSeen && panel === null} onClose={markNewsSeen} />
+      <CoursesPopup
+        open={(!newsSeen && panel === null) || panel === 'courses'}
+        onClose={() => {
+          markNewsSeen();
+          setPanel(null);
+        }}
+      />
       <MissionsModal
         open={panel === 'missions'}
         onClose={() => setPanel(null)}

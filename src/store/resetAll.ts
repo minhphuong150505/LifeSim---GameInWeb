@@ -2,6 +2,7 @@ import { useMissionStore } from './missions';
 import { useProgressStore } from './progress';
 import { useSessionStore } from './session';
 import { useSettingsStore } from './settings';
+import { useStationStore } from './station';
 import { useStreakStore } from './streak';
 import { useUserStore } from './user';
 import { useWalletStore } from './wallet';
@@ -14,5 +15,6 @@ export function resetAllData(): void {
   useUserStore.getState().reset();
   useWalletStore.getState().reset();
   useMissionStore.getState().reset();
+  useStationStore.getState().reset();
   useSessionStore.getState().logout();
 }
