@@ -33,14 +33,40 @@ const wrongOf = (r: SimRound, i: number): OptionId[] => {
 const rightOf = (r: SimRound, i: number) => r.questions[i]?.correctId as OptionId;
 
 describe('bundled simulation data', () => {
-  it('has scenario 1 (nosebleed) then scenario 2 (drowning), with the scripted rewards', () => {
-    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning']);
-    expect(allRounds.map((r) => r.code)).toEqual(['1.1', '1.2', '1.3', '2.1', '2.2', '2.3']);
-    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30, 20, 30, 40]);
-    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7]);
+  it('has scenarios 1 (nosebleed), 2 (drowning) and 5 (burns), with the scripted rewards', () => {
+    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning', 'burns']);
+    expect(allRounds.map((r) => r.code)).toEqual([
+      '1.1',
+      '1.2',
+      '1.3',
+      '2.1',
+      '2.2',
+      '2.3',
+      '5.1',
+      '5.2',
+      '5.3',
+    ]);
+    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30, 20, 30, 40, 20, 25, 30]);
+    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7, 5, 5, 5]);
     expect(nextRoundId('1-1')).toBe('1-2');
     expect(nextRoundId('1-3')).toBe('2-1');
-    expect(nextRoundId('2-3')).toBeNull();
+    expect(nextRoundId('2-3')).toBe('5-1');
+    expect(nextRoundId('5-3')).toBeNull();
+  });
+  it('uses the burn answers from the script, in the kitchen', () => {
+    const answers = (id: string) =>
+      getRound(id)
+        ?.questions.map((q) => q.correctId)
+        .join('');
+    expect(answers('5-1')).toBe('bcbbc');
+    expect(answers('5-2')).toBe('bbcbb');
+    expect(answers('5-3')).toBe('bbbcb');
+    for (const r of allRounds.filter((x) => x.id.startsWith('5-'))) {
+      expect(r.stage.scene).toBe('kitchen');
+      expect(r.cast).toContain('sister');
+    }
+    // The large burn ends with the ambulance arriving.
+    expect(getRound('5-3')?.questions.at(-1)?.effect?.ambulance).toBe(true);
   });
   it('uses the drowning answers from the script', () => {
     const answers = (id: string) =>
@@ -51,7 +77,7 @@ describe('bundled simulation data', () => {
     expect(answers('2-2')).toBe('bbacb');
     expect(answers('2-3')).toBe('bacbacb');
     for (const r of allRounds.filter((x) => x.id.startsWith('2-'))) {
-      expect(r.stage.scene).not.toBe('living-room');
+      expect(['pool', 'lake', 'shore']).toContain(r.stage.scene);
       for (const q of r.questions) expect(q.hint).toBeTruthy();
     }
   });
@@ -79,6 +105,8 @@ describe('bundled simulation data', () => {
       '2.2:find-floats',
       '2.3:cpr-30',
       '2.3:breath-order',
+      '5.2:cling-wrap',
+      '5.3:call-115',
     ]);
   });
 });
@@ -288,6 +316,13 @@ describe('wallet', () => {
     expect(w.buy('life-ring')).toBe(false);
     expect(w.use('life-ring')).toBe(true);
     expect(useWalletStore.getState().items['life-ring']).toBe(1);
+  });
+  it('sells cling film for 20 bandages and uses it up', () => {
+    const w = useWalletStore.getState();
+    expect(w.buy('cling-film')).toBe(true);
+    expect(useWalletStore.getState().bandages).toBe(STARTING_BANDAGES - 20);
+    expect(w.use('cling-film')).toBe(true);
+    expect(useWalletStore.getState().items['cling-film']).toBe(0);
   });
   it('limits rewarded ads in the bandage bank per day', () => {
     const w = useWalletStore.getState();

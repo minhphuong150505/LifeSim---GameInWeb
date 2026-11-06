@@ -30,7 +30,7 @@ export function CoreTopics() {
   const records = useProgressStore((s) => s.rounds);
 
   const cards: CardInfo[] = [
-    ...simScenarios.map((s, i) => ({
+    ...simScenarios.map((s) => ({
       id: s.id,
       number: s.number,
       title: s.title,
@@ -40,9 +40,9 @@ export function CoreTopics() {
       rounds: s.rounds.length,
       stars: s.rounds.reduce((n, r) => n + (records[r.id]?.bestStars ?? 0), 0),
       cleared: s.rounds.filter((r) => (records[r.id]?.wins ?? 0) > 0).length,
-      tone: TONES[i % TONES.length] as string,
+      tone: TONES[(s.number - 1) % TONES.length] as string,
     })),
-    ...upcomingScenarios.map((s, i) => ({
+    ...upcomingScenarios.map((s) => ({
       id: s.id,
       number: s.number,
       title: s.title,
@@ -52,9 +52,9 @@ export function CoreTopics() {
       rounds: 0,
       stars: 0,
       cleared: 0,
-      tone: TONES[(simScenarios.length + i) % TONES.length] as string,
+      tone: TONES[(s.number - 1) % TONES.length] as string,
     })),
-  ];
+  ].sort((a, b) => a.number - b.number);
 
   return (
     <div className="flex min-h-app flex-col">

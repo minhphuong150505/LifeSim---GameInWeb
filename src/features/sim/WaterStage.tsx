@@ -121,7 +121,8 @@ export const WaterStage = forwardRef<SVGSVGElement, WaterStageProps>(function Wa
     return () => ro.disconnect();
   }, []);
 
-  const scene = stage.scene === 'living-room' ? 'pool' : stage.scene;
+  const scene =
+    stage.scene === 'living-room' || stage.scene === 'kitchen' ? 'pool' : stage.scene;
   const cams = CAMERAS[scene];
   const picked = cams[shot] ?? cams.focus ?? (cams.wide as Shot);
   const noPanel = focusX === 0.5;

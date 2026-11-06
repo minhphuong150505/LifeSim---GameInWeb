@@ -1,6 +1,7 @@
 import type { Topic } from '../data/topics';
-import { BandageIcon, BoltIcon, FlameIcon, HeartIcon, StarIcon } from './icons';
+import { BandageIcon, BoltIcon, HeartIcon, StarIcon } from './icons';
 import { C, INK, stroke } from './ink';
+import { Kitchen, TAP } from './Kitchen';
 import { LivingRoom } from './LivingRoom';
 import { Person } from './Person';
 import { PoolBackdrop, Swimmer } from './WaterScenes';
@@ -108,23 +109,25 @@ export function TopicArt({ topic, className }: { topic: Topic; className?: strin
     );
   }
   if (topic === 'burn') {
+    // The sister holding her burned hand under the kitchen tap.
     return (
       <svg
-        viewBox="0 0 160 170"
+        viewBox="96 120 150 150"
         preserveAspectRatio="xMidYMid slice"
         className={className}
         aria-hidden
       >
-        <rect width={160} height={170} fill="#e9f4dc" />
-        <rect x={0} y={120} width={160} height={50} fill="#c9c3b4" />
-        <path d="M0 120 H160" {...stroke(2.5)} />
-        <path d="M60 40 h40 M66 40 V70 L44 116 H116 L94 70 V40" fill="#bfe6f5" {...stroke(3)} />
-        <path d="M52 100 H108 L116 116 H44 Z" fill={C.green} {...stroke(2.5)} />
-        <circle cx={70} cy={92} r={4} fill={C.white} {...stroke(1.5)} />
-        <circle cx={88} cy={84} r={3} fill={C.white} {...stroke(1.5)} />
-        <g transform="translate(104 14)">
-          <FlameIcon size={44} />
-        </g>
+        <Kitchen water />
+        <Person
+          kind="sister"
+          x={TAP.x + 36 * 0.8}
+          y={TAP.waterY - 4 + 82 * 0.8}
+          armR="reach"
+          armL="hold"
+          eyes="worried"
+          mouth="frown"
+          burnArm={{ level: 'red' }}
+        />
       </svg>
     );
   }

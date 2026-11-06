@@ -11,7 +11,8 @@ export type PersonKind =
   | 'lifeguard'
   | 'victim'
   | 'friendA'
-  | 'friendB';
+  | 'friendB'
+  | 'sister';
 export type HairStyle =
   | 'boy'
   | 'ponytail'
@@ -137,5 +138,15 @@ export const LOOKS: Record<PersonKind, Look & { scale: number }> = {
     pants: '#6f978b',
     shorts: true,
     scale: 0.94,
+  },
+  /* Tình huống 5 – Bỏng */
+  sister: {
+    hairStyle: 'pigtails',
+    hair: '#4a3426',
+    skin: C.skin,
+    shirt: '#ffd86b',
+    pants: '#e98b9a',
+    shorts: true,
+    scale: 0.8,
   },
 };

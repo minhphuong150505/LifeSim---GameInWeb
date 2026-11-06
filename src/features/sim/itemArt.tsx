@@ -1,4 +1,5 @@
 import {
+  ClingFilmIcon,
   GogglesIcon,
   IcePackIcon,
   LifeRingIcon,
@@ -15,6 +16,7 @@ const ICONS: Record<ItemId | DecoyId, (p: { size: number }) => React.ReactNode> 
   'toy-float': ToyFloatIcon,
   towel: TowelIcon,
   goggles: GogglesIcon,
+  'cling-film': ClingFilmIcon,
 };
 
 export function ItemIcon({ id, size = 48 }: { id: ItemId | DecoyId; size?: number }) {

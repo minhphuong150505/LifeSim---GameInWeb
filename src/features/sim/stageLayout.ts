@@ -12,6 +12,7 @@ export const CAST_NAMES: Record<CastMember, string> = {
   victim: 'Người đuối nước',
   friendA: 'Bạn A',
   friendB: 'Bạn B',
+  sister: 'Em gái',
 };
 
 /** Where each living-room character stands/sits, and the top of their head, in room units. */

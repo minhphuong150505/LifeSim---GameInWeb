@@ -12,10 +12,17 @@ export type CastMember =
   | 'lifeguard'
   | 'victim'
   | 'friendA'
-  | 'friendB';
+  | 'friendB'
+  | 'sister';
 
-/** Backdrop of a round: the living room (scenario 1) or one of the water scenes (scenario 2). */
-export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore';
+/**
+ * Backdrop of a round: the living room (scenario 1), one of the water scenes (scenario 2)
+ * or the kitchen (scenario 5).
+ */
+export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen';
+
+/** How the burn on the sister's arm looks (scenario 5). */
+export type BurnLevel = 'none' | 'red' | 'blister' | 'severe';
 
 /** Camera shot of the water scenes (story beats can move it, tasks can request one). */
 export type CameraShot = 'wide' | 'focus' | 'bank' | 'face' | 'chest';
@@ -54,6 +61,21 @@ export type StageState = {
   airway: boolean;
   /** Mouth checked and cleared. */
   mouthClear: boolean;
+
+  /* Kitchen (scenario 5 – burns) */
+  burn: BurnLevel;
+  /** The burned hand is under the running cold tap. */
+  atSink: boolean;
+  /** Ring still on the burned hand. */
+  ring: boolean;
+  /** Long sleeve over the burn; `cut` = cut away, the stuck piece left on the skin. */
+  sleeve: 'long' | 'cut' | 'short';
+  /** Burn loosely covered with cling film. */
+  wrap: boolean;
+  /** Unburned parts kept warm with a blanket (large burn). */
+  blanket: boolean;
+  /** The sister sits down to rest. */
+  rest: boolean;
 };
 
 export type OptionId = 'a' | 'b' | 'c';
@@ -72,7 +94,9 @@ export type SimTask =
   /** Tap 30 chest compressions at 100–120 per minute. */
   | 'cpr-30'
   /** Put the rescue-breath steps in the right order. */
-  | 'breath-order';
+  | 'breath-order'
+  /** Optional: buy cling film and lay it over the burn. */
+  | 'cling-wrap';
 
 /** Real photo shown with an explanation, with an optional marker drawn on top. */
 export type ExplainImage = {
@@ -139,6 +163,8 @@ export type SimScenario = {
   location: string;
   /** Items sold in the in-game shop during this scenario. */
   shopItems: ItemId[];
+  /** Who is being helped, used in task titles (defaults to "em trai"). */
+  patient?: string;
   rounds: SimRound[];
 };
 

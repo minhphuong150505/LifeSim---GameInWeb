@@ -20,4 +20,11 @@ export const BASE_STAGE: StageState = {
   hands: false,
   airway: false,
   mouthClear: false,
+  burn: 'none',
+  atSink: false,
+  ring: false,
+  sleeve: 'short',
+  wrap: false,
+  blanket: false,
+  rest: false,
 };

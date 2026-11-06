@@ -1,4 +1,4 @@
-export type ItemId = 'ice-pack' | 'phone' | 'life-ring';
+export type ItemId = 'ice-pack' | 'phone' | 'life-ring' | 'cling-film';
 
 export type ShopItem = {
   id: ItemId;
@@ -30,6 +30,13 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 40,
     description: 'Ném tới người gặp nạn từ trên bờ, giữ đầu dây để kéo vào.',
     consumable: false,
+  },
+  {
+    id: 'cling-film',
+    name: 'Màng bọc thực phẩm sạch',
+    price: 20,
+    description: 'Phủ nhẹ lên vết bỏng đã làm mát để bảo vệ – không quấn chặt.',
+    consumable: true,
   },
 ];
 

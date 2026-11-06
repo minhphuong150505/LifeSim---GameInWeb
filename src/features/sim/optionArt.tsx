@@ -10,6 +10,7 @@ import {
 import { LOOKS } from '../../art/looks';
 import { Head, Person } from '../../art/Person';
 import { ProfileArt, type ProfileGeometry, type ProfileProps } from '../../art/Profile';
+import { BURN_ART } from './optionArtBurn';
 import { WATER_ART } from './optionArtWater';
 
 /* Answer illustrations for the A/B/C options. Each one is drawn from the shared art kit
@@ -375,6 +376,7 @@ const ART = {
     <P pose="lie" furniture="bed" lean={0} tilt={-25} eyes="up" blood="throat" />
   ),
   ...WATER_ART,
+  ...BURN_ART,
 } satisfies Record<string, () => React.ReactNode>;
 
 export type ArtKey = keyof typeof ART;

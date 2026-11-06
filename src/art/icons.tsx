@@ -106,13 +106,27 @@ export function BagIcon(p: IconProps) {
 export function AdBagIcon(p: IconProps) {
   return (
     <Svg {...p}>
-      <path
-        d="M16 15 V10 C16 6 19 4 24 4 C29 4 32 6 32 10 V15"
-        fill="none"
-        {...stroke(3.2)}
-      />
+      <path d="M16 15 V10 C16 6 19 4 24 4 C29 4 32 6 32 10 V15" fill="none" {...stroke(3.2)} />
       <path d="M6 16 H42 L39 43 H9 Z" fill={C.green} {...stroke(3)} strokeLinejoin="round" />
       <path d="M21 21 h6 v6 h6 v6 h-6 v6 h-6 v-6 h-6 v-6 h6 Z" fill={C.white} {...stroke(2)} />
+    </Svg>
+  );
+}
+
+/** Màng bọc thực phẩm – a roll of clean cling film. */
+export function ClingFilmIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x={6} y={14} width={36} height={18} rx={3} fill="#7cc4a4" {...stroke(3)} />
+      <ellipse cx={42} cy={23} rx={3.5} ry={9} fill="#e4f4fb" {...stroke(2.5)} />
+      <path
+        d="M40 30 Q34 40 22 42 L10 42 Q16 36 22 32 Z"
+        fill="#dff3fb"
+        opacity={0.85}
+        {...stroke(2)}
+      />
+      <path d="M12 20 H30" stroke={C.white} strokeWidth={3} strokeLinecap="round" />
+      <path d="M16 39 l8 -3" stroke={C.white} strokeWidth={2} strokeLinecap="round" />
     </Svg>
   );
 }

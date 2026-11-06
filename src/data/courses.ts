@@ -200,7 +200,11 @@ export const COURSES: Course[] = [
     tagline: 'Học online miễn phí, mọi lúc mọi nơi.',
     description:
       'Nhận biết nạn nhân ngừng tim, ngừng thở; kỹ thuật ép tim ngoài lồng ngực và thổi ngạt chuẩn; quy trình gọi cứu thương khẩn cấp.',
-    highlights: ['Nhận biết ngừng tim, ngừng thở', 'Ép tim và thổi ngạt chuẩn', 'Gọi cấp cứu đúng cách'],
+    highlights: [
+      'Nhận biết ngừng tim, ngừng thở',
+      'Ép tim và thổi ngạt chuẩn',
+      'Gọi cấp cứu đúng cách',
+    ],
     mode: 'Trực tuyến',
     format: '100% trực tuyến (E-learning)',
     duration: 'Tự học trong 365 ngày',
@@ -220,7 +224,11 @@ export const COURSES: Course[] = [
     tagline: 'Sơ cứu tai nạn thường gặp ở trẻ nhỏ.',
     description:
       'Các tai nạn thường gặp tại nhà ở trẻ nhỏ; xử trí sốt cao, co giật, bỏng nước sôi; sơ cứu hóc dị vật đường thở ở trẻ em; xử lý chấn thương đầu do ngã từ trên cao.',
-    highlights: ['Sốt cao, co giật, bỏng nước sôi', 'Hóc dị vật ở trẻ em', 'Chấn thương đầu do ngã'],
+    highlights: [
+      'Sốt cao, co giật, bỏng nước sôi',
+      'Hóc dị vật ở trẻ em',
+      'Chấn thương đầu do ngã',
+    ],
     mode: 'Trực tuyến',
     format: '100% trực tuyến (E-learning)',
     duration: 'Tự học trong 365 ngày',
@@ -262,7 +270,11 @@ export const COURSES: Course[] = [
     tagline: 'Chơi thể thao an toàn hơn.',
     description:
       'Phân biệt căng cơ, bong gân, trật khớp; ứng dụng nguyên tắc R.I.C.E trong chấn thương; xử lý đứt dây chằng, tổn thương khớp khi vận động.',
-    highlights: ['Căng cơ, bong gân, trật khớp', 'Nguyên tắc R.I.C.E', 'Tổn thương dây chằng, khớp'],
+    highlights: [
+      'Căng cơ, bong gân, trật khớp',
+      'Nguyên tắc R.I.C.E',
+      'Tổn thương dây chằng, khớp',
+    ],
     mode: 'Trực tuyến',
     format: '100% trực tuyến (E-learning)',
     duration: 'Tự học trong 365 ngày',
@@ -283,7 +295,11 @@ export const COURSES: Course[] = [
     tagline: 'Sơ cứu khi du lịch, dã ngoại.',
     description:
       'Kỹ năng sinh tồn khi đi du lịch, dã ngoại; sơ cứu ngộ độc thức ăn, say nắng, đuối nước; xử lý vết cắn của côn trùng, rắn độc, động vật hoang dã.',
-    highlights: ['Sinh tồn khi du lịch, dã ngoại', 'Ngộ độc thức ăn, say nắng, đuối nước', 'Vết cắn côn trùng, rắn độc'],
+    highlights: [
+      'Sinh tồn khi du lịch, dã ngoại',
+      'Ngộ độc thức ăn, say nắng, đuối nước',
+      'Vết cắn côn trùng, rắn độc',
+    ],
     mode: 'Trực tuyến',
     format: '100% trực tuyến (E-learning)',
     duration: 'Tự học trong 365 ngày',

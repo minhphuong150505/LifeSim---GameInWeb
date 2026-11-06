@@ -309,7 +309,9 @@ export type ArmPose =
   | 'hold'
   | 'shoulder'
   /** Both arms straight down in front, hands on someone lying in front (CPR). */
-  | 'press';
+  | 'press'
+  /** Arm raised forward to the side, hand at counter height (hand under the tap). */
+  | 'reach';
 export type PersonPose = 'stand' | 'sit';
 
 export type PersonProps = FaceProps & {
@@ -324,6 +326,16 @@ export type PersonProps = FaceProps & {
   icePack?: boolean;
   /** Mirror horizontally. */
   flip?: boolean;
+  /** Burn on the right forearm (viewer's left) and what covers it (scenario 5). */
+  burnArm?: {
+    level: 'none' | 'red' | 'blister' | 'severe';
+    sleeve?: 'long' | 'cut' | 'short';
+    wrap?: boolean;
+  };
+  /** Large burn reaching the chest. */
+  chestBurn?: boolean;
+  /** Blanket wrapped around the body below the burn, keeping her warm. */
+  blanket?: boolean;
   x: number;
   y: number;
   scale?: number;
@@ -358,6 +370,8 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
       return { hand: { x: 34 * side, y: -36 }, elbow: { x: 28 * side, y: -20 } };
     case 'press':
       return { hand: { x: 4 * side, y: 22 }, elbow: { x: 12 * side, y: -6 } };
+    case 'reach':
+      return { hand: { x: 36 * side, y: -52 }, elbow: { x: 27 * side, y: -30 } };
     default:
       return { hand: { x: sx + 6 * side, y: -4 }, elbow: { x: sx + 5 * side, y: -18 } };
   }
@@ -384,6 +398,9 @@ export function Person({
   y,
   scale,
   look: lookOverride,
+  burnArm,
+  chestBurn,
+  blanket,
 }: PersonProps) {
   const base = LOOKS[kind];
   const look = lookOverride ?? base;
@@ -396,7 +413,13 @@ export function Person({
   const arm = (p: ArmPose, side: 1 | -1) => {
     const { hand, elbow } = handFor(p, side, headY);
     const shoulder = { x: 14 * side, y: -32 };
-    const sleeveEnd = { x: (shoulder.x + elbow.x) / 2, y: (shoulder.y + elbow.y) / 2 };
+    const burned = side === -1 && burnArm && burnArm.level !== 'none' ? burnArm : null;
+    const longSleeve = side === -1 && burnArm?.sleeve === 'long';
+    const sleeveEnd = longSleeve
+      ? { x: elbow.x + (hand.x - elbow.x) * 0.38, y: elbow.y + (hand.y - elbow.y) * 0.38 }
+      : { x: (shoulder.x + elbow.x) / 2, y: (shoulder.y + elbow.y) / 2 };
+    const fore = { x: (elbow.x + hand.x) / 2, y: (elbow.y + hand.y) / 2 };
+    const foreAngle = (Math.atan2(hand.y - elbow.y, hand.x - elbow.x) * 180) / Math.PI;
     return (
       <g key={side}>
         <Limb
@@ -408,11 +431,59 @@ export function Person({
           color={look.skin}
           width={7}
         />
+        {burned && (
+          <g transform={`translate(${fore.x} ${fore.y}) rotate(${foreAngle})`}>
+            <ellipse
+              rx={burned.level === 'severe' ? 9 : 6}
+              ry={4}
+              fill={burned.level === 'severe' ? '#e0664c' : '#f28b6f'}
+              opacity={0.9}
+            />
+            {burned.level === 'blister' && (
+              <>
+                <circle cx={-2} cy={-1} r={1.5} fill="#fff4e6" stroke="#c9644c" strokeWidth={0.7} />
+                <circle cx={2.5} cy={1} r={1.8} fill="#fff4e6" stroke="#c9644c" strokeWidth={0.7} />
+              </>
+            )}
+            {burned.level === 'severe' && (
+              <>
+                <ellipse cx={-3} cy={-0.5} rx={2.6} ry={1.6} fill="#f4efe6" />
+                <circle cx={3.5} cy={1} r={1.2} fill="#7a3b2a" />
+              </>
+            )}
+            {burned.sleeve === 'cut' && (
+              <rect
+                x={-1.5}
+                y={-2.5}
+                width={4}
+                height={4}
+                rx={0.8}
+                fill={look.shirt}
+                {...stroke(1)}
+              />
+            )}
+          </g>
+        )}
         <Limb
           d={`M${shoulder.x} ${shoulder.y} L${sleeveEnd.x} ${sleeveEnd.y}`}
           color={look.shirt}
-          width={9}
+          width={longSleeve ? 9.5 : 9}
         />
+        {burned?.wrap && (
+          <g transform={`translate(${fore.x} ${fore.y}) rotate(${foreAngle})`}>
+            <rect
+              x={-10}
+              y={-6}
+              width={20}
+              height={12}
+              rx={3}
+              fill="#dff3fb"
+              opacity={0.65}
+              stroke="#7fbfd8"
+              strokeWidth={1.2}
+            />
+          </g>
+        )}
         {p === 'phone' && (
           <rect
             x={hand.x - 4}
@@ -515,6 +586,25 @@ export function Person({
       )}
       {kind === 'grandma' && (
         <path d="M-15 -8 L15 -8" stroke={INK} strokeWidth={1.6} opacity={0.4} />
+      )}
+      {chestBurn && (
+        <g>
+          <ellipse cx={-6} cy={-26} rx={8} ry={5.5} fill="#e0664c" opacity={0.9} />
+          <ellipse cx={-8} cy={-27} rx={3} ry={2} fill="#f4efe6" />
+        </g>
+      )}
+      {blanket && (
+        <g>
+          <path d="M-21 -12 Q0 -18 21 -12 L24 26 Q0 32 -24 26 Z" fill="#9cc7e8" {...stroke()} />
+          <path
+            d="M-21 -2 Q0 -7 22 -2 M-23 12 Q0 7 23 12"
+            fill="none"
+            stroke={C.white}
+            strokeWidth={2.4}
+            strokeDasharray="5 4"
+            opacity={0.8}
+          />
+        </g>
       )}
       <g transform={`translate(0 ${headY}) scale(1.12)`}>
         <Head look={look} face={{ eyes: dizzy ? 'dizzy' : eyes, mouth, tilt, blood }} />

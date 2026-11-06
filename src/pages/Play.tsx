@@ -34,6 +34,7 @@ import { LightningStrike } from '../features/sim/LightningStrike';
 import { PhoneDialer } from '../features/sim/PhoneDialer';
 import { RoundGuide } from '../features/sim/RoundGuide';
 import { Shop } from '../features/sim/Shop';
+import { KitchenStage, kitchenTarget } from '../features/sim/KitchenStage';
 import { Stage } from '../features/sim/Stage';
 import { NOSE_POINT } from '../features/sim/stageLayout';
 import { WaterStage, waterTarget } from '../features/sim/WaterStage';
@@ -60,15 +61,23 @@ export function Play() {
   return <RoundSession key={round.id} round={round} />;
 }
 
-type ItemTask = 'ice-pack' | 'call-115' | 'rescue-ring';
+type ItemTask = 'ice-pack' | 'call-115' | 'rescue-ring' | 'cling-wrap';
 const isItemTask = (t: SimTask | undefined): t is ItemTask =>
-  t === 'ice-pack' || t === 'call-115' || t === 'rescue-ring';
+  t === 'ice-pack' || t === 'call-115' || t === 'rescue-ring' || t === 'cling-wrap';
+/** Items the player drags onto the scene (the phone opens the dialer instead). */
+const DRAGGED: ItemId[] = ['ice-pack', 'life-ring', 'cling-film'];
+const DRAG_LABEL: Partial<Record<ItemId, string>> = {
+  'ice-pack': 'Túi đá chườm lạnh – kéo lên mũi em trai',
+  'life-ring': 'Phao cứu sinh – kéo tới người gặp nạn',
+  'cling-film': 'Màng bọc thực phẩm – kéo lên vết bỏng của em gái',
+};
 
 /** Item tasks: what to use, the checklist, and the scene change once the item is applied. */
 const ITEM_TASKS: Record<
   ItemTask,
   {
     item: ItemId;
+    /** `{patient}` is replaced by who is being helped (em trai, em gái…). */
     title: string;
     steps: string[];
     appliedText?: string;
@@ -97,7 +106,7 @@ const ITEM_TASKS: Record<
   },
   'call-115': {
     item: 'phone',
-    title: 'Hãy gọi cấp cứu 115 cho em trai của bạn!',
+    title: 'Hãy gọi cấp cứu 115 cho {patient} của bạn!',
     steps: [
       'Mua điện thoại ở Cửa hàng 🏪 (30 băng gạc).',
       'Lấy điện thoại trong Túi đồ 🎒.',
@@ -119,6 +128,20 @@ const ITEM_TASKS: Record<
     applied: { victim: 'float' },
     done: { victim: 'float', lifeguard: 'near' },
     hintItem: false,
+  },
+  'cling-wrap': {
+    item: 'cling-film',
+    title: 'Hãy che phủ vết bỏng cho em gái bằng màng bọc thực phẩm!',
+    steps: [
+      'Mua màng bọc thực phẩm ở Cửa hàng 🏪 (20 băng gạc).',
+      'Lấy màng bọc trong Túi đồ 🎒.',
+      'Kéo màng bọc lên vùng da bị bỏng (hoặc chạm vào vòng tròn).',
+    ],
+    appliedText: 'Tốt lắm! Màng bọc chỉ phủ nhẹ lên vết bỏng, không quấn chặt.',
+    applied: { wrap: true },
+    done: { wrap: true },
+    optional: true,
+    hintItem: true,
   },
 };
 
@@ -164,7 +187,9 @@ function RoundSession({ round }: { round: SimRound }) {
   const bagCount = Object.values(items).reduce((n, c) => n + (c ?? 0), 0);
   const stage =
     iceApplied && taskInfo?.applied ? { ...state.stage, ...taskInfo.applied } : state.stage;
-  const water = stage.scene !== 'living-room';
+  const kitchen = stage.scene === 'kitchen';
+  const water = stage.scene !== 'living-room' && !kitchen;
+  const patient = scenario?.patient ?? 'em trai';
   useAmbience(round.ambience);
 
   // Persist the result once per attempt, as soon as the round ends.
@@ -226,7 +251,7 @@ function RoundSession({ round }: { round: SimRound }) {
 
   const useItem = (id: ItemId) => {
     setBagOpen(false);
-    if (id === 'ice-pack' || id === 'life-ring') setCarrying(id);
+    if (DRAGGED.includes(id)) setCarrying(id);
     if (id === 'phone' && useWalletStore.getState().use('phone')) setDialing(true);
   };
 
@@ -269,7 +294,7 @@ function RoundSession({ round }: { round: SimRound }) {
   const isOverTarget = (point: { x: number; y: number }) => {
     const svg = svgRef.current;
     const ctm = svg?.getScreenCTM();
-    const target = water ? waterTarget(stage) : NOSE_POINT;
+    const target = water ? waterTarget(stage) : kitchen ? kitchenTarget(stage) : NOSE_POINT;
     if (!svg || !ctm || !target) return false;
     // Map the target (scene units) to viewport pixels through the zoomed viewBox.
     const p = svg.createSVGPoint();
@@ -312,11 +337,7 @@ function RoundSession({ round }: { round: SimRound }) {
       isOverTarget={isOverTarget}
       onDrop={applyItem}
       className="absolute left-[36%] top-[50%] z-30"
-      label={
-        carrying === 'life-ring'
-          ? 'Phao cứu sinh – kéo tới người gặp nạn'
-          : 'Túi đá chườm lạnh – kéo lên mũi em trai'
-      }
+      label={DRAG_LABEL[carrying] ?? 'Kéo vật dụng'}
     >
       <ItemIcon id={carrying} size={72} />
     </DragItem>
@@ -341,6 +362,21 @@ function RoundSession({ round }: { round: SimRound }) {
         >
           {dragged}
         </WaterStage>
+      ) : kitchen ? (
+        <KitchenStage
+          ref={svgRef}
+          cast={round.cast}
+          stage={stage}
+          speaker={beat?.kind === 'line' ? beat.speaker : null}
+          // Back to the whole kitchen for the story and when the ambulance arrives at the end.
+          mode={state.phase === 'intro' || (stage.ambulance && !sidePanel) ? 'wide' : 'focus'}
+          focusX={sidePanel ? 0.32 : 0.5}
+          showCloseup={state.phase !== 'intro'}
+          dropTarget={carrying === 'cling-film'}
+          onTargetTap={applyItem}
+        >
+          {dragged}
+        </KitchenStage>
       ) : (
         <Stage
           ref={svgRef}
@@ -416,6 +452,7 @@ function RoundSession({ round }: { round: SimRound }) {
           {itemTask && (
             <ItemTaskPanel
               task={itemTask}
+              patient={patient}
               owned={ownsTaskItem}
               carrying={carrying === taskItem}
               applied={iceApplied}
@@ -612,6 +649,7 @@ function RoundSession({ round }: { round: SimRound }) {
 
 function ItemTaskPanel({
   task,
+  patient,
   owned,
   carrying,
   applied,
@@ -619,6 +657,7 @@ function ItemTaskPanel({
   onContinue,
 }: {
   task: ItemTask;
+  patient: string;
   owned: boolean;
   carrying: boolean;
   applied: boolean;
@@ -638,13 +677,13 @@ function ItemTaskPanel({
         <div className="flex items-center gap-2 short:[&>svg]:h-7 short:[&>svg]:w-7">
           {task === 'call-115' ? (
             <PhoneIcon size={40} />
-          ) : task === 'ice-pack' ? (
-            <ItemIcon id="ice-pack" size={40} />
+          ) : task === 'ice-pack' || task === 'cling-wrap' ? (
+            <ItemIcon id={info.item} size={40} />
           ) : (
             <ShopIcon size={40} />
           )}
           <p className="font-display text-xl leading-snug text-navy short:text-[15px] short:leading-tight">
-            {info.title}
+            {info.title.replace('{patient}', patient)}
           </p>
         </div>
         <ol className="mt-3 space-y-1.5 short:mt-1 short:space-y-0.5 short:[&>li]:text-[12px] short:[&>li]:leading-snug">
