@@ -559,3 +559,21 @@ export function GogglesIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** Open cardboard box with a chair and a lamp peeking out (the decoration collection). */
+export function CollectionIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M30 6 V14 M24 20 Q30 10 36 20 Z" fill={C.yellow} {...stroke(2.2)} />
+      <rect x={13} y={10} width={11} height={12} rx={2} fill={C.blue} {...stroke(2.2)} />
+      <path d="M13 22 V26 M24 22 V26" {...stroke(2.2)} />
+      <path d="M6 22 H42 L39 44 H9 Z" fill={C.wood} {...stroke(3)} />
+      <path
+        d="M6 22 L2 16 H18 L22 22 M42 22 L46 16 H30 L26 22"
+        fill={C.woodDark}
+        {...stroke(2.5)}
+      />
+      <path d="M18 30 H30" stroke={C.white} strokeWidth={3} strokeLinecap="round" />
+    </Svg>
+  );
+}

@@ -1,18 +1,26 @@
-import type { SlotId, Variant } from '../data/station';
+import { ROOM, getVariant, type SlotId, type Variant } from '../data/station';
+import {
+  anchorOf,
+  cellRect,
+  paintOrder,
+  spotCell,
+  type Layout,
+  type Spot,
+} from '../features/station/layout';
 import { C, INK, stroke } from './ink';
 
-export const STATION_W = 400;
-export const STATION_H = 300;
-const WALL_Y = 196;
+export const STATION_W = ROOM.W;
+export const STATION_H = ROOM.H;
+const WALL_Y = ROOM.WALL_Y;
 
 /**
  * Every decoration is drawn around its own origin (bottom-centre, or top-centre for the lamp)
  * so the same drawing is used in the room and as a thumbnail in the catalogue.
  */
 type Piece = {
-  /** Where the origin sits in the room. */
+  /** Where the origin sat in the old fixed-slot room (kept for reference only). */
   at: { x: number; y: number };
-  /** Local bounding box, for thumbnails and the empty-slot placeholder. */
+  /** Local bounding box, for thumbnails. */
   box: { x: number; y: number; w: number; h: number };
   draw: (v: Variant) => React.ReactNode;
 };
@@ -307,17 +315,6 @@ const PIECES: Record<Exclude<SlotId, 'theme'>, Piece> = {
   },
 };
 
-/** Order in which the room is painted (back to front). */
-const ORDER: Exclude<SlotId, 'theme'>[] = [
-  'lamp',
-  'poster',
-  'cabinet',
-  'plant',
-  'rug',
-  'bed',
-  'chair',
-];
-
 function Backdrop({ theme }: { theme: Variant | undefined }) {
   const wall = theme?.main ?? C.wall;
   const floor = theme?.accent ?? C.floor;
@@ -354,10 +351,10 @@ function Backdrop({ theme }: { theme: Variant | undefined }) {
             opacity={0.5}
           />
         ))}
-      {Array.from({ length: 8 }, (_, i) => (
+      {Array.from({ length: 9 }, (_, i) => (
         <path
           key={i}
-          d={`M${-20 + i * 60} ${WALL_Y} L${-60 + i * 70} 300`}
+          d={`M${-20 + i * 70} ${WALL_Y} L${-60 + i * 82} 300`}
           stroke={INK}
           strokeWidth={1}
           opacity={0.12}
@@ -366,8 +363,8 @@ function Backdrop({ theme }: { theme: Variant | undefined }) {
       <rect x={-600} y={WALL_Y - 8} width={1600} height={8} fill={INK} opacity={0.08} />
       <path d={`M-600 ${WALL_Y} H1000`} {...stroke(2.5)} />
       {/* station sign */}
-      <g transform="translate(236 34)">
-        <rect x={-48} y={-16} width={110} height={30} rx={8} fill={C.white} {...stroke(2.5)} />
+      <g transform="translate(222 20)">
+        <rect x={-48} y={-14} width={110} height={28} rx={8} fill={C.white} {...stroke(2.5)} />
         <Cross x={-34} y={-1} s={0.8} />
         <text
           x={-24}
@@ -381,12 +378,12 @@ function Backdrop({ theme }: { theme: Variant | undefined }) {
         </text>
       </g>
       {/* window */}
-      <g transform="translate(370 76)">
+      <g transform="translate(440 80)">
         <rect
-          x={-26}
-          y={-30}
-          width={52}
-          height={64}
+          x={-30}
+          y={-36}
+          width={60}
+          height={72}
           rx={4}
           fill={night ? '#3c4a7a' : C.sky}
           {...stroke(2.5)}
@@ -396,70 +393,63 @@ function Backdrop({ theme }: { theme: Variant | undefined }) {
         ) : (
           <circle cx={10} cy={-14} r={7} fill={C.yellow} {...stroke(1.4)} />
         )}
-        <path d="M0 -30 V34 M-26 2 H26" {...stroke(2)} />
+        <path d="M0 -36 V36 M-30 0 H30" {...stroke(2)} />
       </g>
     </g>
   );
 }
 
 type RoomProps = {
-  placed: Partial<Record<SlotId, Variant>>;
-  /** Highlighted slot (open in the catalogue). */
-  selected?: SlotId | null;
-  /** Tapping an item or an empty slot. */
-  onSlot?: (slot: SlotId) => void;
+  /** Theme variant id (wall and floor colours). */
+  theme: string;
+  layout: Layout;
+  /** Item that is highlighted (selected or being moved). */
+  selectedId?: string | null;
+  /** Tapping an item in the room. */
+  onItem?: (id: string) => void;
+  /** Placement mode: the item to place, where it fits, and the tap handler. */
+  placing?: {
+    id: string;
+    spots: Spot[];
+    /** Spot being previewed (ghost of the item drawn there). */
+    preview?: Spot | null;
+    onSpot: (spot: Spot) => void;
+  } | null;
 };
 
-/** The player's Rescue Station: backdrop from the theme + one decoration per slot. */
-export function StationRoom({ placed, selected, onSlot }: RoomProps) {
+/** The player's Rescue Station: themed backdrop + the items placed on the grid. */
+export function StationRoom({ theme, layout, selectedId, onItem, placing }: RoomProps) {
+  const placingVariant = placing ? getVariant(placing.id) : undefined;
+  const placingSlot =
+    placingVariant && placingVariant.slot !== 'theme' ? placingVariant.slot : null;
   return (
     <g>
-      <Backdrop theme={placed.theme} />
-      {ORDER.map((slot) => {
-        const piece = PIECES[slot];
-        const v = placed[slot];
-        const { x, y, w, h } = piece.box;
-        const hot = selected === slot;
+      <Backdrop theme={getVariant(theme)} />
+      {paintOrder(layout).map((id) => {
+        const v = getVariant(id);
+        const spot = layout[id];
+        if (!v || v.slot === 'theme' || !spot) return null;
+        const at = anchorOf(v.slot, spot);
+        const moving = placing?.id === id;
+        const hot = selectedId === id;
+        const { x, y, w, h } = PIECES[v.slot].box;
         return (
           <g
-            key={slot}
-            transform={`translate(${piece.at.x} ${piece.at.y})`}
-            onClick={onSlot ? () => onSlot(slot) : undefined}
-            className={onSlot ? 'cursor-pointer' : undefined}
+            key={id}
+            transform={`translate(${at.x} ${at.y})`}
+            opacity={moving ? 0.35 : 1}
+            onClick={onItem && !placing ? () => onItem(id) : undefined}
+            className={onItem && !placing ? 'cursor-pointer' : undefined}
+            role={onItem && !placing ? 'button' : undefined}
+            aria-label={onItem && !placing ? v.name : undefined}
           >
-            {v ? (
-              piece.draw(v)
-            ) : (
-              <g opacity={hot ? 0.9 : 0.55}>
-                <rect
-                  x={x + 4}
-                  y={y + 4}
-                  width={w - 8}
-                  height={h - 8}
-                  rx={10}
-                  fill="rgb(255 255 255 / 0.45)"
-                  stroke={INK}
-                  strokeWidth={2}
-                  strokeDasharray="6 5"
-                />
-                <text
-                  x={x + w / 2}
-                  y={y + h / 2 + 8}
-                  textAnchor="middle"
-                  fontFamily="Itim, sans-serif"
-                  fontSize={24}
-                  fill={INK}
-                >
-                  +
-                </text>
-              </g>
-            )}
+            {PIECES[v.slot].draw(v)}
             {hot && (
               <rect
-                x={x - 2}
-                y={y - 2}
-                width={w + 4}
-                height={h + 4}
+                x={x - 3}
+                y={y - 3}
+                width={w + 6}
+                height={h + 6}
                 rx={12}
                 fill="none"
                 stroke={C.yellow}
@@ -477,6 +467,70 @@ export function StationRoom({ placed, selected, onSlot }: RoomProps) {
           </g>
         );
       })}
+      {placing && placingSlot && placingVariant && (
+        <g>
+          {placing.spots.map((spot) => {
+            const r = spotCell(placingSlot, spot);
+            const on = placing.preview?.col === spot.col && placing.preview?.row === spot.row;
+            return (
+              <g
+                key={`${spot.col}-${spot.row}`}
+                role="button"
+                aria-label={`Ô cột ${spot.col + 1}, hàng ${spot.row + 1}`}
+                onClick={() => placing.onSpot(spot)}
+                className="cursor-pointer"
+              >
+                <rect
+                  x={r.x + 3}
+                  y={r.y + 3}
+                  width={r.w - 6}
+                  height={r.h - 6}
+                  rx={7}
+                  fill={on ? 'rgb(255 210 63 / 0.6)' : 'rgb(134 192 108 / 0.35)'}
+                  stroke={on ? C.yellow : C.green}
+                  strokeWidth={2}
+                  strokeDasharray={on ? undefined : '4 3'}
+                />
+                <text
+                  x={r.x + r.w / 2}
+                  y={r.y + r.h / 2 + 6}
+                  textAnchor="middle"
+                  fontFamily="Itim, sans-serif"
+                  fontSize={17}
+                  fill="#3f7a2c"
+                >
+                  +
+                </text>
+              </g>
+            );
+          })}
+          {placing.preview && (
+            <g pointerEvents="none">
+              {(() => {
+                const r = cellRect(placingSlot, placing.preview);
+                const at = anchorOf(placingSlot, placing.preview);
+                return (
+                  <>
+                    <rect
+                      x={r.x + 1}
+                      y={r.y + 1}
+                      width={r.w - 2}
+                      height={r.h - 2}
+                      rx={8}
+                      fill="rgb(255 210 63 / 0.25)"
+                      stroke={C.yellow}
+                      strokeWidth={3}
+                    />
+                    <g transform={`translate(${at.x} ${at.y})`} opacity={0.8}>
+                      {PIECES[placingSlot].draw(placingVariant)}
+                    </g>
+                  </>
+                );
+              })()}
+            </g>
+          )}
+        </g>
+      )}
     </g>
   );
 }

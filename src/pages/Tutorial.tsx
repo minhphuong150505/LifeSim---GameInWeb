@@ -18,7 +18,7 @@ import { LivingRoom } from '../art/LivingRoom';
 import { Mascot } from '../art/Mascot';
 import { Person } from '../art/Person';
 import { STATION_H, STATION_W, StationRoom } from '../art/StationRoom';
-import { DEFAULT_VARIANT, getVariant } from '../data/station';
+import { DEFAULT_SPOT, DEFAULT_VARIANT, getVariant, type ItemSlot } from '../data/station';
 import { Button } from '../components/Button';
 import { cn } from '../lib/cn';
 import { useUserStore } from '../store/user';
@@ -158,16 +158,12 @@ function ItemsArt() {
 }
 
 function StationArt() {
-  const placed = {
-    theme: getVariant(DEFAULT_VARIANT),
-    cabinet: getVariant('cabinet-kinh'),
-    bed: getVariant('bed-xanh'),
-    poster: getVariant('poster-115'),
-    plant: getVariant('plant-hoa'),
-    rug: getVariant('rug-do'),
-    chair: getVariant('chair-banh'),
-    lamp: getVariant('lamp-vom'),
-  };
+  const layout = Object.fromEntries(
+    ['cabinet-kinh', 'bed-xanh', 'poster-115', 'plant-hoa', 'rug-do', 'chair-banh', 'lamp-vom'].map(
+      (id) => [id, DEFAULT_SPOT[getVariant(id)?.slot as ItemSlot]],
+    ),
+  );
+
   return (
     <div className="ink-border h-full w-full overflow-hidden rounded-[20px]">
       <svg
@@ -176,7 +172,7 @@ function StationArt() {
         className="h-full w-full"
         aria-hidden
       >
-        <StationRoom placed={placed} />
+        <StationRoom theme={DEFAULT_VARIANT} layout={layout} />
       </svg>
     </div>
   );

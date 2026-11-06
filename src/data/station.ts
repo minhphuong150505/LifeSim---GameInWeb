@@ -1,7 +1,7 @@
 /**
  * Rescue Station (Trạm cứu hộ) – the player's own room, decorated with bandages earned in
- * the game. Every product comes in a few variants (colour / style); each variant is bought
- * separately and the player picks which one is placed.
+ * the game. Every product comes in a few variants (colour / style); bought variants go to the
+ * collection ("Bộ sưu tập") and the player places them anywhere in the room where they fit.
  */
 export type SlotId = 'theme' | 'cabinet' | 'bed' | 'chair' | 'poster' | 'plant' | 'rug' | 'lamp';
 
@@ -124,3 +124,63 @@ export function getVariant(id: string | undefined): Variant | undefined {
 export function getProduct(slot: SlotId): Product {
   return PRODUCTS.find((p) => p.slot === slot) as Product;
 }
+
+/* ───────────────────────── room grid ───────────────────────── */
+
+/** Room drawing size and the placement grid (world units). */
+export const ROOM = {
+  W: 480,
+  H: 300,
+  COLS: 12,
+  CELL: 40,
+  /** Where the wall meets the floor. */
+  WALL_Y: 172,
+  FLOOR_ROWS: 3,
+  ROW_H: 42,
+  WALL_TOP: 38,
+  WALL_ROWS: 3,
+  WALL_ROW_H: 42,
+} as const;
+
+export type Zone = 'floor' | 'rug' | 'wall';
+export type ItemSlot = Exclude<SlotId, 'theme'>;
+
+/**
+ * Size of each kind of item on the grid: `w` columns × `h` rows of its zone. Floor items
+ * stand on the floor (rows = depth, 0 = against the wall), rugs lie under them, posters
+ * and lamps go on the wall. `rows` limits where the item may go.
+ */
+export const FOOTPRINT: Record<ItemSlot, { zone: Zone; w: number; h: number; rows?: number[] }> = {
+  cabinet: { zone: 'floor', w: 2, h: 1, rows: [0] },
+  bed: { zone: 'floor', w: 4, h: 2 },
+  chair: { zone: 'floor', w: 2, h: 1 },
+  plant: { zone: 'floor', w: 1, h: 1 },
+  rug: { zone: 'rug', w: 4, h: 2 },
+  poster: { zone: 'wall', w: 2, h: 2 },
+  lamp: { zone: 'wall', w: 2, h: 1, rows: [0] },
+};
+
+export const ZONE_ROWS: Record<Zone, number> = {
+  floor: ROOM.FLOOR_ROWS,
+  rug: ROOM.FLOOR_ROWS,
+  wall: ROOM.WALL_ROWS,
+};
+
+/** Wall cells taken by the window (fixed decoration). */
+export const BLOCKED_WALL: { col: number; row: number }[] = [
+  { col: 10, row: 0 },
+  { col: 11, row: 0 },
+  { col: 10, row: 1 },
+  { col: 11, row: 1 },
+];
+
+/** Where items first go when an old save (one item per slot) is converted. */
+export const DEFAULT_SPOT: Record<ItemSlot, { col: number; row: number }> = {
+  cabinet: { col: 0, row: 0 },
+  poster: { col: 3, row: 1 },
+  lamp: { col: 6, row: 0 },
+  plant: { col: 2, row: 0 },
+  rug: { col: 4, row: 1 },
+  bed: { col: 8, row: 0 },
+  chair: { col: 4, row: 2 },
+};
