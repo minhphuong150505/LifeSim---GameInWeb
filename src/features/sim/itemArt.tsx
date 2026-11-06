@@ -1,6 +1,23 @@
-import { IcePackIcon, PhoneIcon } from '../../art/icons';
-import type { ItemId } from './items';
+import {
+  GogglesIcon,
+  IcePackIcon,
+  LifeRingIcon,
+  PhoneIcon,
+  TowelIcon,
+  ToyFloatIcon,
+} from '../../art/icons';
+import type { DecoyId, ItemId } from './items';
 
-export function ItemIcon({ id, size = 48 }: { id: ItemId; size?: number }) {
-  return id === 'phone' ? <PhoneIcon size={size} /> : <IcePackIcon size={size} />;
+const ICONS: Record<ItemId | DecoyId, (p: { size: number }) => React.ReactNode> = {
+  'ice-pack': IcePackIcon,
+  phone: PhoneIcon,
+  'life-ring': LifeRingIcon,
+  'toy-float': ToyFloatIcon,
+  towel: TowelIcon,
+  goggles: GogglesIcon,
+};
+
+export function ItemIcon({ id, size = 48 }: { id: ItemId | DecoyId; size?: number }) {
+  const Icon = ICONS[id];
+  return <Icon size={size} />;
 }

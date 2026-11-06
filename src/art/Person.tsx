@@ -299,7 +299,17 @@ export function Head({ look, face }: { look: Look; face?: FaceProps }) {
   );
 }
 
-export type ArmPose = 'down' | 'nose' | 'wave' | 'phone' | 'point' | 'hip' | 'hold' | 'shoulder';
+export type ArmPose =
+  | 'down'
+  | 'nose'
+  | 'wave'
+  | 'phone'
+  | 'point'
+  | 'hip'
+  | 'hold'
+  | 'shoulder'
+  /** Both arms straight down in front, hands on someone lying in front (CPR). */
+  | 'press';
 export type PersonPose = 'stand' | 'sit';
 
 export type PersonProps = FaceProps & {
@@ -346,6 +356,8 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
       return { hand: { x: 7 * side, y: -18 }, elbow: { x: 20 * side, y: -14 } };
     case 'shoulder':
       return { hand: { x: 34 * side, y: -36 }, elbow: { x: 28 * side, y: -20 } };
+    case 'press':
+      return { hand: { x: 4 * side, y: 22 }, elbow: { x: 12 * side, y: -6 } };
     default:
       return { hand: { x: sx + 6 * side, y: -4 }, elbow: { x: sx + 5 * side, y: -18 } };
   }
@@ -443,7 +455,7 @@ export function Person({
   };
 
   // Arms that reach the face are drawn over the head; the rest behind the torso.
-  const front = (p: ArmPose) => p === 'nose' || p === 'phone' || p === 'hold';
+  const front = (p: ArmPose) => p === 'nose' || p === 'phone' || p === 'hold' || p === 'press';
 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -k : k} ${k}) translate(0 ${hipLift})`}>

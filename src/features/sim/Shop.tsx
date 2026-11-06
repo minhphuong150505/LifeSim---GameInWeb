@@ -1,12 +1,19 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { BackIcon, BandageIcon, LockIcon } from '../../art/icons';
 import { Button } from '../../components/Button';
 import { cn } from '../../lib/cn';
-import { playSound } from '../../lib/sound';
+import { playSound, vibrate } from '../../lib/sound';
 import { useWalletStore } from '../../store/wallet';
 import { ItemIcon } from './itemArt';
-import { SHOP_ITEMS, UPCOMING_ITEMS, getItem, type ItemId } from './items';
+import {
+  DECOY_ITEMS,
+  SHOP_ITEMS,
+  UPCOMING_ITEMS,
+  getItem,
+  type DecoyId,
+  type ItemId,
+} from './items';
 
 type ShopProps = {
   open: boolean;
@@ -16,22 +23,60 @@ type ShopProps = {
   onBought?: (id: ItemId) => void;
   /** Opens the bandage bank (earn more bandages). */
   onOpenBank?: () => void;
+  /** Items on sale (defaults to every item). */
+  itemIds?: ItemId[];
+  /** Wrong picks mixed into the shelf for a "choose the right item" task. */
+  decoys?: boolean;
+  onDecoy?: (id: DecoyId) => void;
 };
 
+type Shelf =
+  | { kind: 'item'; id: ItemId; name: string; price: number; description: string }
+  | { kind: 'decoy'; id: DecoyId; name: string; price: number; description: string };
+
 /** Cửa hàng vật dụng – full-screen sheet with a wooden header, like the reference art. */
-export function Shop({ open, onClose, highlight, onBought, onOpenBank }: ShopProps) {
+export function Shop({
+  open,
+  onClose,
+  highlight,
+  onBought,
+  onOpenBank,
+  itemIds,
+  decoys,
+  onDecoy,
+}: ShopProps) {
   const bandages = useWalletStore((s) => s.bandages);
   const items = useWalletStore((s) => s.items);
   const buy = useWalletStore((s) => s.buy);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
+  const toastTimer = useRef(0);
+
+  const showToast = (text: string, bad?: boolean, ms = 1800) => {
+    window.clearTimeout(toastTimer.current);
+    setToast({ text, bad });
+    toastTimer.current = window.setTimeout(() => setToast(null), ms);
+  };
 
   const purchase = (id: ItemId) => {
     if (!buy(id)) return;
     playSound('found');
-    setToast(`Đã cho ${getItem(id).name} vào túi vật dụng!`);
-    window.setTimeout(() => setToast(null), 1800);
+    showToast(`${getItem(id).name} đã được thêm vào Túi vật dụng!`);
     onBought?.(id);
   };
+
+  const pickDecoy = (id: DecoyId) => {
+    const d = DECOY_ITEMS.find((x) => x.id === id);
+    playSound('wrong');
+    vibrate(80);
+    if (d) showToast(`${d.name}: ${d.reason}`, true, 3600);
+    onDecoy?.(id);
+  };
+
+  const onSale = SHOP_ITEMS.filter((i) => !itemIds || itemIds.includes(i.id));
+  const shelf: Shelf[] = [
+    ...onSale.map((i) => ({ kind: 'item' as const, ...i })),
+    ...(decoys ? DECOY_ITEMS.map((d) => ({ kind: 'decoy' as const, ...d })) : []),
+  ];
 
   return (
     <AnimatePresence>
@@ -68,9 +113,9 @@ export function Shop({ open, onClose, highlight, onBought, onOpenBank }: ShopPro
               kéo/thả.
             </p>
             <ul className="grid grid-cols-4 gap-3">
-              {SHOP_ITEMS.map((item) => {
-                const owned = items[item.id] ?? 0;
-                const soldOut = !item.consumable && owned > 0;
+              {shelf.map((item) => {
+                const owned = item.kind === 'item' ? (items[item.id] ?? 0) : 0;
+                const soldOut = item.kind === 'item' && !getItem(item.id).consumable && owned > 0;
                 const short = bandages < item.price;
                 const hot = highlight === item.id;
                 return (
@@ -107,8 +152,10 @@ export function Shop({ open, onClose, highlight, onBought, onOpenBank }: ShopPro
                         block
                         variant={soldOut ? 'gray' : 'yellow'}
                         className="mt-2"
-                        disabled={soldOut || short}
-                        onClick={() => purchase(item.id)}
+                        disabled={soldOut || (item.kind === 'item' && short)}
+                        onClick={() =>
+                          item.kind === 'item' ? purchase(item.id) : pickDecoy(item.id)
+                        }
                         aria-label={`Mua ${item.name} giá ${item.price} băng gạc`}
                       >
                         {soldOut ? (
@@ -155,9 +202,12 @@ export function Shop({ open, onClose, highlight, onBought, onOpenBank }: ShopPro
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="ink-border safe-bottom absolute inset-x-4 bottom-4 rounded-2xl bg-success-dark px-4 py-2 text-center font-display text-lg text-white"
+                className={cn(
+                  'ink-border safe-bottom absolute inset-x-4 bottom-4 rounded-2xl px-4 py-2 text-center font-display text-lg leading-snug text-white',
+                  toast.bad ? 'bg-primary-dark' : 'bg-success-dark',
+                )}
               >
-                {toast}
+                {toast.text}
               </motion.p>
             )}
           </AnimatePresence>

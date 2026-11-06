@@ -1,6 +1,17 @@
 import { C } from './ink';
 
-export type PersonKind = 'brother' | 'player' | 'mom' | 'dad' | 'grandma' | 'mascot';
+export type PersonKind =
+  | 'brother'
+  | 'player'
+  | 'mom'
+  | 'dad'
+  | 'grandma'
+  | 'mascot'
+  | 'friend'
+  | 'lifeguard'
+  | 'victim'
+  | 'friendA'
+  | 'friendB';
 export type HairStyle =
   | 'boy'
   | 'ponytail'
@@ -80,5 +91,51 @@ export const LOOKS: Record<PersonKind, Look & { scale: number }> = {
     pants: '#5d6f8a',
     backpack: true,
     scale: 1,
+  },
+  /* Tình huống 2 – Đuối nước */
+  friend: {
+    hairStyle: 'bob',
+    hair: '#3e2a22',
+    skin: '#ffe6cf',
+    shirt: '#9fd5c9',
+    pants: '#4d8fc2',
+    shorts: true,
+    scale: 0.98,
+  },
+  lifeguard: {
+    hairStyle: 'buzz',
+    hair: '#2f2520',
+    skin: '#f0c49c',
+    shirt: C.yellow,
+    pants: C.red,
+    shorts: true,
+    scale: 1.12,
+  },
+  victim: {
+    hairStyle: 'short',
+    hair: '#4a3426',
+    skin: '#f8d6b8',
+    shirt: '#5aa0d6',
+    pants: '#3f5f86',
+    shorts: true,
+    scale: 1.04,
+  },
+  friendA: {
+    hairStyle: 'spiky',
+    hair: '#3a2a20',
+    skin: '#f6d2b0',
+    shirt: '#f29e4c',
+    pants: '#3f5f86',
+    shorts: true,
+    scale: 0.96,
+  },
+  friendB: {
+    hairStyle: 'pigtails',
+    hair: '#5a3b28',
+    skin: C.skin,
+    shirt: '#c7a6d9',
+    pants: '#6f978b',
+    shorts: true,
+    scale: 0.94,
   },
 };

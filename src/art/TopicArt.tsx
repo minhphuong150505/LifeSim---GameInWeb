@@ -3,6 +3,7 @@ import { BandageIcon, BoltIcon, FlameIcon, HeartIcon, StarIcon } from './icons';
 import { C, INK, stroke } from './ink';
 import { LivingRoom } from './LivingRoom';
 import { Person } from './Person';
+import { PoolBackdrop, Swimmer } from './WaterScenes';
 
 /** Cover illustration of a topic card (Core game topic picker, Hub course thumbnails). */
 export function TopicArt({ topic, className }: { topic: Topic; className?: string }) {
@@ -27,6 +28,25 @@ export function TopicArt({ topic, className }: { topic: Topic; className?: strin
           eyes="worried"
           mouth="frown"
         />
+      </svg>
+    );
+  }
+  if (topic === 'drowning') {
+    return (
+      <svg
+        viewBox="110 96 170 150"
+        preserveAspectRatio="xMidYMid slice"
+        className={className}
+        aria-hidden
+      >
+        <PoolBackdrop />
+        <g transform="translate(200 186)">
+          <Swimmer kind="victim" mode="struggle" k={1.1} />
+        </g>
+        <g transform="translate(150 196) rotate(-12)">
+          <circle r={14} fill={C.red} {...stroke(2.5)} />
+          <circle r={6} fill="#8fd0ea" {...stroke(2)} />
+        </g>
       </svg>
     );
   }

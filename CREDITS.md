@@ -12,11 +12,21 @@ Toàn bộ hình ảnh trong game dùng **một phong cách 2D chung** (nét vi�
 | `src/art/Person.tsx`, `looks.ts`      | Nhân vật nhìn chính diện: em trai, người chơi, bố, mẹ, bà, mascot        |
 | `src/art/Profile.tsx`                 | Em trai nhìn nghiêng (tư thế cúi/ngửa/nằm, bóp mũi, thở miệng…)          |
 | `src/features/sim/optionArt.tsx`      | Hình minh hoạ cho từng đáp án A/B/C                                      |
+| `src/art/WaterScenes.tsx`             | Tình huống 2: hồ bơi, hồ nước dã ngoại, bờ hồ, người bơi/đuối nước       |
+| `src/features/sim/optionArtWater.tsx` | Hình minh hoạ đáp án của Tình huống 2 (Đuối nước)                        |
 | `src/art/icons.tsx`                   | Trái tim, tia sét, băng gạc, túi vật dụng, cửa hàng, túi đá, điện thoại… |
 | `src/art/Mascot.tsx`, `AvatarArt.tsx` | Mascot và 12 avatar                                                      |
 | `src/components/Logo.tsx`             | Logo chữ LifeSim                                                         |
 | `public/favicon.svg`                  | Icon trái tim dấu cộng                                                   |
 | `public/assets/ui/*.png`              | Icon PWA, render từ `favicon.svg`                                        |
+
+## 2. Ảnh chụp (`public/assets/sim/`)
+
+| File                | Nguồn                                                                                                      | License   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- | --------- |
+| `carotid-pulse.jpg` | “Checking for a pulse” – Hendrik Dacquin, https://commons.wikimedia.org/wiki/File:Checking_for_a_pulse.jpg | CC BY 2.0 |
+
+Xử lý: cắt vùng cổ, tăng sáng, thu nhỏ 480×480 (ffmpeg). Trong game hiển thị kèm dòng ghi nguồn và vòng đánh dấu vị trí mạch cảnh.
 
 ## 3. Âm thanh (`public/assets/audio/`)
 
@@ -33,6 +43,8 @@ Xử lý: chuyển `.ogg` → `.mp3` mono 64 kbps bằng ffmpeg (để chạy đ
 | `found.mp3`   | `pluck_001.ogg`          |
 | `tick.mp3`    | `tick_002.ogg` (đếm giờ) |
 | `win.mp3`     | `confirmation_004.ogg`   |
+
+Âm nền hồ bơi / thiên nhiên của Tình huống 2 được tổng hợp trực tiếp bằng Web Audio API (`src/lib/ambience.ts`), không dùng file âm thanh.
 
 ## 4. Font
 

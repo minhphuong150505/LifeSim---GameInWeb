@@ -1,10 +1,31 @@
+import type { ItemId } from './items';
 import type { Topic } from '../../data/topics';
 import type { ArtKey } from './optionArt';
 
-export type CastMember = 'brother' | 'player' | 'mom' | 'dad' | 'grandma';
+export type CastMember =
+  | 'brother'
+  | 'player'
+  | 'mom'
+  | 'dad'
+  | 'grandma'
+  | 'friend'
+  | 'lifeguard'
+  | 'victim'
+  | 'friendA'
+  | 'friendB';
 
-/** What the living-room stage shows; correct answers patch it (e.g. "now sitting leaning forward"). */
+/** Backdrop of a round: the living room (scenario 1) or one of the water scenes (scenario 2). */
+export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore';
+
+/** Camera shot of the water scenes (story beats can move it, tasks can request one). */
+export type CameraShot = 'wide' | 'focus' | 'bank' | 'face' | 'chest';
+
+/**
+ * What the stage shows; correct answers patch it (e.g. "now sitting leaning forward").
+ * The first block is the living room (scenario 1), the second the water scenes (scenario 2).
+ */
 export type StageState = {
+  scene: SceneKind;
   posture: 'upright' | 'forward' | 'back';
   pinch: boolean;
   mouthOpen: boolean;
@@ -18,6 +39,21 @@ export type StageState = {
   /** Mom sits next to the brother, keeping an eye on him. */
   comfort: boolean;
   ambulance: boolean;
+
+  /** Person in danger: playing near the bank, struggling, holding a float, brought ashore. */
+  victim: 'swim' | 'struggle' | 'float' | 'ashore';
+  /** Lifeguard: on the high chair, alerted, standing next to the player, rescuing. */
+  lifeguard: 'seat' | 'alert' | 'near' | 'rescue';
+  /** Camera held by the story / a question (`focus` = the default zoom on the action). */
+  shot: CameraShot;
+  /** 115 has been called (player holds the phone). */
+  called: boolean;
+  /** Player's hands are on the centre of the chest (CPR). */
+  hands: boolean;
+  /** Airway opened: head tilted back, chin lifted. */
+  airway: boolean;
+  /** Mouth checked and cleared. */
+  mouthClear: boolean;
 };
 
 export type OptionId = 'a' | 'b' | 'c';
@@ -25,7 +61,27 @@ export type OptionId = 'a' | 'b' | 'c';
 export type SimOption = { id: OptionId; text: string; art: ArtKey };
 
 /** Hands-on activity that follows a question. */
-export type SimTask = 'nose-tap' | 'ice-pack' | 'call-115';
+export type SimTask =
+  | 'nose-tap'
+  | 'ice-pack'
+  | 'call-115'
+  /** Pick the right float in the shop and throw it to the person in the water. */
+  | 'rescue-ring'
+  /** No rescue gear around: find the 2 objects on the bank that can help. */
+  | 'find-floats'
+  /** Tap 30 chest compressions at 100–120 per minute. */
+  | 'cpr-30'
+  /** Put the rescue-breath steps in the right order. */
+  | 'breath-order';
+
+/** Real photo shown with an explanation, with an optional marker drawn on top. */
+export type ExplainImage = {
+  src: string;
+  alt: string;
+  credit: string;
+  /** Marker position in % of the image, and its label. */
+  marker?: { x: number; y: number; label: string };
+};
 
 export type SimQuestion = {
   id: string;
@@ -40,12 +96,22 @@ export type SimQuestion = {
   /** Short caption describing the new illustration. */
   caption?: string;
   task?: SimTask;
+  /** Picture shown above the options; the player can also tap its A/B/C spots. */
+  figure?: 'chest-spots';
+  /** Photo illustrating the explanation. */
+  explainImage?: ExplainImage;
 };
 
+/** Scene change played when a story beat appears (someone swims out, the camera zooms…). */
+type BeatEffect = { effect?: Partial<StageState> };
+
 export type Beat =
-  | { kind: 'narration'; text: string }
-  | { kind: 'line'; speaker: CastMember; text: string }
-  | { kind: 'mission'; text: string };
+  | ({ kind: 'narration'; text: string } & BeatEffect)
+  | ({ kind: 'line'; speaker: CastMember; text: string } & BeatEffect)
+  | ({ kind: 'mission'; text: string } & BeatEffect);
+
+/** Background sound loop of a round. */
+export type Ambience = 'pool' | 'nature';
 
 export type SimRound = {
   /** URL-safe id, e.g. `1-1`. */
@@ -62,6 +128,7 @@ export type SimRound = {
   stage: StageState;
   intro: Beat[];
   questions: SimQuestion[];
+  ambience?: Ambience;
 };
 
 export type SimScenario = {
@@ -70,6 +137,8 @@ export type SimScenario = {
   title: string;
   topic: Topic;
   location: string;
+  /** Items sold in the in-game shop during this scenario. */
+  shopItems: ItemId[];
   rounds: SimRound[];
 };
 

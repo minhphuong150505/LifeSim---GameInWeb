@@ -31,7 +31,21 @@ export type RoundAction =
   | { type: 'ANSWER'; optionId: OptionId }
   | { type: 'ACK' }
   | { type: 'TASK_DONE'; effect?: Partial<StageState> }
+  /** Wrong move inside a hands-on task (e.g. picking an object that sinks): one bolt. */
+  | { type: 'MISTAKE' }
   | { type: 'RETRY' };
+
+/** Stage after the story beats `0..upTo` played their scene changes. */
+export function stageAtBeat(round: SimRound, upTo: number): StageState {
+  return round.intro
+    .slice(0, upTo + 1)
+    .reduce<StageState>((st, b) => (b.effect ? { ...st, ...b.effect } : st), round.stage);
+}
+
+/** Stage once the whole story has played (questions start from here). */
+export function stageAfterIntro(round: SimRound): StageState {
+  return stageAtBeat(round, round.intro.length - 1);
+}
 
 export function initialRoundState(round: SimRound): RoundState {
   return {
@@ -42,7 +56,7 @@ export function initialRoundState(round: SimRound): RoundState {
     bolts: 0,
     wrongIds: [],
     firstTry: [],
-    stage: round.stage,
+    stage: round.intro.length > 0 ? stageAtBeat(round, 0) : round.stage,
     attempt: 1,
   };
 }
@@ -58,11 +72,13 @@ export function createRoundReducer(round: SimRound) {
       case 'NEXT_BEAT':
         if (state.phase !== 'intro') return state;
         return state.beat + 1 < round.intro.length
-          ? { ...state, beat: state.beat + 1 }
-          : { ...state, phase: 'question' };
+          ? { ...state, beat: state.beat + 1, stage: stageAtBeat(round, state.beat + 1) }
+          : { ...state, phase: 'question', stage: stageAfterIntro(round) };
 
       case 'SKIP_INTRO':
-        return state.phase === 'intro' ? { ...state, phase: 'question' } : state;
+        return state.phase === 'intro'
+          ? { ...state, phase: 'question', stage: stageAfterIntro(round) }
+          : state;
 
       case 'ANSWER': {
         if (state.phase !== 'question') return state;
@@ -96,9 +112,20 @@ export function createRoundReducer(round: SimRound) {
         if (state.phase !== 'task') return state;
         return advance({ ...state, stage: { ...state.stage, ...action.effect } });
 
+      case 'MISTAKE': {
+        if (state.phase !== 'task') return state;
+        const bolts = state.bolts + 1;
+        return { ...state, bolts, phase: bolts >= MAX_BOLTS ? 'lost' : 'task' };
+      }
+
       case 'RETRY':
         // Replays skip the story and start again from question 1.
-        return { ...initialRoundState(round), phase: 'question', attempt: state.attempt + 1 };
+        return {
+          ...initialRoundState(round),
+          phase: 'question',
+          stage: stageAfterIntro(round),
+          attempt: state.attempt + 1,
+        };
     }
   };
 }

@@ -14,6 +14,14 @@ import {
 import { ART_KEYS } from './optionArt';
 import type { OptionId, SimRound } from './types';
 import { isRoundUnlocked, nextRoundToPlay } from './unlock';
+import {
+  BREATH_CARDS,
+  BREATH_ORDER,
+  CPR_TARGET,
+  compressionCounts,
+  RIGHT_FINDS,
+  rhythmOf,
+} from './waterTaskLogic';
 
 const round = getRound('1-1') as SimRound;
 const reducer = createRoundReducer(round);
@@ -25,13 +33,27 @@ const wrongOf = (r: SimRound, i: number): OptionId[] => {
 const rightOf = (r: SimRound, i: number) => r.questions[i]?.correctId as OptionId;
 
 describe('bundled simulation data', () => {
-  it('has scenario 1 (nosebleed) with rounds 1.1 → 1.3 and rewards 20/25/30', () => {
-    expect(simScenarios[0]?.id).toBe('nosebleed');
-    expect(allRounds.map((r) => r.code)).toEqual(['1.1', '1.2', '1.3']);
-    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30]);
-    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4]);
+  it('has scenario 1 (nosebleed) then scenario 2 (drowning), with the scripted rewards', () => {
+    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning']);
+    expect(allRounds.map((r) => r.code)).toEqual(['1.1', '1.2', '1.3', '2.1', '2.2', '2.3']);
+    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30, 20, 30, 40]);
+    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7]);
     expect(nextRoundId('1-1')).toBe('1-2');
-    expect(nextRoundId('1-3')).toBeNull();
+    expect(nextRoundId('1-3')).toBe('2-1');
+    expect(nextRoundId('2-3')).toBeNull();
+  });
+  it('uses the drowning answers from the script', () => {
+    const answers = (id: string) =>
+      getRound(id)
+        ?.questions.map((q) => q.correctId)
+        .join('');
+    expect(answers('2-1')).toBe('acc');
+    expect(answers('2-2')).toBe('bbacb');
+    expect(answers('2-3')).toBe('bacbacb');
+    for (const r of allRounds.filter((x) => x.id.startsWith('2-'))) {
+      expect(r.stage.scene).not.toBe('living-room');
+      for (const q of r.questions) expect(q.hint).toBeTruthy();
+    }
   });
   it('gives every question 3 options with exactly one valid answer and known artwork', () => {
     for (const r of allRounds) {
@@ -49,7 +71,15 @@ describe('bundled simulation data', () => {
     const tasks = allRounds.flatMap((r) =>
       r.questions.filter((q) => q.task).map((q) => `${r.code}:${q.task}`),
     );
-    expect(tasks).toEqual(['1.2:nose-tap', '1.2:ice-pack', '1.3:call-115']);
+    expect(tasks).toEqual([
+      '1.2:nose-tap',
+      '1.2:ice-pack',
+      '1.3:call-115',
+      '2.1:rescue-ring',
+      '2.2:find-floats',
+      '2.3:cpr-30',
+      '2.3:breath-order',
+    ]);
   });
 });
 
@@ -144,6 +174,48 @@ describe('round engine', () => {
     });
   });
 
+  it('plays story-beat scene changes and keeps them when the intro is skipped or replayed', () => {
+    const r = getRound('2-2') as SimRound;
+    const red = createRoundReducer(r);
+    let s = initialRoundState(r);
+    expect(s.stage).toMatchObject({ scene: 'lake', victim: 'swim', shot: 'wide' });
+    s = red(red(s, { type: 'NEXT_BEAT' }), { type: 'NEXT_BEAT' });
+    expect(s.stage.victim).toBe('struggle');
+    const skipped = red(initialRoundState(r), { type: 'SKIP_INTRO' });
+    expect(skipped.stage).toMatchObject({ victim: 'struggle', shot: 'focus' });
+    const replay = red({ ...skipped, phase: 'lost' }, { type: 'RETRY' });
+    expect(replay.stage).toEqual(skipped.stage);
+  });
+
+  it('counts a wrong move inside a task as a bolt and can lose the round', () => {
+    const r = getRound('2-2') as SimRound;
+    const red = createRoundReducer(r);
+    let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
+    s = red(s, { type: 'ANSWER', optionId: rightOf(r, 0) });
+    s = red(s, { type: 'ACK' });
+    s = red(s, { type: 'ANSWER', optionId: rightOf(r, 1) });
+    s = red(s, { type: 'ACK' });
+    expect(s.phase).toBe('task');
+    expect(red(s, { type: 'MISTAKE' })).toMatchObject({ phase: 'task', bolts: 1 });
+    s = red(red(red(s, { type: 'MISTAKE' }), { type: 'MISTAKE' }), { type: 'MISTAKE' });
+    expect(s).toMatchObject({ phase: 'lost', bolts: 3 });
+    // MISTAKE outside a task does nothing.
+    expect(red(initialRoundState(r), { type: 'MISTAKE' }).bolts).toBe(0);
+  });
+
+  it('wins round 2.3 after the CPR and rescue-breath tasks', () => {
+    const r = getRound('2-3') as SimRound;
+    const red = createRoundReducer(r);
+    let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
+    r.questions.forEach((q, i) => {
+      s = red(s, { type: 'ANSWER', optionId: rightOf(r, i) });
+      s = red(s, { type: 'ACK' });
+      if (q.task) s = red(s, { type: 'TASK_DONE' });
+    });
+    expect(s).toMatchObject({ phase: 'won', hearts: 7 });
+    expect(s.stage).toMatchObject({ airway: true, mouthClear: true });
+  });
+
   it('scores 3/2/1 stars by bolts and scales points with difficulty', () => {
     expect([0, 1, 2].map(starsFor)).toEqual([3, 2, 1]);
     expect(roundScore(round, 0)).toBe(650);
@@ -164,7 +236,28 @@ describe('round unlocking', () => {
   it('suggests the first uncleared round', () => {
     expect(nextRoundToPlay(allRounds, {})?.id).toBe('1-1');
     expect(nextRoundToPlay(allRounds, { '1-1': win })?.id).toBe('1-2');
-    expect(nextRoundToPlay(allRounds, { '1-1': win, '1-2': win, '1-3': win })?.id).toBe('1-1');
+    expect(nextRoundToPlay(allRounds, { '1-1': win, '1-2': win, '1-3': win })?.id).toBe('2-1');
+  });
+});
+
+describe('drowning tasks', () => {
+  it('accepts compressions at about 100–120 per minute', () => {
+    expect(compressionCounts(null)).toBe(true);
+    expect(compressionCounts(545)).toBe(true); // 110/min
+    expect(compressionCounts(1000)).toBe(false); // 60/min, too slow
+    expect(compressionCounts(350)).toBe(false); // ~171/min, too fast
+    expect([rhythmOf(null), rhythmOf(80), rhythmOf(110), rhythmOf(140)]).toEqual([
+      'idle',
+      'slow',
+      'good',
+      'fast',
+    ]);
+    expect(CPR_TARGET).toBe(30);
+  });
+  it('wants B → D → A → C for the rescue breaths and 2 floating objects', () => {
+    expect(BREATH_ORDER).toEqual(['B', 'D', 'A', 'C']);
+    expect(BREATH_CARDS.map((c) => c.id).sort()).toEqual(['A', 'B', 'C', 'D']);
+    expect(RIGHT_FINDS).toEqual(['long-branch', 'plastic-box']);
   });
 });
 
@@ -188,6 +281,13 @@ describe('wallet', () => {
     expect(w.use('ice-pack')).toBe(false);
     expect(w.use('phone')).toBe(true);
     expect(useWalletStore.getState().items).toEqual({ 'ice-pack': 0, phone: 1 });
+  });
+  it('keeps the life ring after use (one is enough)', () => {
+    const w = useWalletStore.getState();
+    expect(w.buy('life-ring')).toBe(true);
+    expect(w.buy('life-ring')).toBe(false);
+    expect(w.use('life-ring')).toBe(true);
+    expect(useWalletStore.getState().items['life-ring']).toBe(1);
   });
   it('limits rewarded ads in the bandage bank per day', () => {
     const w = useWalletStore.getState();

@@ -42,7 +42,7 @@ export function BagSheet({ open, onClose, usable, onUse, onOpenShop }: BagSheetP
                     {item.name}
                   </span>
                   <span className="text-xs text-muted">
-                    {item.consumable ? `x${items[item.id]}` : 'Đồ cá nhân'} ·{' '}
+                    {item.consumable ? `x${items[item.id]}` : 'Dùng nhiều lần'} ·{' '}
                     {canUse ? 'Chạm để dùng' : 'Chưa cần dùng'}
                   </span>
                 </button>

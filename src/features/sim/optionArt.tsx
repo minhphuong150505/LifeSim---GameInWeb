@@ -10,6 +10,7 @@ import {
 import { LOOKS } from '../../art/looks';
 import { Head, Person } from '../../art/Person';
 import { ProfileArt, type ProfileGeometry, type ProfileProps } from '../../art/Profile';
+import { WATER_ART } from './optionArtWater';
 
 /* Answer illustrations for the A/B/C options. Each one is drawn from the shared art kit
  * (side-view kid, front-view characters, icons) so they all match the stage. They show
@@ -373,6 +374,7 @@ const ART = {
   'lie-head-back': () => (
     <P pose="lie" furniture="bed" lean={0} tilt={-25} eyes="up" blood="throat" />
   ),
+  ...WATER_ART,
 } satisfies Record<string, () => React.ReactNode>;
 
 export type ArtKey = keyof typeof ART;

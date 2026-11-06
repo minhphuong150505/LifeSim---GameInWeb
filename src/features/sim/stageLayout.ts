@@ -7,10 +7,18 @@ export const CAST_NAMES: Record<CastMember, string> = {
   mom: 'Mẹ',
   dad: 'Bố',
   grandma: 'Bà',
+  friend: 'Bạn đi cùng',
+  lifeguard: 'Nhân viên cứu hộ',
+  victim: 'Người đuối nước',
+  friendA: 'Bạn A',
+  friendB: 'Bạn B',
 };
 
-/** Where each character stands/sits, and the top of their head (for speech bubbles), in room units. */
-export const SPOTS: Record<CastMember, { x: number; y: number; headTop: number }> = {
+/** Where each living-room character stands/sits, and the top of their head, in room units. */
+export const SPOTS: Record<
+  'brother' | 'grandma' | 'player' | 'mom' | 'dad',
+  { x: number; y: number; headTop: number }
+> = {
   brother: { x: 200, y: SOFA_SEAT_Y, headTop: 92 },
   grandma: { x: 148, y: SOFA_SEAT_Y, headTop: 80 },
   player: { x: 70, y: 290, headTop: 166 },

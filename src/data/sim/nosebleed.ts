@@ -1,17 +1,7 @@
+import { BASE_STAGE } from '../../features/sim/stageDefaults';
 import type { SimScenario, StageState } from '../../features/sim/types';
 
-const START: StageState = {
-  posture: 'upright',
-  pinch: false,
-  mouthOpen: false,
-  bleeding: true,
-  dizzy: false,
-  icePack: false,
-  clock: null,
-  phone: false,
-  comfort: false,
-  ambulance: false,
-};
+const START: StageState = { ...BASE_STAGE, scene: 'living-room', bleeding: true };
 
 /** Tình huống 1 – Chảy máu cam (nội dung theo tài liệu "Nội dung game Lifesim"). */
 export const nosebleed: SimScenario = {
@@ -20,6 +10,7 @@ export const nosebleed: SimScenario = {
   title: 'Chảy máu cam',
   topic: 'nosebleed',
   location: 'Phòng khách',
+  shopItems: ['ice-pack', 'phone'],
   rounds: [
     {
       id: '1-1',

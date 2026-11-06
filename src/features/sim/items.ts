@@ -1,11 +1,11 @@
-export type ItemId = 'ice-pack' | 'phone';
+export type ItemId = 'ice-pack' | 'phone' | 'life-ring';
 
 export type ShopItem = {
   id: ItemId;
   name: string;
   price: number;
   description: string;
-  /** Used up when applied (the phone is kept). */
+  /** Used up when applied (the phone and the life ring are kept). */
   consumable: boolean;
 };
 
@@ -23,6 +23,53 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 30,
     description: 'Gọi cấp cứu 115 khi tình huống nguy hiểm.',
     consumable: false,
+  },
+  {
+    id: 'life-ring',
+    name: 'Phao cứu sinh có dây',
+    price: 40,
+    description: 'Ném tới người gặp nạn từ trên bờ, giữ đầu dây để kéo vào.',
+    consumable: false,
+  },
+];
+
+/**
+ * Wrong picks on the shelf during the life-ring task. They are never sold: choosing one
+ * only explains why it would not keep someone afloat.
+ */
+export type DecoyId = 'toy-float' | 'towel' | 'goggles';
+
+export type DecoyItem = {
+  id: DecoyId;
+  name: string;
+  price: number;
+  description: string;
+  /** Why it does not help, shown when the player picks it. */
+  reason: string;
+};
+
+export const DECOY_ITEMS: DecoyItem[] = [
+  {
+    id: 'toy-float',
+    name: 'Phao bơi đồ chơi',
+    price: 20,
+    description: 'Phao bơm hơi nhỏ để vui chơi dưới nước.',
+    reason:
+      'Phao đồ chơi nhỏ, dễ xẹp và không có dây để kéo – không đủ an toàn để cứu người đang hoảng loạn.',
+  },
+  {
+    id: 'towel',
+    name: 'Khăn tắm',
+    price: 15,
+    description: 'Khăn bông lớn để lau khô người.',
+    reason: 'Khăn tắm không nổi được – người gặp nạn không thể bám vào để giữ mình trên mặt nước.',
+  },
+  {
+    id: 'goggles',
+    name: 'Kính bơi',
+    price: 15,
+    description: 'Giúp nhìn rõ khi bơi dưới nước.',
+    reason: 'Kính bơi không giúp người gặp nạn nổi lên được.',
   },
 ];
 

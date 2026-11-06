@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { BandageIcon, BoltIcon, PhoneIcon, StarIcon } from '../art/icons';
+import { BandageIcon, BoltIcon, PhoneIcon, ShopIcon, StarIcon } from '../art/icons';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { allRounds, getRound, nextRoundId, scenarioOf } from '../data/sim';
@@ -19,7 +19,7 @@ import {
   starsFor,
 } from '../features/sim/engine';
 import { ItemIcon } from '../features/sim/itemArt';
-import { getItem, type ItemId } from '../features/sim/items';
+import type { ItemId } from '../features/sim/items';
 import { NoseTap } from '../features/sim/NoseTap';
 import {
   DialogueBox,
@@ -36,7 +36,12 @@ import { RoundGuide } from '../features/sim/RoundGuide';
 import { Shop } from '../features/sim/Shop';
 import { Stage } from '../features/sim/Stage';
 import { NOSE_POINT } from '../features/sim/stageLayout';
-import type { OptionId, SimRound, StageState } from '../features/sim/types';
+import { WaterStage, waterTarget } from '../features/sim/WaterStage';
+import { RIGHT_FINDS } from '../features/sim/waterTaskLogic';
+import { BreathOrderTask, CprTask, FindFloatsPanel } from '../features/sim/waterTasks';
+import type { BankItemId } from '../art/WaterScenes';
+import { useAmbience } from '../lib/ambience';
+import type { CameraShot, OptionId, SimRound, SimTask, StageState } from '../features/sim/types';
 import { isRoundUnlocked } from '../features/sim/unlock';
 import { toDateKey } from '../lib/date';
 import { playSound, vibrate } from '../lib/sound';
@@ -55,9 +60,66 @@ export function Play() {
   return <RoundSession key={round.id} round={round} />;
 }
 
-const TASK_ITEM: Record<'ice-pack' | 'call-115', ItemId> = {
-  'ice-pack': 'ice-pack',
-  'call-115': 'phone',
+type ItemTask = 'ice-pack' | 'call-115' | 'rescue-ring';
+const isItemTask = (t: SimTask | undefined): t is ItemTask =>
+  t === 'ice-pack' || t === 'call-115' || t === 'rescue-ring';
+
+/** Item tasks: what to use, the checklist, and the scene change once the item is applied. */
+const ITEM_TASKS: Record<
+  ItemTask,
+  {
+    item: ItemId;
+    title: string;
+    steps: string[];
+    appliedText?: string;
+    /** Shown on the stage as soon as the item is applied. */
+    applied?: Partial<StageState>;
+    /** Applied when the player continues. */
+    done?: Partial<StageState>;
+    optional?: boolean;
+    /** The shop marks the right item (off when choosing it is the challenge). */
+    hintItem: boolean;
+  }
+> = {
+  'ice-pack': {
+    item: 'ice-pack',
+    title: 'Hãy dùng túi chườm lạnh cho em trai của bạn!',
+    steps: [
+      'Mua túi chườm ở Cửa hàng 🏪 (40 băng gạc).',
+      'Lấy túi chườm trong Túi đồ 🎒.',
+      'Kéo túi chườm lên mũi em trai.',
+    ],
+    appliedText: 'Tốt lắm! Em trai vẫn tiếp tục bóp giữ mũi nhé.',
+    applied: { icePack: true },
+    done: { icePack: true },
+    optional: true,
+    hintItem: true,
+  },
+  'call-115': {
+    item: 'phone',
+    title: 'Hãy gọi cấp cứu 115 cho em trai của bạn!',
+    steps: [
+      'Mua điện thoại ở Cửa hàng 🏪 (30 băng gạc).',
+      'Lấy điện thoại trong Túi đồ 🎒.',
+      'Bấm 115 và gọi.',
+    ],
+    done: { phone: true },
+    hintItem: true,
+  },
+  'rescue-ring': {
+    item: 'life-ring',
+    title: 'Hãy tìm một phương tiện có thể giúp người gặp nạn nổi trên mặt nước!',
+    steps: [
+      'Mở Cửa hàng vật dụng 🏪 và chọn vật dụng phù hợp.',
+      'Lấy vật dụng trong Túi đồ 🎒.',
+      'Kéo phao tới người gặp nạn (hoặc chạm vào vòng tròn).',
+    ],
+    appliedText:
+      'Tuyệt! Người gặp nạn đã bám được phao. Giữ chặt đầu dây – nhân viên cứu hộ đang chạy đến!',
+    applied: { victim: 'float' },
+    done: { victim: 'float', lifeguard: 'near' },
+    hintItem: false,
+  },
 };
 
 function RoundSession({ round }: { round: SimRound }) {
@@ -79,6 +141,10 @@ function RoundSession({ round }: { round: SimRound }) {
   const [dialing, setDialing] = useState(false);
   const [carrying, setCarrying] = useState<ItemId | null>(null);
   const [iceApplied, setIceApplied] = useState(false);
+  const [found, setFound] = useState<BankItemId[]>([]);
+  const [wrongFinds, setWrongFinds] = useState<BankItemId[]>([]);
+  const [lastWrong, setLastWrong] = useState<BankItemId | null>(null);
+  const [compressions, setCompressions] = useState(0);
   const [claimed, setClaimed] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<OptionId | null>(null);
   const recordedAttempt = useRef(0);
@@ -88,14 +154,18 @@ function RoundSession({ round }: { round: SimRound }) {
   const question = round.questions[state.qIndex];
   const beat = state.phase === 'intro' ? round.intro[state.beat] : undefined;
   const task = state.phase === 'task' ? question?.task : undefined;
-  const itemTask = task === 'ice-pack' || task === 'call-115' ? task : undefined;
-  const taskItem = itemTask ? TASK_ITEM[itemTask] : null;
+  const itemTask = isItemTask(task) ? task : undefined;
+  const taskInfo = itemTask ? ITEM_TASKS[itemTask] : null;
+  const taskItem = taskInfo?.item ?? null;
   const ownsTaskItem = taskItem ? (items[taskItem] ?? 0) > 0 : false;
   const score = roundScore(round, state.bolts);
   const stars = starsFor(state.bolts);
   const nextId = nextRoundId(round.id);
   const bagCount = Object.values(items).reduce((n, c) => n + (c ?? 0), 0);
-  const stage = iceApplied ? { ...state.stage, icePack: true } : state.stage;
+  const stage =
+    iceApplied && taskInfo?.applied ? { ...state.stage, ...taskInfo.applied } : state.stage;
+  const water = stage.scene !== 'living-room';
+  useAmbience(round.ambience);
 
   // Persist the result once per attempt, as soon as the round ends.
   useEffect(() => {
@@ -132,14 +202,23 @@ function RoundSession({ round }: { round: SimRound }) {
     }
   };
 
-  const finishTask = (effect?: Partial<StageState>) => {
+  const resetTaskState = () => {
     setCarrying(null);
     setIceApplied(false);
+    setFound([]);
+    setWrongFinds([]);
+    setLastWrong(null);
+    setCompressions(0);
+  };
+
+  const finishTask = (effect?: Partial<StageState>) => {
+    resetTaskState();
     dispatch({ type: 'TASK_DONE', effect });
   };
 
-  const applyIce = () => {
-    if (!useWalletStore.getState().use('ice-pack')) return;
+  /** Drops the carried item (ice pack on the nose, life ring to the person in the water). */
+  const applyItem = () => {
+    if (!carrying || !useWalletStore.getState().use(carrying)) return;
     setCarrying(null);
     setIceApplied(true);
     playSound('found');
@@ -147,14 +226,34 @@ function RoundSession({ round }: { round: SimRound }) {
 
   const useItem = (id: ItemId) => {
     setBagOpen(false);
-    if (id === 'ice-pack') setCarrying('ice-pack');
+    if (id === 'ice-pack' || id === 'life-ring') setCarrying(id);
     if (id === 'phone' && useWalletStore.getState().use('phone')) setDialing(true);
+  };
+
+  const mistake = () => {
+    dispatch({ type: 'MISTAKE' });
+    playSound('wrong');
+    vibrate(150);
+    setFlash((f) => f + 1);
+  };
+
+  const pickBankItem = (id: BankItemId) => {
+    if (RIGHT_FINDS.includes(id)) {
+      setFound((f) => (f.includes(id) ? f : [...f, id]));
+      setLastWrong(null);
+      playSound('found');
+    } else {
+      setWrongFinds((w) => [...w, id]);
+      setLastWrong(id);
+      mistake();
+    }
   };
 
   const retry = (paid: boolean) => {
     if (paid && !useWalletStore.getState().spend(RETRY_COST)) return;
     setClaimed(null);
     setWrongPick(null);
+    resetTaskState();
     dispatch({ type: 'RETRY' });
   };
 
@@ -166,17 +265,18 @@ function RoundSession({ round }: { round: SimRound }) {
     playSound('found');
   };
 
-  /** Is a screen point (viewport px) over the brother's nose? Generous radius for fingers. */
-  const isOverNose = (point: { x: number; y: number }) => {
+  /** Is a screen point (viewport px) over the drop target? Generous radius for fingers. */
+  const isOverTarget = (point: { x: number; y: number }) => {
     const svg = svgRef.current;
     const ctm = svg?.getScreenCTM();
-    if (!svg || !ctm) return false;
-    // Map the nose (room units) to viewport pixels through the zoomed viewBox.
+    const target = water ? waterTarget(stage) : NOSE_POINT;
+    if (!svg || !ctm || !target) return false;
+    // Map the target (scene units) to viewport pixels through the zoomed viewBox.
     const p = svg.createSVGPoint();
-    p.x = NOSE_POINT.x;
-    p.y = NOSE_POINT.y;
+    p.x = target.x;
+    p.y = target.y;
     const nose = p.matrixTransform(ctm);
-    const r = NOSE_POINT.r * 2.4 * Math.hypot(ctm.a, ctm.b);
+    const r = target.r * 2.4 * Math.hypot(ctm.a, ctm.b);
     const dx = point.x - nose.x;
     const dy = point.y - nose.y;
     return dx * dx + dy * dy <= r * r;
@@ -193,31 +293,69 @@ function RoundSession({ round }: { round: SimRound }) {
     (state.phase === 'question' && question) ||
     (state.phase === 'explain' && question) ||
     state.phase === 'task';
+  const compactPanel = task === 'find-floats';
+  const shot: CameraShot =
+    state.phase === 'intro'
+      ? stage.shot
+      : task === 'find-floats'
+        ? 'bank'
+        : task === 'cpr-30'
+          ? 'chest'
+          : task === 'breath-order'
+            ? 'face'
+            : 'focus';
+  const lastScenarioRound = scenario?.rounds.at(-1)?.id === round.id;
+  const nextScenario = nextId && lastScenarioRound ? scenarioOf(nextId) : undefined;
+
+  const dragged = carrying && (
+    <DragItem
+      isOverTarget={isOverTarget}
+      onDrop={applyItem}
+      className="absolute left-[36%] top-[50%] z-30"
+      label={
+        carrying === 'life-ring'
+          ? 'Phao cứu sinh – kéo tới người gặp nạn'
+          : 'Túi đá chườm lạnh – kéo lên mũi em trai'
+      }
+    >
+      <ItemIcon id={carrying} size={72} />
+    </DragItem>
+  );
 
   return (
     <div className="relative h-app overflow-hidden">
-      <Stage
-        ref={svgRef}
-        cast={round.cast}
-        stage={stage}
-        speaker={beat?.kind === 'line' ? beat.speaker : null}
-        mode={state.phase === 'intro' ? 'wide' : 'focus'}
-        focusX={sidePanel ? 0.25 : 0.5}
-        showCloseup={state.phase !== 'intro'}
-        dropTarget={carrying === 'ice-pack'}
-        onTargetTap={applyIce}
-      >
-        {carrying === 'ice-pack' && (
-          <DragItem
-            isOverTarget={isOverNose}
-            onDrop={applyIce}
-            className="absolute left-[36%] top-[50%] z-30"
-            label="Túi đá chườm lạnh – kéo lên mũi em trai"
-          >
-            <ItemIcon id="ice-pack" size={72} />
-          </DragItem>
-        )}
-      </Stage>
+      {water ? (
+        <WaterStage
+          ref={svgRef}
+          cast={round.cast}
+          stage={stage}
+          speaker={beat?.kind === 'line' ? beat.speaker : null}
+          shot={shot}
+          focusX={sidePanel ? (compactPanel ? 0.32 : 0.25) : 0.5}
+          dropTarget={carrying === 'life-ring'}
+          onTargetTap={applyItem}
+          bankPick={
+            task === 'find-floats' ? { found, wrong: wrongFinds, onPick: pickBankItem } : undefined
+          }
+          compressions={compressions}
+        >
+          {dragged}
+        </WaterStage>
+      ) : (
+        <Stage
+          ref={svgRef}
+          cast={round.cast}
+          stage={stage}
+          speaker={beat?.kind === 'line' ? beat.speaker : null}
+          mode={state.phase === 'intro' ? 'wide' : 'focus'}
+          focusX={sidePanel ? 0.25 : 0.5}
+          showCloseup={state.phase !== 'intro'}
+          dropTarget={carrying === 'ice-pack'}
+          onTargetTap={applyItem}
+        >
+          {dragged}
+        </Stage>
+      )}
 
       <Hud
         title={`Tình huống ${scenario?.number} · Màn ${round.code}: ${round.title}`}
@@ -273,19 +411,27 @@ function RoundSession({ round }: { round: SimRound }) {
         </SidePanel>
       )}
       {state.phase === 'task' && (
-        <SidePanel label="Nhiệm vụ tương tác">
+        <SidePanel label="Nhiệm vụ tương tác" compact={compactPanel}>
           {task === 'nose-tap' && <NoseTap onDone={() => finishTask()} />}
-          {itemTask && taskItem && (
+          {itemTask && (
             <ItemTaskPanel
               task={itemTask}
-              item={taskItem}
               owned={ownsTaskItem}
               carrying={carrying === taskItem}
               applied={iceApplied}
               onSkip={() => finishTask()}
-              onContinue={() => finishTask({ icePack: true })}
+              onContinue={() => finishTask(ITEM_TASKS[itemTask].done)}
             />
           )}
+          {task === 'find-floats' && (
+            <FindFloatsPanel
+              found={found}
+              lastWrong={lastWrong}
+              onDone={() => finishTask({ victim: 'float' })}
+            />
+          )}
+          {task === 'cpr-30' && <CprTask onPress={setCompressions} onDone={() => finishTask()} />}
+          {task === 'breath-order' && <BreathOrderTask onDone={() => finishTask()} />}
         </SidePanel>
       )}
 
@@ -299,7 +445,9 @@ function RoundSession({ round }: { round: SimRound }) {
           setShopOpen(false);
           setBankOpen(true);
         }}
-        highlight={taskItem && !ownsTaskItem ? taskItem : null}
+        highlight={taskItem && !ownsTaskItem && taskInfo?.hintItem ? taskItem : null}
+        itemIds={itemTask === 'rescue-ring' ? ['life-ring'] : scenario?.shopItems}
+        decoys={itemTask === 'rescue-ring' && !ownsTaskItem}
         onBought={(id) => {
           if (id === taskItem) {
             setShopOpen(false);
@@ -311,7 +459,7 @@ function RoundSession({ round }: { round: SimRound }) {
       <BagSheet
         open={bagOpen}
         onClose={() => setBagOpen(false)}
-        usable={taskItem && !iceApplied ? [taskItem] : []}
+        usable={taskItem && !iceApplied && !carrying ? [taskItem] : []}
         onUse={useItem}
         onOpenShop={() => {
           setBagOpen(false);
@@ -386,9 +534,16 @@ function RoundSession({ round }: { round: SimRound }) {
               </p>
             )}
             <div className="mt-4 flex flex-col gap-2">
+              {nextScenario && (
+                <p className="text-center text-sm text-ink">
+                  Bạn đã hoàn thành Tình huống {scenario?.number}: {scenario?.title}!
+                </p>
+              )}
               {nextId && (
                 <Button size="lg" block onClick={() => navigate(`/play/${nextId}`)}>
-                  Màn tiếp theo ▸
+                  {nextScenario
+                    ? `Tình huống ${nextScenario.number}: ${nextScenario.title} ▸`
+                    : 'Màn tiếp theo ▸'}
                 </Button>
               )}
               <div className="grid grid-cols-2 gap-2">
@@ -457,34 +612,20 @@ function RoundSession({ round }: { round: SimRound }) {
 
 function ItemTaskPanel({
   task,
-  item,
   owned,
   carrying,
   applied,
   onSkip,
   onContinue,
 }: {
-  task: 'ice-pack' | 'call-115';
-  item: ItemId;
+  task: ItemTask;
   owned: boolean;
   carrying: boolean;
   applied: boolean;
   onSkip: () => void;
   onContinue: () => void;
 }) {
-  const info = getItem(item);
-  const steps =
-    task === 'ice-pack'
-      ? [
-          `Mua túi chườm ở Cửa hàng 🏪 (${info.price} băng gạc).`,
-          'Lấy túi chườm trong Túi đồ 🎒.',
-          'Kéo túi chườm lên mũi em trai.',
-        ]
-      : [
-          `Mua điện thoại ở Cửa hàng 🏪 (${info.price} băng gạc).`,
-          'Lấy điện thoại trong Túi đồ 🎒.',
-          'Bấm 115 và gọi.',
-        ];
+  const info = ITEM_TASKS[task];
   const current = applied ? 3 : carrying ? 2 : owned ? 1 : 0;
 
   return (
@@ -495,15 +636,19 @@ function ItemTaskPanel({
     >
       <div className="ink-border rounded-card bg-[#fff1c2] p-4 shadow-soft short:rounded-xl short:p-2">
         <div className="flex items-center gap-2 short:[&>svg]:h-7 short:[&>svg]:w-7">
-          {task === 'call-115' ? <PhoneIcon size={40} /> : <ItemIcon id="ice-pack" size={40} />}
+          {task === 'call-115' ? (
+            <PhoneIcon size={40} />
+          ) : task === 'ice-pack' ? (
+            <ItemIcon id="ice-pack" size={40} />
+          ) : (
+            <ShopIcon size={40} />
+          )}
           <p className="font-display text-xl leading-snug text-navy short:text-[15px] short:leading-tight">
-            {task === 'call-115'
-              ? 'Hãy gọi cấp cứu 115 cho em trai của bạn!'
-              : 'Hãy dùng túi chườm lạnh cho em trai của bạn!'}
+            {info.title}
           </p>
         </div>
         <ol className="mt-3 space-y-1.5 short:mt-1 short:space-y-0.5 short:[&>li]:text-[12px] short:[&>li]:leading-snug">
-          {steps.map((s, i) => (
+          {info.steps.map((s, i) => (
             <li
               key={s}
               className={
@@ -519,12 +664,12 @@ function ItemTaskPanel({
           ))}
         </ol>
       </div>
-      {applied && (
+      {applied && info.appliedText && (
         <p
           role="status"
           className="ink-border rounded-2xl bg-[#eef7e6] p-3 text-[15px] text-navy short:p-1.5 short:text-[12px]"
         >
-          Tốt lắm! Em trai vẫn tiếp tục bóp giữ mũi nhé.
+          {info.appliedText}
         </p>
       )}
       <div className="flex flex-col gap-2 short:gap-1">
@@ -533,7 +678,7 @@ function ItemTaskPanel({
             Tiếp tục ▸
           </Button>
         )}
-        {task === 'ice-pack' && !applied && (
+        {info.optional && !applied && (
           <Button variant="secondary" block onClick={onSkip}>
             Bỏ qua (không bắt buộc)
           </Button>

@@ -193,6 +193,7 @@ function RoundDetails({
   onGuide: () => void;
 }) {
   const record = useProgressStore((s) => s.rounds[round.id]);
+  const prev = allRounds[allRounds.findIndex((r) => r.id === round.id) - 1];
   return (
     <div className="grid gap-3 @xl:grid-cols-[1.3fr_1fr]">
       <div className="space-y-2">
@@ -229,7 +230,11 @@ function RoundDetails({
           <HelpIcon size={26} /> Hướng dẫn
         </Button>
         <Button size="lg" block disabled={!unlocked} onClick={onPlay}>
-          {unlocked ? (record ? 'Chơi lại' : 'Bắt đầu') : 'Hoàn thành màn trước để mở khoá'}
+          {unlocked
+            ? record
+              ? 'Chơi lại'
+              : 'Bắt đầu'
+            : `Hoàn thành Màn ${prev?.code ?? 'trước'} để mở khoá`}
         </Button>
       </div>
     </div>

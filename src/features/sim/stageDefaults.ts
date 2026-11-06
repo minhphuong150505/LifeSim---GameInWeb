@@ -1,0 +1,23 @@
+import type { StageState } from './types';
+
+/** Neutral stage every round starts from; data files only spell out what differs. */
+export const BASE_STAGE: StageState = {
+  scene: 'living-room',
+  posture: 'upright',
+  pinch: false,
+  mouthOpen: false,
+  bleeding: false,
+  dizzy: false,
+  icePack: false,
+  clock: null,
+  phone: false,
+  comfort: false,
+  ambulance: false,
+  victim: 'swim',
+  lifeguard: 'seat',
+  shot: 'focus',
+  called: false,
+  hands: false,
+  airway: false,
+  mouthClear: false,
+};

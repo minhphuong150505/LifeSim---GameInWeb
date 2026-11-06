@@ -242,13 +242,26 @@ export function MissionPopup({ text, onStart }: { text: string; onStart: () => v
 }
 
 /** Right-hand popup holding the question / feedback / task; the scene stays visible on the left. */
-export function SidePanel({ children, label }: { children: React.ReactNode; label: string }) {
+export function SidePanel({
+  children,
+  label,
+  compact,
+}: {
+  children: React.ReactNode;
+  label: string;
+  /** Narrow panel, leaving most of the scene free to tap (find-the-object tasks). */
+  compact?: boolean;
+}) {
   return (
     <motion.section
       aria-label={label}
       initial={{ x: 60, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="ink-border absolute right-[max(8px,env(safe-area-inset-right))] top-[70px] z-20 flex max-h-[calc(100%-80px)] w-[min(54%,620px)] flex-col overflow-hidden rounded-[22px] bg-paper p-3 pb-2 shadow-pop short:bottom-1 short:top-[46px] short:rounded-2xl short:p-2 short:pb-1.5 tiny:top-[40px]"
+      className={cn(
+        'ink-border absolute right-[max(8px,env(safe-area-inset-right))] top-[70px] z-20 flex max-h-[calc(100%-80px)] flex-col',
+        'overflow-hidden rounded-[22px] bg-paper p-3 pb-2 shadow-pop short:bottom-1 short:top-[46px] short:rounded-2xl short:p-2 short:pb-1.5 tiny:top-[40px]',
+        compact ? 'w-[min(34%,380px)]' : 'w-[min(54%,620px)]',
+      )}
     >
       <FitContent innerClassName="flex flex-col">{children}</FitContent>
     </motion.section>
@@ -281,37 +294,110 @@ export function QuestionPanel({
         </span>
         {question.prompt}
       </h2>
-      <ul className="flex flex-col gap-1.5 short:gap-1">
-        {question.options.map((o) => {
-          const wrong = wrongIds.includes(o.id);
-          return (
-            <li key={o.id}>
-              <motion.button
-                type="button"
-                disabled={wrong}
-                onClick={() => onAnswer(o.id)}
-                whileTap={{ scale: 0.98 }}
-                animate={wrong ? { x: [0, -10, 10, -7, 7, 0] } : { x: 0 }}
-                transition={{ duration: 0.4 }}
-                aria-label={`${LETTERS[o.id]}. ${o.text}${wrong ? ' (đã chọn sai)' : ''}`}
-                className="ink-border relative flex w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl"
-              >
-                <OptionArt
-                  art={o.art}
-                  className="aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg"
-                />
-                <span className="ink-border grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent font-display text-lg text-navy short:h-5 short:w-5 short:text-xs">
-                  {LETTERS[o.id]}
-                </span>
-                <span className="flex-1 text-[17px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]">
-                  {o.text}
-                </span>
-              </motion.button>
-            </li>
-          );
-        })}
-      </ul>
+      <div className={cn(question.figure && 'flex items-stretch gap-2')}>
+        {question.figure === 'chest-spots' && <ChestSpots wrongIds={wrongIds} onPick={onAnswer} />}
+        <ul
+          className={cn('flex flex-col gap-1.5 short:gap-1', question.figure && 'min-w-0 flex-1')}
+        >
+          {question.options.map((o) => {
+            const wrong = wrongIds.includes(o.id);
+            return (
+              <li key={o.id}>
+                <motion.button
+                  type="button"
+                  disabled={wrong}
+                  onClick={() => onAnswer(o.id)}
+                  whileTap={{ scale: 0.98 }}
+                  animate={wrong ? { x: [0, -10, 10, -7, 7, 0] } : { x: 0 }}
+                  transition={{ duration: 0.4 }}
+                  aria-label={`${LETTERS[o.id]}. ${o.text}${wrong ? ' (đã chọn sai)' : ''}`}
+                  className="ink-border relative flex w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl"
+                >
+                  {!question.figure && (
+                    <OptionArt
+                      art={o.art}
+                      className="aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg"
+                    />
+                  )}
+                  <span className="ink-border grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent font-display text-lg text-navy short:h-5 short:w-5 short:text-xs">
+                    {LETTERS[o.id]}
+                  </span>
+                  <span className="flex-1 text-[17px] font-semibold leading-snug text-navy short:text-[12.5px] short:leading-tight tiny:text-[11.5px]">
+                    {o.text}
+                  </span>
+                </motion.button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </motion.div>
+  );
+}
+
+/** Top view of a torso with the three spots A/B/C the player can tap (CPR hand position). */
+const SPOTS_ABC: { id: OptionId; x: number; y: number }[] = [
+  { id: 'a', x: 75, y: 34 },
+  { id: 'b', x: 50, y: 92 },
+  { id: 'c', x: 50, y: 49 },
+];
+
+function ChestSpots({
+  wrongIds,
+  onPick,
+}: {
+  wrongIds: OptionId[];
+  onPick: (id: OptionId) => void;
+}) {
+  return (
+    <div className="ink-border relative aspect-[4/5] w-[34%] max-w-[190px] shrink-0 overflow-hidden rounded-2xl bg-[#cfe7b4] short:rounded-xl">
+      <svg viewBox="0 0 100 125" className="absolute inset-0 h-full w-full" aria-hidden>
+        <circle cx={50} cy={-2} r={16} fill="#f6d2b0" stroke="#3b2d26" strokeWidth={2.5} />
+        <path d="M44 12 H56 V20 H44 Z" fill="#f6d2b0" stroke="#3b2d26" strokeWidth={2} />
+        <path
+          d="M18 26 Q50 14 82 26 L86 118 H14 Z"
+          fill="#f29e4c"
+          stroke="#3b2d26"
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+        />
+        <path
+          d="M18 26 L6 80 M82 26 L94 80"
+          stroke="#3b2d26"
+          strokeWidth={9}
+          strokeLinecap="round"
+        />
+        <path
+          d="M18 26 L6 80 M82 26 L94 80"
+          stroke="#f6d2b0"
+          strokeWidth={5.5}
+          strokeLinecap="round"
+        />
+        <path d="M50 28 V66" stroke="#3b2d26" strokeWidth={1.4} opacity={0.35} />
+        <circle cx={36} cy={47} r={1.8} fill="#3b2d26" opacity={0.5} />
+        <circle cx={64} cy={47} r={1.8} fill="#3b2d26" opacity={0.5} />
+        <path d="M36 47 H64" stroke="#3b2d26" strokeWidth={1} strokeDasharray="2 2" opacity={0.4} />
+      </svg>
+      {SPOTS_ABC.map((p) => {
+        const wrong = wrongIds.includes(p.id);
+        return (
+          <button
+            key={p.id}
+            type="button"
+            disabled={wrong}
+            onClick={() => onPick(p.id)}
+            aria-label={`Vị trí ${LETTERS[p.id]}`}
+            className={cn(
+              'ink-border absolute grid h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full font-display text-lg shadow-pop short:h-6 short:w-6 short:text-sm',
+              wrong ? 'bg-gray-300 text-navy/40 line-through' : 'bg-accent text-navy',
+            )}
+            style={{ left: `${p.x}%`, top: `${(p.y / 125) * 100}%` }}
+          >
+            {LETTERS[p.id]}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -406,7 +492,7 @@ export function WrongPanel({
           </p>
         )}
         <p className="mt-1 short:mt-0.5">
-          💡 {question.hint ?? 'Hãy nghĩ xem cách nào an toàn nhất cho em trai nhé.'}
+          💡 {question.hint ?? 'Hãy nghĩ xem cách nào an toàn nhất cho người gặp nạn nhé.'}
         </p>
       </GuideSays>
       <Button size="lg" block className="shrink-0" onClick={onRetry}>
@@ -416,6 +502,10 @@ export function WrongPanel({
   );
 }
 
+/**
+ * Right answer: one clean card – a big green tick and "CHÍNH XÁC!" in the middle, the
+ * explanation underneath (no nested frames, per the design feedback).
+ */
 export function ExplainPanel({
   question,
   firstTry,
@@ -425,45 +515,65 @@ export function ExplainPanel({
   firstTry: boolean;
   onAck: () => void;
 }) {
-  const answer = question.options.find((o) => o.id === question.correctId);
+  const img = question.explainImage;
   return (
     <motion.div
       role="status"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="flex flex-col gap-2 short:gap-1.5"
+      className="relative flex flex-col items-center gap-2 text-center short:gap-1"
     >
-      <GuideSays
-        tone="good"
-        title={firstTry ? 'Chính xác!' : 'Đúng rồi!'}
-        aside={
-          <span className="flex items-center font-display text-lg text-navy short:text-sm">
-            +1 <HeartIcon size={24} />
-          </span>
-        }
+      <span
+        className="absolute right-0 top-0 flex items-center font-display text-lg text-navy short:text-sm short:[&_svg]:h-5 short:[&_svg]:w-5"
+        aria-label="+1 trái tim"
       >
-        {answer && (
-          <div className="my-1.5 flex items-center gap-2 short:my-0.5 tiny:hidden">
-            <OptionArt
-              art={answer.art}
-              className="aspect-square w-[44px] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-cream short:hidden"
-            />
-            <p className="font-display text-[16px] leading-snug text-navy short:text-[13px]">
-              {LETTERS[answer.id]}. {answer.text}
-            </p>
-          </div>
+        +1 <HeartIcon size={24} />
+      </span>
+      <motion.span
+        initial={{ scale: 0.3, rotate: -20 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 14 }}
+        className="short:[&>svg]:h-12 short:[&>svg]:w-12"
+      >
+        <CheckIcon size={84} />
+      </motion.span>
+      <p className="font-display text-[34px] leading-none tracking-wide text-success-dark short:text-[24px]">
+        {firstTry ? 'CHÍNH XÁC!' : 'ĐÚNG RỒI!'}
+      </p>
+      <div className={cn('flex w-full items-center gap-3 text-left', img ? '' : 'justify-center')}>
+        {img && (
+          <figure className="relative w-[34%] max-w-[180px] shrink-0">
+            <span className="ink-border relative block aspect-square overflow-hidden rounded-xl">
+              <img src={img.src} alt={img.alt} className="h-full w-full object-cover" />
+              {img.marker && (
+                <span
+                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${img.marker.x}%`, top: `${img.marker.y}%` }}
+                >
+                  <span className="block h-9 w-9 animate-pulse rounded-full border-[3px] border-dashed border-primary bg-primary/20" />
+                  <span className="absolute left-1/2 top-full mt-0.5 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-1.5 font-display text-[11px] leading-4 text-white">
+                    {img.marker.label}
+                  </span>
+                </span>
+              )}
+            </span>
+            <figcaption className="mt-0.5 text-[9px] leading-tight text-muted">
+              {img.credit}
+            </figcaption>
+          </figure>
         )}
-        <p>
-          <span className="font-bold text-navy">Giải thích: </span>
-          {question.explanation}
-        </p>
-        {question.caption && (
-          <p className="mt-1 text-sm font-semibold text-success-dark short:mt-0.5 short:text-[12px] tiny:hidden">
-            ✨ {question.caption}
+        <div className={cn('min-w-0', img ? 'flex-1' : 'text-center')}>
+          <p className="text-[17px] leading-relaxed text-ink short:text-[12.5px] short:leading-snug tiny:text-[11.5px]">
+            {question.explanation}
           </p>
-        )}
-      </GuideSays>
-      <Button size="lg" variant="green" block className="shrink-0" onClick={onAck}>
+          {question.caption && (
+            <p className="mt-1 text-sm font-semibold text-success-dark short:mt-0.5 short:text-[12px] tiny:hidden">
+              ✨ {question.caption}
+            </p>
+          )}
+        </div>
+      </div>
+      <Button size="lg" variant="green" block className="mt-1 shrink-0" onClick={onAck}>
         Đã hiểu ▸
       </Button>
     </motion.div>

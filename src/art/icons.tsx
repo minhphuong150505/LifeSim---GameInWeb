@@ -496,3 +496,66 @@ export function StationIcon(p: IconProps) {
     </Svg>
   );
 }
+
+export function LifeRingIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M40 30 C46 34 46 42 40 44" fill="none" stroke="#e9d3a6" strokeWidth={3} />
+      <circle cx={22} cy={24} r={17} fill={C.red} {...stroke(3)} />
+      <circle cx={22} cy={24} r={8} fill={C.paper} {...stroke(2.5)} />
+      <g fill={C.white} stroke={INK} strokeWidth={1.6}>
+        <path d="M17 8.2 A17 17 0 0 1 27 8.2 L25.2 16.4 A8 8 0 0 0 18.8 16.4 Z" />
+        <path d="M17 39.8 A17 17 0 0 0 27 39.8 L25.2 31.6 A8 8 0 0 1 18.8 31.6 Z" />
+        <path d="M6.2 19 A17 17 0 0 0 6.2 29 L14.4 27.2 A8 8 0 0 1 14.4 20.8 Z" />
+        <path d="M37.8 19 A17 17 0 0 1 37.8 29 L29.6 27.2 A8 8 0 0 0 29.6 20.8 Z" />
+      </g>
+      <path
+        d="M38 26 C44 28 46 34 42 38 C38 42 40 45 44 46"
+        fill="none"
+        stroke="#c79a6c"
+        strokeWidth={2.6}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export function ToyFloatIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <ellipse cx={24} cy={30} rx={19} ry={11} fill={C.yellow} {...stroke(3)} />
+      <ellipse cx={24} cy={29} rx={8} ry={4} fill={C.paper} {...stroke(2.2)} />
+      <circle cx={36} cy={14} r={7} fill={C.yellow} {...stroke(2.5)} />
+      <path d="M42 14 l5 1.5 -5 2 Z" fill={C.red} {...stroke(1.6)} />
+      <circle cx={37.5} cy={12.5} r={1.4} fill={INK} />
+      <path d="M33 20 C34 24 30 22 31 20" fill={C.yellow} {...stroke(2)} />
+    </Svg>
+  );
+}
+
+export function TowelIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M8 10 H40 V38 Q24 42 8 38 Z" fill={C.blue} {...stroke(3)} />
+      <path d="M8 18 H40 M8 30 H40" stroke={C.white} strokeWidth={3} />
+      <path d="M12 38 v5 M18 39.5 v5 M24 40 v5 M30 39.5 v5 M36 38 v5" {...stroke(2)} />
+    </Svg>
+  );
+}
+
+export function GogglesIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M4 24 C6 16 10 14 12 18 M44 24 C42 16 38 14 36 18" fill="none" {...stroke(3)} />
+      <ellipse cx={15} cy={26} rx={9} ry={7.5} fill={C.ice} {...stroke(3)} />
+      <ellipse cx={33} cy={26} rx={9} ry={7.5} fill={C.ice} {...stroke(3)} />
+      <path d="M22 25 Q24 22 26 25" fill="none" {...stroke(2.5)} />
+      <path
+        d="M11 23 l3 -2 M29 23 l3 -2"
+        stroke={C.white}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
