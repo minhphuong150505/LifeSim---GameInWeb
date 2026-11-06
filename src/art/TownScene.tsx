@@ -71,7 +71,7 @@ export function TownScene({ heroes = true }: { heroes?: boolean }) {
       </defs>
       <rect x={-400} y={-200} width={1600} height={600} fill="url(#town-sky)" />
       <circle cx={660} cy={80} r={38} fill={C.yellow} {...stroke(2.5)} />
-      <Cloud x={90} y={60} s={1.2} />
+      <Cloud x={300} y={135} s={1.1} />
       <Cloud x={380} y={40} />
       <Cloud x={520} y={110} s={0.8} />
       <Cloud x={-120} y={120} />

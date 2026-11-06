@@ -2,27 +2,23 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
-import { COURSES, type Course } from '../../data/courses';
+import { SPONSORED_COURSES, type Course } from '../../data/courses';
 import { cn } from '../../lib/cn';
-import { CourseBanner } from './CourseBanner';
+import { CourseCover } from './CourseBanner';
 
-/** Opens a course: the partner's own page (new tab) if it has one, else the in-game page. */
-export function useOpenCourse() {
-  const navigate = useNavigate();
-  return (course: Course) => {
-    if (course.url) window.open(course.url, '_blank', 'noopener,noreferrer');
-    else navigate(`/course/${course.id}`);
-  };
-}
 
 /**
- * Lobby pop-up (after login and from the "Khoá học" side button): partner courses.
- * Each course has a short introduction; "Xem chi tiết" goes to the course's detail page.
+ * Lobby pop-up shown after logging in: partner course ads. "Đăng ký ngay" opens the
+ * course's detail page (whose back button leads to the Practice Hub, then the lobby).
  */
 export function CoursesPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const openCourse = useOpenCourse();
+  const navigate = useNavigate();
   const [active, setActive] = useState(0);
-  const course = COURSES[active] as Course;
+  const course = SPONSORED_COURSES[active] as Course;
+  const register = () => {
+    onClose();
+    navigate(`/course/${course.id}`);
+  };
 
   return (
     <AnimatePresence>
@@ -50,7 +46,7 @@ export function CoursesPopup({ open, onClose }: { open: boolean; onClose: () => 
               className="wood flex w-[28%] min-w-[150px] flex-col gap-1.5 overflow-y-auto border-r-[2.5px] border-navy p-2"
             >
               <p className="px-1 font-display text-lg text-navy">🎓 Khoá học</p>
-              {COURSES.map((c, i) => (
+              {SPONSORED_COURSES.map((c, i) => (
                 <button
                   key={c.id}
                   type="button"
@@ -74,49 +70,31 @@ export function CoursesPopup({ open, onClose }: { open: boolean; onClose: () => 
               </p>
             </nav>
             <section className="flex min-w-0 flex-1 flex-col">
-              <div
-                className="relative h-[40%] shrink-0 border-b-[2.5px] border-navy p-2"
+              {/* the course's illustration on top, only its name and description below */}
+              <button
+                type="button"
+                onClick={register}
+                aria-label={`Xem khoá ${course.title}`}
+                className="relative h-[58%] shrink-0 overflow-hidden border-b-[2.5px] border-navy"
                 style={{ backgroundColor: course.tone }}
               >
-                <span className="ink-border absolute left-3 top-3 rounded-full bg-paper px-2 font-display text-sm text-navy">
-                  {course.partner}
-                </span>
-                <CourseBanner course={course} />
-              </div>
-              <div className="flex min-h-0 flex-1 flex-col p-3">
-                <h2 className="font-display text-[24px] leading-tight text-navy">{course.title}</h2>
-                <p className="mt-0.5 text-[15px] font-semibold text-navy/85">{course.tagline}</p>
-                <p className="mt-1 line-clamp-3 text-[13px] leading-snug text-ink">
+                <CourseCover course={course} />
+                {!course.banner && (
+                  <span className="ink-border absolute left-3 top-3 rounded-full bg-paper px-2 font-display text-sm text-navy">
+                    {course.partner}
+                  </span>
+                )}
+              </button>
+              <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 pt-2">
+                <h2 className="font-display text-[23px] leading-tight text-navy">{course.title}</h2>
+                <p className="mt-1 line-clamp-3 text-[14px] leading-snug text-ink">
                   {course.description}
                 </p>
-                <ul className="mt-1.5 flex flex-wrap gap-1.5 text-[13px] font-semibold text-navy">
-                  {[course.format, course.duration, course.schedule].map((t) => (
-                    <li key={t} className="ink-border rounded-full bg-cream px-2">
-                      {t}
-                    </li>
-                  ))}
-                </ul>
                 <div className="mt-auto flex items-center justify-end gap-2 pt-2">
-                  <p className="mr-auto font-display text-2xl text-primary-dark">
-                    {course.price}
-                    {course.oldPrice && (
-                      <span className="ml-1.5 text-base text-muted line-through">
-                        {course.oldPrice}
-                      </span>
-                    )}
-                  </p>
                   <Button variant="secondary" onClick={onClose}>
                     Đóng
                   </Button>
-                  <Button
-                    variant="green"
-                    onClick={() => {
-                      onClose();
-                      openCourse(course);
-                    }}
-                  >
-                    Xem chi tiết ▸
-                  </Button>
+                  <Button onClick={register}>Đăng ký ngay ▸</Button>
                 </div>
               </div>
             </section>

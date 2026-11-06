@@ -36,7 +36,9 @@
   --color-wood-dark: #a8743f;
   --color-sky: #cfe9ef;
 
-  --font-display: 'Itim', 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-display: 'Baloo 2', 'Be Vietnam Pro', system-ui, sans-serif;
+  /* Rounder hand-lettered face kept for in-round content (dialogue, answers). */
+  --font-play: 'Itim', 'Be Vietnam Pro', system-ui, sans-serif;
   --font-body: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius-card: 20px;
@@ -64,11 +66,23 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.15;
 }
 
-/* Itim has a single weight; never fake a bold version of it. */
+h1,
+h2,
+h3,
+.font-display {
+  font-weight: 700;
+}
+
+/* Inside a round the display face stays Itim (single weight). */
+.play-font {
+  --font-display: var(--font-play);
+}
+
+/* Never fake a bold version of a font. */
 h1,
 h2,
 h3,

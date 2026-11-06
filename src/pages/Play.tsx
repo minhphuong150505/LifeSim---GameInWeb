@@ -323,7 +323,7 @@ function RoundSession({ round }: { round: SimRound }) {
   );
 
   return (
-    <div className="relative h-app overflow-hidden">
+    <div className="play-font relative h-app overflow-hidden">
       {water ? (
         <WaterStage
           ref={svgRef}

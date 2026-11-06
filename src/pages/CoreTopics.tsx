@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LockIcon, StarIcon } from '../art/icons';
 import { TopicArt } from '../art/TopicArt';
 import { PageHeader } from '../components/PageHeader';
+import { ShopButton } from '../features/sim/ShopButton';
 import { simScenarios, upcomingScenarios } from '../data/sim';
 import type { Topic } from '../data/topics';
 import { cn } from '../lib/cn';
@@ -57,7 +58,11 @@ export function CoreTopics() {
 
   return (
     <div className="flex min-h-app flex-col">
-      <PageHeader title="Core game" subtitle="Chọn một chủ đề để xem các màn chơi." />
+      <PageHeader
+        title="Core game"
+        subtitle="Chọn một chủ đề để xem các màn chơi."
+        right={<ShopButton />}
+      />
       <ul
         className="scroll-row mx-auto flex w-full max-w-6xl flex-1 items-stretch gap-3 overflow-x-auto px-4 pb-3"
         aria-label="Chủ đề"
@@ -84,7 +89,7 @@ export function CoreTopics() {
               <p className="px-3 pt-2 text-center font-display text-[22px] leading-tight text-navy">
                 {c.title}
               </p>
-              <div className="ink-border relative mx-2 mt-1 min-h-[110px] flex-1 overflow-hidden rounded-2xl bg-paper">
+              <div className="ink-border relative mx-2 mt-1 block min-h-[110px] w-[calc(100%-1rem)] flex-1 self-stretch overflow-hidden rounded-2xl bg-paper">
                 <TopicArt
                   topic={c.topic}
                   className={cn('absolute inset-0 h-full w-full', c.locked && 'grayscale')}

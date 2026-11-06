@@ -2,17 +2,14 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  AdBagIcon,
   BookIcon,
+  CapIcon,
   FlameIcon,
   GearIcon,
-  HelpIcon,
-  CapIcon,
-  PartyIcon,
-  StationIcon,
-  PinIcon,
   PlayIcon,
   ScrollIcon,
-  ShopIcon,
+  StationIcon,
   TrophyIcon,
 } from '../art/icons';
 import { LivingRoom, ROOM_H, ROOM_W } from '../art/LivingRoom';
@@ -23,6 +20,7 @@ import { allRounds, scenarioOf } from '../data/sim';
 import { CoursesPopup } from '../features/courses/CoursesPopup';
 import { MissionsModal } from '../features/lobby/MissionsModal';
 import { SettingsModal } from '../features/lobby/SettingsModal';
+import { StreetAdPopup } from '../features/lobby/StreetAdPopup';
 import {
   claimableCount,
   missionsDoneCount,
@@ -31,7 +29,6 @@ import {
 } from '../features/missions/missionLogic';
 import { usePlayerLevel } from '../features/profile/usePlayerLevel';
 import { BandageBank } from '../features/sim/BandageBank';
-import { Shop } from '../features/sim/Shop';
 import { nextRoundToPlay } from '../features/sim/unlock';
 import { activeStreak } from '../features/streak/streakLogic';
 import { cn } from '../lib/cn';
@@ -39,7 +36,8 @@ import { toDateKey } from '../lib/date';
 import { useMissionStore } from '../store/missions';
 import { useProgressStore } from '../store/progress';
 import { useSessionStore } from '../store/session';
-import { attemptsLeft, useStreakStore } from '../store/streak';
+import { useStreakStore } from '../store/streak';
+import { useStreetAdStore } from '../store/streetAds';
 import { useUserStore } from '../store/user';
 
 function SideButton({
@@ -112,7 +110,9 @@ function BigButton({
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-display text-[36px] leading-[1.05] text-navy">{title}</span>
+        <span className="block truncate font-display text-[30px] leading-[1.1] text-navy">
+          {title}
+        </span>
         <span className="mt-0.5 line-clamp-2 block text-[15px] font-semibold leading-snug text-navy/85">
           {subtitle}
         </span>
@@ -124,7 +124,7 @@ function BigButton({
   );
 }
 
-/** Step 2 – main screen: profile, missions character, Core game / Streak / Hub and side menu. */
+/** Step 2 – main screen: profile, missions character, the four main modes and side menu. */
 export function Home() {
   const navigate = useNavigate();
   const nickname = useUserStore((s) => s.nickname);
@@ -135,14 +135,13 @@ export function Home() {
   const newsSeen = useSessionStore((s) => s.newsSeen);
   const markNewsSeen = useSessionStore((s) => s.markNewsSeen);
   const { level, into, needed } = usePlayerLevel();
-  const [panel, setPanel] = useState<'missions' | 'settings' | 'shop' | 'bank' | 'courses' | null>(
-    null,
-  );
+  const [panel, setPanel] = useState<'missions' | 'settings' | 'bank' | 'street' | null>(null);
+  useStreetAdStore((s) => s.count);
+  const adsLeft = useStreetAdStore.getState().left();
 
   const today = toDateKey();
   const streakDays = activeStreak(streak, today);
   const todayResult = streak.results[today];
-  const triesLeft = attemptsLeft(todayResult);
   const next = nextRoundToPlay(allRounds, records);
   const nextScenario = next ? scenarioOf(next.id) : undefined;
 
@@ -207,36 +206,8 @@ export function Home() {
               </span>
             </span>
           </button>
-          <button
-            type="button"
-            onClick={() => setPanel('settings')}
-            aria-label="Cài đặt"
-            className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper shadow-pop"
-          >
-            <GearIcon size={32} />
-          </button>
-          <motion.button
-            type="button"
-            onClick={() => navigate('/team')}
-            aria-label="Sự kiện 5v5"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 1.8 }}
-            className="ink-border flex h-12 shrink-0 items-center gap-1.5 rounded-2xl bg-[#bfe3a6] pl-1.5 pr-3 font-display text-lg text-navy shadow-pop"
-          >
-            <PartyIcon size={34} />
-            Sự kiện 5v5
-          </motion.button>
           <span className="flex-1" />
           <CurrencyPill onClick={() => setPanel('bank')} />
-          <button
-            type="button"
-            onClick={() => setPanel('shop')}
-            aria-label="Cửa hàng vật dụng"
-            className="ink-border flex h-12 shrink-0 items-center gap-1.5 rounded-2xl bg-paper pl-1.5 pr-3 font-display text-lg text-navy shadow-pop"
-          >
-            <ShopIcon size={34} />
-            Cửa hàng
-          </button>
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,0.78fr)_minmax(0,1.5fr)_auto] gap-x-4 pt-2">
@@ -275,16 +246,42 @@ export function Home() {
               title="Nhân vật của bạn"
               className="min-h-0 w-auto flex-1 aspect-[11/16] max-w-full"
             />
+            {/* bottom-left corner: settings, and the bag of rewarded ads */}
+            <div className="absolute bottom-0 left-0 z-10 flex flex-col items-center gap-2">
+              <motion.button
+                type="button"
+                onClick={() => setPanel('street')}
+                aria-label={`Xem quảng cáo nhận quà (còn ${adsLeft} lượt hôm nay)`}
+                animate={adsLeft > 0 ? { y: [0, -5, 0] } : undefined}
+                transition={{ repeat: Infinity, duration: 1.6 }}
+                className="relative grid h-[62px] w-[62px] place-items-center drop-shadow-[0_3px_0_#3b2d26]"
+              >
+                <AdBagIcon size={62} />
+                {adsLeft > 0 && (
+                  <span className="ink-border absolute -right-1.5 -top-1 grid h-6 min-w-6 place-items-center rounded-full bg-primary px-1 font-display text-sm leading-none text-white">
+                    {adsLeft}
+                  </span>
+                )}
+              </motion.button>
+              <button
+                type="button"
+                onClick={() => setPanel('settings')}
+                aria-label="Cài đặt"
+                className="ink-border grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper shadow-pop"
+              >
+                <GearIcon size={32} />
+              </button>
+            </div>
           </div>
 
           {/* center: main modes */}
           <div className="flex min-h-0 flex-col justify-center gap-4 py-3">
             <BigButton
-              title="Core game"
+              title="Chơi ngay"
               subtitle={
                 next && nextScenario
                   ? `Tiếp: ${nextScenario.title} · Màn ${next.code} – ${next.title}`
-                  : 'Chọn chủ đề và màn chơi'
+                  : 'Khám phá và xử lý các tình huống sơ cấp cứu'
               }
               icon={<PlayIcon size={34} />}
               tone="#ec6a4c"
@@ -292,29 +289,29 @@ export function Home() {
               delay={0.05}
             />
             <BigButton
-              title="Streak"
-              subtitle={
-                todayResult?.passed
-                  ? `Chuỗi ${streakDays} ngày · Hôm nay đã xong ✓`
-                  : `Chuỗi ${streakDays} ngày · còn ${triesLeft} lượt hôm nay`
-              }
-              icon={<FlameIcon size={38} lit={streakDays > 0} />}
-              tone="#ffd23f"
-              onClick={() => navigate('/daily')}
-              delay={0.12}
-            />
-            <BigButton
-              title="Trạm cứu hộ"
-              subtitle="Dùng băng gạc trang trí trạm của riêng bạn"
+              title="Trạm cứu hộ của tôi"
+              subtitle="Tích lũy băng gạc và trang trí trạm cứu hộ"
               icon={<StationIcon size={36} />}
               tone="#7cb8e4"
               onClick={() => navigate('/station')}
+              delay={0.12}
+            />
+            <BigButton
+              title="Nhiệm vụ mỗi ngày"
+              subtitle={
+                todayResult?.passed
+                  ? `Hoàn thành nhiệm vụ hằng ngày để nhận thưởng · Chuỗi ${streakDays} ngày ✓`
+                  : 'Hoàn thành nhiệm vụ hằng ngày để nhận thưởng'
+              }
+              icon={<ScrollIcon size={36} />}
+              tone="#ffd23f"
+              onClick={() => navigate('/daily')}
               delay={0.19}
             />
             <BigButton
-              title="Hub"
-              subtitle="Tìm khoá học sơ cứu thực tế gần bạn"
-              icon={<PinIcon size={36} />}
+              title="Khám phá khóa học"
+              subtitle="Đăng ký ngay các khóa học sơ cấp cứu thực tế"
+              icon={<CapIcon size={36} />}
               tone="#86c06c"
               onClick={() => navigate('/hub')}
               delay={0.26}
@@ -327,38 +324,27 @@ export function Home() {
             className="flex min-h-0 flex-col items-center justify-center gap-2 py-1"
           >
             <SideButton
-              label="Hướng dẫn"
-              icon={<HelpIcon size={32} />}
-              onClick={() => navigate('/tutorial')}
-            />
-            <SideButton
               label="Nhiệm vụ"
               icon={<ScrollIcon size={32} />}
               onClick={() => setPanel('missions')}
               badge={claimable}
             />
             <SideButton
-              label="Khoá học"
-              icon={<CapIcon size={32} />}
-              onClick={() => setPanel('courses')}
-              glow
+              label="Cẩm nang"
+              icon={<BookIcon size={32} />}
+              onClick={() => navigate('/handbook')}
             />
             <SideButton
               label="BXH"
               icon={<TrophyIcon size={32} />}
               onClick={() => navigate('/leaderboard')}
             />
-            <SideButton
-              label="Cẩm nang"
-              icon={<BookIcon size={32} />}
-              onClick={() => navigate('/handbook')}
-            />
           </nav>
         </div>
       </div>
 
       <CoursesPopup
-        open={(!newsSeen && panel === null) || panel === 'courses'}
+        open={!newsSeen && panel === null}
         onClose={() => {
           markNewsSeen();
           setPanel(null);
@@ -370,11 +356,7 @@ export function Home() {
         input={missionInput}
       />
       <SettingsModal open={panel === 'settings'} onClose={() => setPanel(null)} />
-      <Shop
-        open={panel === 'shop'}
-        onClose={() => setPanel(null)}
-        onOpenBank={() => setPanel('bank')}
-      />
+      <StreetAdPopup open={panel === 'street'} onClose={() => setPanel(null)} />
       <BandageBank
         open={panel === 'bank'}
         onClose={() => setPanel(null)}

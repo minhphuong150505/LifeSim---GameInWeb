@@ -1,6 +1,33 @@
 import { C, INK, stroke } from '../../art/ink';
 import { Person } from '../../art/Person';
+import { TopicArt } from '../../art/TopicArt';
 import type { Course } from '../../data/courses';
+import { cn } from '../../lib/cn';
+
+/**
+ * Cover of a course in cards, the pop-up and the detail page: the partner's banner image,
+ * a drawn banner for the demo partner, or the course's topic illustration.
+ */
+export function CourseCover({ course, className }: { course: Course; className?: string }) {
+  if (course.banner) {
+    return (
+      <img
+        src={course.banner}
+        alt={course.title}
+        draggable={false}
+        className={cn('h-full w-full object-contain', className)}
+      />
+    );
+  }
+  if (course.sponsored) {
+    return (
+      <div className={cn('h-full w-full p-2', className)} style={{ backgroundColor: course.tone }}>
+        <CourseBanner course={course} />
+      </div>
+    );
+  }
+  return <TopicArt topic={course.cover} className={cn('h-full w-full', className)} />;
+}
 
 /** Illustration for a course card: a trainer with a first-aid dummy or a heart + AED. */
 export function CourseBanner({ course }: { course: Course }) {

@@ -102,6 +102,21 @@ export function BagIcon(p: IconProps) {
   );
 }
 
+/** Green first-aid bag of the lobby's rewarded ads ("Cùng dạo phố nào"). */
+export function AdBagIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path
+        d="M16 15 V10 C16 6 19 4 24 4 C29 4 32 6 32 10 V15"
+        fill="none"
+        {...stroke(3.2)}
+      />
+      <path d="M6 16 H42 L39 43 H9 Z" fill={C.green} {...stroke(3)} strokeLinejoin="round" />
+      <path d="M21 21 h6 v6 h6 v6 h-6 v6 h-6 v-6 h-6 v-6 h6 Z" fill={C.white} {...stroke(2)} />
+    </Svg>
+  );
+}
+
 /** Cửa hàng – little shop front with an awning. */
 export function ShopIcon(p: IconProps) {
   return (

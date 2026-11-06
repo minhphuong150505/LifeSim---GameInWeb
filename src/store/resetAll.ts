@@ -5,6 +5,7 @@ import { useSettingsStore } from './settings';
 import { useStationStore } from './station';
 import { useStreakStore } from './streak';
 import { useUserStore } from './user';
+import { useStreetAdStore } from './streetAds';
 import { useWalletStore } from './wallet';
 
 /** Wipes every piece of player data stored on this device. */
@@ -16,5 +17,6 @@ export function resetAllData(): void {
   useWalletStore.getState().reset();
   useMissionStore.getState().reset();
   useStationStore.getState().reset();
+  useStreetAdStore.getState().reset();
   useSessionStore.getState().logout();
 }

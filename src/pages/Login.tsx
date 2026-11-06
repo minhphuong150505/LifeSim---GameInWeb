@@ -7,6 +7,7 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { InstallTip } from '../components/InstallTip';
 import { Logo } from '../components/Logo';
+import { Modal } from '../components/Modal';
 import { AVATAR_IDS, type AvatarId } from '../data/assets';
 import { DISCLAIMER, SLOGAN } from '../data/copy';
 import { STARTING_BANDAGES } from '../features/sim/engine';
@@ -88,6 +89,7 @@ export function Login() {
   const [editing, setEditing] = useState(!user.onboarded);
   const [nickname, setNickname] = useState(user.nickname);
   const [avatar, setAvatar] = useState<AvatarId>(user.avatar);
+  const [gift, setGift] = useState(false);
 
   // Fake asset loading: fills the bar, then reveals the login panel.
   const progress = useFill(true, LOAD_MS);
@@ -164,8 +166,13 @@ export function Login() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!valid) return;
+                const firstTime = !user.onboarded;
                 user.setProfile(nickname, avatar);
-                enter();
+                // New players get their welcome gift first, then the game loads.
+                if (firstTime) {
+                  playSound('select');
+                  setGift(true);
+                } else enter();
               }}
             >
               <div className="flex items-end gap-2">
@@ -174,7 +181,7 @@ export function Login() {
                     htmlFor="nickname"
                     className="font-display text-lg text-navy short:text-base"
                   >
-                    Tên người chơi
+                    Hãy tạo Nickname của bạn
                   </label>
                   <input
                     id="nickname"
@@ -221,13 +228,6 @@ export function Login() {
                   ))}
                 </div>
               </fieldset>
-              {!user.onboarded && (
-                <p className="mt-1 flex items-center gap-1 text-[13px] text-navy tiny:hidden">
-                  <BandageIcon size={22} />
-                  <b>Quà chào mừng: {STARTING_BANDAGES} băng gạc!</b>
-                  <span className="text-muted">· Dữ liệu chỉ lưu trên thiết bị này.</span>
-                </p>
-              )}
             </motion.form>
           ) : (
             <motion.div
@@ -255,6 +255,34 @@ export function Login() {
           )}
         </AnimatePresence>
       </div>
+
+      <Modal open={gift} title="Quà chào mừng!" tone="green" sparkle>
+        <div className="flex flex-col items-center text-center">
+          <motion.span
+            initial={{ scale: 0.4, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', damping: 10 }}
+            className="flex items-center gap-2 font-display text-[44px] leading-none text-navy"
+          >
+            <BandageIcon size={72} />+{STARTING_BANDAGES}
+          </motion.span>
+          <p className="mt-2 text-[16px] font-semibold text-ink">
+            Chào mừng <b>{nickname.trim()}</b> đến với LifeSim! Tặng bạn {STARTING_BANDAGES} băng
+            gạc để bắt đầu hành trình sơ cứu.
+          </p>
+          <Button
+            size="lg"
+            variant="green"
+            className="mt-3"
+            onClick={() => {
+              setGift(false);
+              enter();
+            }}
+          >
+            Nhận quà ▸
+          </Button>
+        </div>
+      </Modal>
 
       <p className="absolute bottom-1 right-2 hidden max-w-[260px] text-right text-[10px] leading-tight text-navy/70 @5xl:block">
         {DISCLAIMER}

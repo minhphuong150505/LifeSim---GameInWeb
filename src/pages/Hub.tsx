@@ -1,42 +1,31 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { TopicArt } from '../art/TopicArt';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
-import locationsJson from '../data/hubLocations.json';
+import { COURSES, type Course } from '../data/courses';
 import { ALL_TOPICS, TOPIC_EMOJI, TOPIC_LABELS, type Topic } from '../data/topics';
-import {
-  DEFAULT_CENTER,
-  formatVnd,
-  rankLocations,
-  weakestTopic,
-  type HubFilters,
-  type HubLocation,
-  type LatLng,
-  type RankedLocation,
-} from '../features/hub/hubLogic';
+import { CourseCover } from '../features/courses/CourseBanner';
+import { weakestTopic } from '../features/hub/hubLogic';
 import { cn } from '../lib/cn';
-import { WEEKDAY_SHORT } from '../lib/date';
 import { useProgressStore } from '../store/progress';
 
-const locations = locationsJson as HubLocation[];
-
-const DISTANCES = [
-  { label: 'Mọi khoảng cách', value: null },
-  { label: '≤ 5 km', value: 5 },
-  { label: '≤ 10 km', value: 10 },
+const MODES = [
+  { label: 'Tất cả', value: null },
+  { label: 'Trực tiếp', value: 'Trực tiếp' },
+  { label: 'Trực tuyến', value: 'Trực tuyến' },
+  { label: 'Kết hợp', value: 'Kết hợp' },
 ] as const;
 const BUDGETS = [
   { label: 'Tất cả', value: null },
-  { label: '≤ 100k', value: 100_000 },
-  { label: '≤ 300k', value: 300_000 },
+  { label: 'Miễn phí', value: 0 },
+  { label: '≤ 500k', value: 500_000 },
+  { label: '≤ 1 triệu', value: 1_000_000 },
 ] as const;
-const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
-const EMPTY_FILTERS: HubFilters = { maxKm: null, day: null, budgetVnd: null, topic: null };
-type GeoStatus = 'idle' | 'loading' | 'granted' | 'denied';
+type Filters = { mode: Course['mode'] | null; budget: number | null; topic: Topic | null };
+const EMPTY_FILTERS: Filters = { mode: null, budget: null, topic: null };
 
 function Chip({
   active,
@@ -71,51 +60,29 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
-const formatDays = (days: number[]) =>
-  DAY_ORDER.filter((d) => days.includes(d))
-    .map((d) => WEEKDAY_SHORT[d])
-    .join(', ');
-
-/** Cover topic of a course: the recommended one if it teaches it, else its first topic. */
-const coverTopic = (loc: RankedLocation, focus: Topic | null): Topic =>
-  focus && loc.topics.includes(focus) ? focus : (loc.topics[0] ?? 'cpr');
-
-/** Practice Hub: every course listed as a card; filters fold away until the player needs them. */
+/**
+ * Practice Hub: every first-aid course as a card. Tapping a card opens the course's own
+ * detail page (its back button returns here; the Hub's back button returns to the lobby).
+ */
 export function Hub() {
+  const navigate = useNavigate();
   const topicStats = useProgressStore((s) => s.topicStats);
   const focusTopic = useMemo(() => weakestTopic(topicStats), [topicStats]);
-  const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
-  const [geo, setGeo] = useState<GeoStatus>('idle');
-  const [filters, setFilters] = useState<HubFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const ranked = useMemo(
-    () => rankLocations(locations, center, filters, focusTopic),
-    [center, filters, focusTopic],
-  );
-  const selected = ranked.find((l) => l.id === selectedId) ?? null;
-  const activeCount = Object.values(filters).filter((v) => v !== null).length;
-
-  // Ask for the location only on an explicit tap; fall back to Thủ Đức when unavailable.
-  const locate = () => {
-    if (!('geolocation' in navigator)) {
-      setGeo('denied');
-      return;
-    }
-    setGeo('loading');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setGeo('granted');
-      },
-      () => {
-        setCenter(DEFAULT_CENTER);
-        setGeo('denied');
-      },
-      { timeout: 8000, maximumAge: 60_000 },
+  const list = useMemo(() => {
+    const shown = COURSES.filter(
+      (c) =>
+        (filters.mode === null || c.mode === filters.mode) &&
+        (filters.budget === null || c.priceVnd <= filters.budget) &&
+        (filters.topic === null || c.topics.includes(filters.topic)),
     );
-  };
+    // Courses teaching the player's weakest topic first.
+    const hit = (c: Course) => (focusTopic && c.topics.includes(focusTopic) ? 0 : 1);
+    return [...shown].sort((a, b) => hit(a) - hit(b));
+  }, [filters, focusTopic]);
+  const activeCount = Object.values(filters).filter((v) => v !== null).length;
 
   return (
     <div>
@@ -136,11 +103,8 @@ export function Hub() {
             </Button>
           )}
           <h2 className="ml-auto font-display text-xl text-navy" aria-live="polite">
-            {ranked.length} khoá học
+            {list.length} khoá học
           </h2>
-          <span className="w-full text-xs font-semibold text-muted @xl:w-auto">
-            ⚠️ Dữ liệu demo, không phải cơ sở thật.
-          </span>
         </div>
 
         <AnimatePresence initial={false}>
@@ -153,39 +117,14 @@ export function Hub() {
               className="overflow-hidden"
             >
               <Card className="space-y-2 p-3">
-                <FilterRow label="Khoảng cách">
-                  {DISTANCES.map((d) => (
+                <FilterRow label="Hình thức">
+                  {MODES.map((m) => (
                     <Chip
-                      key={d.label}
-                      active={filters.maxKm === d.value}
-                      onClick={() => setFilters((f) => ({ ...f, maxKm: d.value }))}
+                      key={m.label}
+                      active={filters.mode === m.value}
+                      onClick={() => setFilters((f) => ({ ...f, mode: m.value }))}
                     >
-                      {d.label}
-                    </Chip>
-                  ))}
-                  <Chip active={geo === 'granted'} onClick={locate}>
-                    📍 {geo === 'loading' ? 'Đang định vị…' : 'Dùng vị trí của tôi'}
-                  </Chip>
-                </FilterRow>
-                {geo === 'denied' && (
-                  <p role="status" className="pl-24 text-xs text-muted">
-                    Không lấy được vị trí – tính khoảng cách từ trung tâm Thủ Đức.
-                  </p>
-                )}
-                <FilterRow label="Ngày học">
-                  <Chip
-                    active={filters.day === null}
-                    onClick={() => setFilters((f) => ({ ...f, day: null }))}
-                  >
-                    Tất cả
-                  </Chip>
-                  {DAY_ORDER.map((d) => (
-                    <Chip
-                      key={d}
-                      active={filters.day === d}
-                      onClick={() => setFilters((f) => ({ ...f, day: d }))}
-                    >
-                      {WEEKDAY_SHORT[d]}
+                      {m.label}
                     </Chip>
                   ))}
                 </FilterRow>
@@ -193,8 +132,8 @@ export function Hub() {
                   {BUDGETS.map((b) => (
                     <Chip
                       key={b.label}
-                      active={filters.budgetVnd === b.value}
-                      onClick={() => setFilters((f) => ({ ...f, budgetVnd: b.value }))}
+                      active={filters.budget === b.value}
+                      onClick={() => setFilters((f) => ({ ...f, budget: b.value }))}
                     >
                       {b.label}
                     </Chip>
@@ -231,37 +170,40 @@ export function Hub() {
           </p>
         )}
 
-        {ranked.length === 0 && (
+        {list.length === 0 && (
           <Card className="text-center text-sm text-muted">
-            Không có khoá nào khớp bộ lọc. Hãy nới khoảng cách, ngày học hoặc ngân sách.
+            Không có khoá nào khớp bộ lọc. Hãy chọn hình thức, ngân sách hoặc nhu cầu khác.
           </Card>
         )}
         <ul className="grid grid-cols-2 gap-3 pb-2 @xl:grid-cols-3 @5xl:grid-cols-4">
-          {ranked.map((loc) => (
-            <li key={loc.id}>
+          {list.map((c) => (
+            <li key={c.id}>
               <button
                 type="button"
-                onClick={() => setSelectedId(loc.id)}
+                onClick={() => navigate(`/course/${c.id}`)}
                 className="ink-border flex h-full w-full flex-col overflow-hidden rounded-card bg-paper text-left shadow-pop active:translate-y-0.5"
               >
-                <span className="relative block aspect-[16/9] w-full border-b-[2.5px] border-navy">
-                  <TopicArt
-                    topic={coverTopic(loc, focusTopic)}
-                    className="absolute inset-0 h-full w-full"
-                  />
-                  {loc.recommended && (
-                    <span className="absolute left-2 top-2">
+                <span
+                  className="relative block aspect-[16/9] w-full overflow-hidden border-b-[2.5px] border-navy"
+                  style={{ backgroundColor: c.tone }}
+                >
+                  <span className="absolute inset-0">
+                    <CourseCover course={c} />
+                  </span>
+                  <span className="absolute left-2 top-2 flex gap-1">
+                    {focusTopic && c.topics.includes(focusTopic) && (
                       <Badge tone="red">🎯 Gợi ý</Badge>
-                    </span>
-                  )}
+                    )}
+                    {c.sponsored && <Badge tone="navy">Đối tác</Badge>}
+                  </span>
                 </span>
                 <span className="flex flex-1 flex-col p-2.5">
-                  <span className="font-display text-[17px] leading-snug text-navy">
-                    {loc.name}
+                  <span className="font-display text-[17px] leading-snug text-navy">{c.title}</span>
+                  <span className="mt-0.5 text-xs font-semibold text-muted">
+                    🏫 {c.partner} · {c.mode}
                   </span>
-                  <span className="mt-0.5 text-xs font-semibold text-muted">🏫 {loc.provider}</span>
                   <span className="mt-auto pt-1 text-sm font-bold text-primary-dark">
-                    {formatVnd(loc.priceVnd)}
+                    {c.price}
                   </span>
                 </span>
               </button>
@@ -269,54 +211,6 @@ export function Hub() {
           ))}
         </ul>
       </div>
-
-      <Modal
-        open={selected !== null}
-        onClose={() => setSelectedId(null)}
-        title={selected?.name ?? ''}
-        tone="wood"
-        size="lg"
-      >
-        {selected && (
-          <div className="grid gap-3 @xl:grid-cols-[1fr_1.3fr]">
-            <div className="ink-border relative aspect-[4/3] overflow-hidden rounded-2xl">
-              <TopicArt
-                topic={coverTopic(selected, focusTopic)}
-                className="absolute inset-0 h-full w-full"
-              />
-            </div>
-            <div className="space-y-2 text-sm text-ink">
-              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-                <dt className="font-bold text-navy">Đơn vị</dt>
-                <dd>{selected.provider}</dd>
-                <dt className="font-bold text-navy">Địa chỉ</dt>
-                <dd>
-                  {selected.address} · {selected.distanceKm.toFixed(1)} km
-                </dd>
-                <dt className="font-bold text-navy">Lịch học</dt>
-                <dd>
-                  {formatDays(selected.days)}, {selected.time}
-                </dd>
-                <dt className="font-bold text-navy">Học phí</dt>
-                <dd className="font-bold text-primary-dark">{formatVnd(selected.priceVnd)}</dd>
-                <dt className="font-bold text-navy">Cấp độ</dt>
-                <dd>{selected.level}</dd>
-              </dl>
-              <div className="flex flex-wrap gap-1.5">
-                {selected.topics.map((t) => (
-                  <Badge key={t} tone={t === focusTopic ? 'red' : 'navy'}>
-                    {TOPIC_EMOJI[t]} {TOPIC_LABELS[t]}
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-muted">
-                Dữ liệu demo, không phải cơ sở thật. Ở bản chính thức, bạn sẽ đăng ký trực tiếp với
-                đơn vị đào tạo tại đây.
-              </p>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

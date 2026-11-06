@@ -13,6 +13,8 @@ type StationState = {
   layout: Layout;
   /** Buys a variant into the collection. False if already owned or too few bandages. */
   buy: (id: string) => boolean;
+  /** Adds a variant to the collection for free (ad rewards). False if already owned. */
+  grant: (id: string) => boolean;
   /** Puts an owned item on a free spot (or moves it there). False if it does not fit. */
   place: (id: string, spot: Spot) => boolean;
   /** Takes an item out of the room, back into the collection. */
@@ -51,6 +53,11 @@ export const useStationStore = create<StationState>()(
         const variant = getVariant(id);
         if (!variant || get().owned.includes(id)) return false;
         if (!useWalletStore.getState().spend(variant.price)) return false;
+        set((s) => ({ owned: [...s.owned, id] }));
+        return true;
+      },
+      grant: (id) => {
+        if (!getVariant(id) || get().owned.includes(id)) return false;
         set((s) => ({ owned: [...s.owned, id] }));
         return true;
       },

@@ -8,6 +8,7 @@ import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
+import { ShopButton } from '../features/sim/ShopButton';
 import { allRounds, simScenarios } from '../data/sim';
 import { RoundGuide } from '../features/sim/RoundGuide';
 import { CAST_NAMES } from '../features/sim/stageLayout';
@@ -52,6 +53,7 @@ export function Scenarios() {
         title={`${scenario.title}`}
         subtitle={`Tình huống ${scenario.number} · ${scenario.location} · ⭐ ${totalStars}/${n * 3}`}
         backTo="/core"
+        right={<ShopButton />}
       />
       <div className="relative mx-3 mb-3 min-h-0 flex-1 overflow-hidden rounded-[24px] border-[2.5px] border-navy bg-[#cfe7b4]">
         <svg

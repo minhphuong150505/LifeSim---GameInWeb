@@ -85,7 +85,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           )}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="secondary" onClick={() => navigate('/tutorial')}>
-              📖 Xem lại hướng dẫn
+              📖 Hướng dẫn chơi
             </Button>
             <Button
               variant="secondary"
