@@ -692,7 +692,7 @@ function ItemTaskPanel({
               key={s}
               className={
                 i < current
-                  ? 'text-sm text-success-dark line-through'
+                  ? 'text-sm text-success-dark'
                   : i === current
                     ? 'text-[15px] font-bold text-navy'
                     : 'text-sm text-muted'

@@ -34,7 +34,7 @@ const CAMERAS: Record<'pool' | 'lake' | 'shore', Partial<Record<CameraShot, Shot
   lake: {
     wide: { x: 200, y: 30, h: 330 },
     focus: { x: 212, y: 84, h: 206, minW: 380, intro: { x: 205, y: 60, h: 262 } },
-    bank: { x: 72, y: 150, h: 168, minW: 300 },
+    bank: { x: 60, y: 160, h: 172, minW: 340 },
   },
   shore: {
     wide: { x: 200, y: 60, h: 300 },
@@ -514,6 +514,8 @@ function LakeScene({
           </g>
         );
       })}
+      {/* names on top of every tap ring, so neighbouring rings never cover them */}
+      {bankPick && BANK_ITEMS.map((it) => <BankTag key={it.id} id={it.id} x={it.x} y={it.y} />)}
 
       <At to={pos} duration={stage.victim === 'struggle' ? 2 : 1.2}>
         {stage.victim === 'ashore' ? (
@@ -570,6 +572,48 @@ const BANK_LABELS: Record<BankItemId, string> = {
   sandals: 'Đôi dép',
   'small-towel': 'Khăn nhỏ',
 };
+
+/** Short name shown under/over each bank object during the find task, and where it sits. */
+const BANK_TAGS: Record<BankItemId, { text: string; dx?: number; dy: number }> = {
+  'long-branch': { text: 'Cành cây dài', dx: -6, dy: -22 },
+  'short-branch': { text: 'Cành cây ngắn', dx: -4, dy: 14 },
+  sandals: { text: 'Đôi dép', dy: -16 },
+  'plastic-box': { text: 'Thùng nhựa', dy: 23 },
+  backpack: { text: 'Ba lô', dy: 23 },
+  rock: { text: 'Hòn đá', dy: 21 },
+  'small-towel': { text: 'Khăn nhỏ', dy: 17 },
+};
+
+/** Paper pill with the object's name, so the small drawings read at a glance. */
+function BankTag({ id, x, y }: { id: BankItemId; x: number; y: number }) {
+  const tag = BANK_TAGS[id];
+  const size = 7.4;
+  // Itim is narrow: ~0.5 em per character is enough room, plus padding.
+  const w = tag.text.length * size * 0.5 + 7;
+  return (
+    <g transform={`translate(${x + (tag.dx ?? 0)} ${y + tag.dy})`} pointerEvents="none">
+      <rect
+        x={-w / 2}
+        y={-5.8}
+        width={w}
+        height={11.6}
+        rx={5.8}
+        fill="rgb(255 250 238 / 0.94)"
+        stroke={INK}
+        strokeWidth={1.3}
+      />
+      <text
+        y={2.6}
+        textAnchor="middle"
+        fontFamily="Itim, sans-serif"
+        fontSize={size}
+        fill={INK}
+      >
+        {tag.text}
+      </text>
+    </g>
+  );
+}
 
 /* ───────────────────────── 2.3 shore ───────────────────────── */
 
