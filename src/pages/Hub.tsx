@@ -81,7 +81,9 @@ export function Hub() {
     // Partner courses with a banner always lead, then courses teaching the player's
     // weakest topic, then the newest ("Khoá mới nhất").
     const rank = (c: Course) =>
-      (c.banner ? 0 : 4) + (focusTopic && c.topics.includes(focusTopic) ? 0 : 2) + (c.isNew ? 0 : 1);
+      (c.banner ? 0 : 4) +
+      (focusTopic && c.topics.includes(focusTopic) ? 0 : 2) +
+      (c.isNew ? 0 : 1);
     return [...shown].sort((a, b) => rank(a) - rank(b));
   }, [filters, focusTopic]);
   const activeCount = Object.values(filters).filter((v) => v !== null).length;
