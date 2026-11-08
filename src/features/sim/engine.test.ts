@@ -2,6 +2,7 @@ import { allRounds, getRound, nextRoundId, simScenarios } from '../../data/sim';
 import { ADS_PER_DAY, AD_BONUS, useWalletStore } from '../../store/wallet';
 import {
   createRoundReducer,
+  currentTask,
   initialRoundState,
   MAX_BOLTS,
   roundReward,
@@ -13,6 +14,7 @@ import {
 } from './engine';
 import { ART_KEYS } from './optionArt';
 import type { OptionId, SimRound } from './types';
+import { allSignsFound, BREATH_NOW, SIGN_SPOTS, SORT_ITEMS, sortIsRight } from './strokeTaskLogic';
 import { isRoundUnlocked, nextRoundToPlay } from './unlock';
 import {
   BREATH_CARDS,
@@ -33,8 +35,8 @@ const wrongOf = (r: SimRound, i: number): OptionId[] => {
 const rightOf = (r: SimRound, i: number) => r.questions[i]?.correctId as OptionId;
 
 describe('bundled simulation data', () => {
-  it('has scenarios 1 (nosebleed), 2 (drowning) and 5 (burns), with the scripted rewards', () => {
-    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning', 'burns']);
+  it('has scenarios 1 (nosebleed), 2 (drowning), 3 (stroke) and 5 (burns), with the scripted rewards', () => {
+    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning', 'stroke', 'burns']);
     expect(allRounds.map((r) => r.code)).toEqual([
       '1.1',
       '1.2',
@@ -42,16 +44,48 @@ describe('bundled simulation data', () => {
       '2.1',
       '2.2',
       '2.3',
+      '3.1',
+      '3.2',
+      '3.3',
+      '3.4',
       '5.1',
       '5.2',
       '5.3',
     ]);
-    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30, 20, 30, 40, 20, 25, 30]);
-    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7, 5, 5, 5]);
+    expect(allRounds.map((r) => r.reward)).toEqual([
+      20, 25, 30, 20, 30, 40, 20, 25, 30, 35, 20, 25, 30,
+    ]);
+    expect(allRounds.map((r) => r.questions.length)).toEqual([
+      5, 5, 4, 3, 5, 7, 4, 4, 4, 4, 5, 5, 5,
+    ]);
     expect(nextRoundId('1-1')).toBe('1-2');
     expect(nextRoundId('1-3')).toBe('2-1');
-    expect(nextRoundId('2-3')).toBe('5-1');
+    expect(nextRoundId('2-3')).toBe('3-1');
+    expect(nextRoundId('3-4')).toBe('5-1');
     expect(nextRoundId('5-3')).toBeNull();
+  });
+  it('uses the stroke answers from the script: 4 questions + 1 hands-on task per round', () => {
+    const answers = (id: string) =>
+      getRound(id)
+        ?.questions.map((q) => q.correctId)
+        .join('');
+    expect(answers('3-1')).toBe('babc');
+    expect(answers('3-2')).toBe('baca');
+    expect(answers('3-3')).toBe('bacb');
+    expect(answers('3-4')).toBe('babc');
+    const stroke = simScenarios.find((s) => s.id === 'stroke');
+    expect(stroke?.number).toBe(3);
+    expect(stroke?.freeCall).toBe(true);
+    for (const r of stroke?.rounds ?? []) {
+      expect(r.stage.scene).toBe('stroke-room');
+      expect(r.cast).toContain('nam');
+      const tasks = [r.openingTask, ...r.questions.map((q) => q.task)].filter(Boolean);
+      expect(tasks).toHaveLength(1);
+      for (const q of r.questions) expect(q.hint).toBeTruthy();
+    }
+    expect(getRound('3-2')?.openingTask).toBe('dial-115');
+    // Ends with the ambulance crew taking over.
+    expect(getRound('3-4')?.questions.at(-1)?.effect?.ambulance).toBe(true);
   });
   it('uses the burn answers from the script, in the kitchen', () => {
     const answers = (id: string) =>
@@ -105,6 +139,9 @@ describe('bundled simulation data', () => {
       '2.2:find-floats',
       '2.3:cpr-30',
       '2.3:breath-order',
+      '3.1:stroke-signs',
+      '3.3:sort-items',
+      '3.4:breathing-check',
       '5.2:cling-wrap',
       '5.3:call-115',
     ]);
@@ -244,6 +281,40 @@ describe('round engine', () => {
     expect(s.stage).toMatchObject({ airway: true, mouthClear: true });
   });
 
+  it('plays round 3.2: the 115 call task comes right after the story, before question 1', () => {
+    const r = getRound('3-2') as SimRound;
+    const red = createRoundReducer(r);
+    let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
+    expect(s).toMatchObject({ phase: 'task', opening: true, qIndex: 0 });
+    expect(currentTask(r, s)).toBe('dial-115');
+    // Answers are ignored while the call is being made.
+    expect(red(s, { type: 'ANSWER', optionId: rightOf(r, 0) }).hearts).toBe(0);
+    s = red(s, { type: 'TASK_DONE', effect: { called: true } });
+    expect(s).toMatchObject({ phase: 'question', opening: false, qIndex: 0 });
+    expect(s.stage.called).toBe(true);
+    expect(currentTask(r, s)).toBeUndefined();
+    r.questions.forEach((_, i) => {
+      s = red(s, { type: 'ANSWER', optionId: rightOf(r, i) });
+      s = red(s, { type: 'ACK' });
+    });
+    expect(s).toMatchObject({ phase: 'won', hearts: 4 });
+    // A replay starts again with the call.
+    expect(red(s, { type: 'RETRY' })).toMatchObject({ phase: 'task', opening: true });
+  });
+
+  it('records a call made with the always-on 115 button without leaving the question', () => {
+    const r = getRound('3-1') as SimRound;
+    const red = createRoundReducer(r);
+    let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
+    expect(s.stage).toMatchObject({ nam: 'stroke', freeze: true, called: false });
+    s = red(s, { type: 'STAGE', effect: { called: true } });
+    expect(s).toMatchObject({ phase: 'question', qIndex: 0, bolts: 0 });
+    expect(s.stage.called).toBe(true);
+    s = red(s, { type: 'ANSWER', optionId: rightOf(r, 0) });
+    s = red(s, { type: 'ACK' });
+    expect(currentTask(r, s)).toBe('stroke-signs');
+  });
+
   it('scores 3/2/1 stars by bolts and scales points with difficulty', () => {
     expect([0, 1, 2].map(starsFor)).toEqual([3, 2, 1]);
     expect(roundScore(round, 0)).toBe(650);
@@ -286,6 +357,24 @@ describe('drowning tasks', () => {
     expect(BREATH_ORDER).toEqual(['B', 'D', 'A', 'C']);
     expect(BREATH_CARDS.map((c) => c.id).sort()).toEqual(['A', 'B', 'C', 'D']);
     expect(RIGHT_FINDS).toEqual(['long-branch', 'plastic-box']);
+  });
+});
+
+describe('stroke tasks', () => {
+  it('needs the 3 Face–Arm–Speech signs, in any order', () => {
+    expect(SIGN_SPOTS.map((z) => z.label)).toEqual(['Méo miệng', 'Yếu một bên tay', 'Nói khó']);
+    expect(allSignsFound(['speech', 'face'])).toBe(false);
+    expect(allSignsFound(['speech', 'arm', 'face'])).toBe(true);
+  });
+  it('keeps the phone as safe help and the water and aspirin as "do not give"', () => {
+    expect(SORT_ITEMS.map((i) => i.id)).toEqual(['phone', 'water', 'aspirin']);
+    expect(sortIsRight('phone', 'safe')).toBe(true);
+    expect(sortIsRight('phone', 'avoid')).toBe(false);
+    expect(sortIsRight('water', 'avoid')).toBe(true);
+    expect(sortIsRight('aspirin', 'safe')).toBe(false);
+  });
+  it('reads gasping as not breathing normally', () => {
+    expect(BREATH_NOW).toBe('abnormal');
   });
 });
 

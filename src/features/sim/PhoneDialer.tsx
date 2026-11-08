@@ -9,14 +9,29 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 
 type Stage = 'dial' | 'calling' | 'connected';
 
+type DialerProps = {
+  onDone: () => void;
+  /** Shown for any wrong number instead of the default message. */
+  wrongHint?: string;
+  /** What the 115 operator says once connected. */
+  operatorLine?: string;
+  /** The call is already going on: open straight on the connected screen. */
+  connected?: boolean;
+  /** Lets the player put the phone away without calling (the always-on 115 button). */
+  onCancel?: () => void;
+};
+
+const DEFAULT_LINE =
+  'Trung tâm cấp cứu 115 xin nghe! Bạn hãy bình tĩnh cho biết địa chỉ và tình trạng của người bệnh nhé.';
+
 /** Phone keypad → simulated emergency call. Only 115 connects. */
-export function PhoneDialer({ open, onDone }: { open: boolean; onDone: () => void }) {
-  return <AnimatePresence>{open && <Dialer onDone={onDone} />}</AnimatePresence>;
+export function PhoneDialer({ open, ...props }: DialerProps & { open: boolean }) {
+  return <AnimatePresence>{open && <Dialer {...props} />}</AnimatePresence>;
 }
 
-function Dialer({ onDone }: { onDone: () => void }) {
+function Dialer({ onDone, wrongHint, operatorLine, connected, onCancel }: DialerProps) {
   const [number, setNumber] = useState('');
-  const [stage, setStage] = useState<Stage>('dial');
+  const [stage, setStage] = useState<Stage>(connected ? 'connected' : 'dial');
   const [hint, setHint] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,9 +56,9 @@ function Dialer({ onDone }: { onDone: () => void }) {
     }
     vibrate(100);
     setHint(
-      number
-        ? `${number} không phải số cấp cứu. Hãy gọi ${EMERGENCY_NUMBER}!`
-        : `Nhập số ${EMERGENCY_NUMBER} rồi bấm gọi.`,
+      !number
+        ? `Nhập số ${EMERGENCY_NUMBER} rồi bấm gọi.`
+        : (wrongHint ?? `${number} không phải số cấp cứu. Hãy gọi ${EMERGENCY_NUMBER}!`),
     );
   };
 
@@ -92,7 +107,17 @@ function Dialer({ onDone }: { onDone: () => void }) {
                 ))}
               </div>
               <div className="mt-3 grid grid-cols-3 items-center">
-                <span />
+                {onCancel ? (
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    className="mx-auto font-display text-sm text-navy underline"
+                  >
+                    Đóng
+                  </button>
+                ) : (
+                  <span />
+                )}
                 <button
                   type="button"
                   onClick={call}
@@ -134,11 +159,12 @@ function Dialer({ onDone }: { onDone: () => void }) {
           )}
           {stage === 'connected' && (
             <div className="flex flex-1 flex-col gap-3">
-              <p className="text-center font-display text-xl text-success-dark">● Đã kết nối 115</p>
+              <p className="text-center font-display text-xl text-success-dark">
+                ● Đã kết nối tổng đài 115
+              </p>
               <div className="ink-border rounded-2xl bg-paper p-3 text-[15px] leading-relaxed text-navy">
-                <p className="font-display text-primary-dark">Tổng đài 115:</p>
-                “Trung tâm cấp cứu 115 xin nghe! Bạn hãy bình tĩnh cho biết địa chỉ và tình trạng
-                của người bệnh nhé.”
+                <p className="font-display text-primary-dark">Tổng đài 115:</p>“
+                {operatorLine ?? DEFAULT_LINE}”
               </div>
               <p className="text-center text-xs text-muted">
                 Cuộc gọi mô phỏng – trong thực tế hãy gọi 115 khi khẩn cấp.

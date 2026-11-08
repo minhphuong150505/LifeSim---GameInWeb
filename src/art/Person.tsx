@@ -4,7 +4,8 @@ import { LOOKS, type Look, type PersonKind } from './looks';
 export type { Look, PersonKind } from './looks';
 
 export type Eyes = 'open' | 'happy' | 'closed' | 'dizzy' | 'worried' | 'wide';
-export type Mouth = 'smile' | 'open' | 'frown' | 'o' | 'flat' | 'grin';
+/** `droop`: one corner of the mouth hangs down (the viewer's right = the person's left side). */
+export type Mouth = 'smile' | 'open' | 'frown' | 'o' | 'flat' | 'grin' | 'droop';
 export type HeadTilt = 'normal' | 'down' | 'up';
 
 type FaceProps = { eyes?: Eyes; mouth?: Mouth; tilt?: HeadTilt; blood?: boolean };
@@ -49,6 +50,13 @@ function HairBack({ look }: { look: Look }) {
         <>
           <ellipse cx={-29} cy={4} rx={7} ry={11} {...f} />
           <ellipse cx={29} cy={4} rx={7} ry={11} {...f} />
+        </>
+      );
+    case 'elder':
+      return (
+        <>
+          <path d="M-26 -8 C-31 0 -30 10 -24 14 L-21 -4 Z" {...f} />
+          <path d="M26 -8 C31 0 30 10 24 14 L21 -4 Z" {...f} />
         </>
       );
     case 'curly':
@@ -132,6 +140,14 @@ function HairFront({ look }: { look: Look }) {
           d="M-26 2 C-27 -23 -11 -31 1 -31 C17 -31 27 -23 26 2 C24 -6 20 -12 14 -14 C10 -8 -4 -8 -10 -13 C-16 -10 -22 -6 -26 2 Z"
           {...f}
         />
+      );
+    case 'elder':
+      return (
+        <>
+          <path d="M-25 2 C-27 -8 -24 -15 -18 -18 C-17 -10 -19 -4 -25 2 Z" {...f} />
+          <path d="M25 2 C27 -8 24 -15 18 -18 C17 -10 19 -4 25 2 Z" {...f} />
+          <path d="M-9 -16 Q0 -19 9 -16" fill="none" {...stroke(1.4)} opacity={0.35} />
+        </>
       );
     case 'spiky':
       return (
@@ -241,6 +257,21 @@ export function Face({ eyes = 'open', mouth = 'smile', tilt = 'normal', blood }:
         <path d={`M-5 ${my + 2} Q0 ${my - 3} 5 ${my + 2}`} fill="none" {...s} />
       )}
       {mouth === 'flat' && <path d={`M-4 ${my} L4 ${my}`} {...s} />}
+      {mouth === 'droop' && (
+        <>
+          <path
+            d={`M-5 ${my - 1} Q-1 ${my} 2 ${my + 1.5} Q4 ${my + 3} 5 ${my + 5}`}
+            fill="none"
+            {...s}
+          />
+          <path
+            d={`M9 ${my - 4} Q11 ${my} 9 ${my + 4}`}
+            fill="none"
+            {...stroke(1.2)}
+            opacity={0.4}
+          />
+        </>
+      )}
       {mouth === 'o' && <ellipse cx={0} cy={my} rx={2.5} ry={3} fill="#b5473a" {...stroke(2)} />}
       {mouth === 'open' && (
         <ellipse cx={0} cy={my + 1} rx={4.5} ry={4} fill="#b5473a" {...stroke(2)} />
@@ -257,6 +288,8 @@ export function Face({ eyes = 'open', mouth = 'smile', tilt = 'normal', blood }:
   );
 }
 
+const tiltDy = (tilt?: HeadTilt) => (tilt === 'down' ? 5 : tilt === 'up' ? -6 : 0);
+
 export function Head({ look, face }: { look: Look; face?: FaceProps }) {
   return (
     <g>
@@ -270,8 +303,15 @@ export function Head({ look, face }: { look: Look; face?: FaceProps }) {
         opacity={0.55}
       />
       <Face {...face} />
+      {look.mustache && (
+        <path
+          d={`M-7 ${11.5 + tiltDy(face?.tilt)} Q-3.5 ${9 + tiltDy(face?.tilt)} 0 ${11 + tiltDy(face?.tilt)} Q3.5 ${9 + tiltDy(face?.tilt)} 7 ${11.5 + tiltDy(face?.tilt)} Q3.5 ${13.5 + tiltDy(face?.tilt)} 0 ${12.5 + tiltDy(face?.tilt)} Q-3.5 ${13.5 + tiltDy(face?.tilt)} -7 ${11.5 + tiltDy(face?.tilt)} Z`}
+          fill={look.hair}
+          {...stroke(1.4)}
+        />
+      )}
       <HairFront look={look} />
-      {look.hairStyle !== 'cap' && look.hairStyle !== 'buzz' && (
+      {look.hairStyle !== 'cap' && look.hairStyle !== 'buzz' && look.hairStyle !== 'elder' && (
         <path
           d="M-15 -21 Q-8 -27 1 -26.5"
           fill="none"
@@ -311,7 +351,13 @@ export type ArmPose =
   /** Both arms straight down in front, hands on someone lying in front (CPR). */
   | 'press'
   /** Arm raised forward to the side, hand at counter height (hand under the tap). */
-  | 'reach';
+  | 'reach'
+  /** Weak arm hanging loose at the side, hand lower than the other one (stroke). */
+  | 'limp'
+  /** Hand resting against the cheek (recovery position). */
+  | 'cheek'
+  /** Hand on the belly (stomach ache). */
+  | 'belly';
 export type PersonPose = 'stand' | 'sit';
 
 export type PersonProps = FaceProps & {
@@ -336,6 +382,8 @@ export type PersonProps = FaceProps & {
   chestBurn?: boolean;
   /** Blanket wrapped around the body below the burn, keeping her warm. */
   blanket?: boolean;
+  /** Left leg (viewer's right) bent at the knee – the top leg of the recovery position. */
+  knee?: boolean;
   x: number;
   y: number;
   scale?: number;
@@ -372,6 +420,12 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
       return { hand: { x: 4 * side, y: 22 }, elbow: { x: 12 * side, y: -6 } };
     case 'reach':
       return { hand: { x: 36 * side, y: -52 }, elbow: { x: 27 * side, y: -30 } };
+    case 'limp':
+      return { hand: { x: 25 * side, y: 10 }, elbow: { x: 22 * side, y: -12 } };
+    case 'cheek':
+      return { hand: { x: 22 * side, y: headY + 14 }, elbow: { x: 30 * side, y: -40 } };
+    case 'belly':
+      return { hand: { x: 3 * side, y: -10 }, elbow: { x: 19 * side, y: -12 } };
     default:
       return { hand: { x: sx + 6 * side, y: -4 }, elbow: { x: sx + 5 * side, y: -18 } };
   }
@@ -401,6 +455,7 @@ export function Person({
   burnArm,
   chestBurn,
   blanket,
+  knee,
 }: PersonProps) {
   const base = LOOKS[kind];
   const look = lookOverride ?? base;
@@ -526,7 +581,13 @@ export function Person({
   };
 
   // Arms that reach the face are drawn over the head; the rest behind the torso.
-  const front = (p: ArmPose) => p === 'nose' || p === 'phone' || p === 'hold' || p === 'press';
+  const front = (p: ArmPose) =>
+    p === 'nose' ||
+    p === 'phone' ||
+    p === 'hold' ||
+    p === 'press' ||
+    p === 'cheek' ||
+    p === 'belly';
 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -k : k} ${k}) translate(0 ${hipLift})`}>
@@ -547,7 +608,7 @@ export function Person({
       ) : (
         <>
           <Limb d="M-7 0 L-8 28" color={legColor} width={8} />
-          <Limb d="M7 0 L8 28" color={legColor} width={8} />
+          <Limb d={knee ? 'M7 0 L24 12 L16 28' : 'M7 0 L8 28'} color={legColor} width={8} />
           {look.shorts && (
             <>
               <Limb d="M-7 0 L-7.5 11" color={look.pants} width={10} />
@@ -555,7 +616,7 @@ export function Person({
             </>
           )}
           <ellipse cx={-10} cy={30} rx={8} ry={4.6} fill="#8a5a44" {...stroke(2)} />
-          <ellipse cx={10} cy={30} rx={8} ry={4.6} fill="#8a5a44" {...stroke(2)} />
+          <ellipse cx={knee ? 17 : 10} cy={30} rx={8} ry={4.6} fill="#8a5a44" {...stroke(2)} />
           <path
             d="M-14 28.5 q3 -2 6 -1 M6 28.5 q3 -2 6 -1"
             stroke={C.white}
@@ -586,6 +647,13 @@ export function Person({
       )}
       {kind === 'grandma' && (
         <path d="M-15 -8 L15 -8" stroke={INK} strokeWidth={1.6} opacity={0.4} />
+      )}
+      {look.medic && (
+        <g>
+          <path d="M-17 -12 Q0 -8 17 -12" stroke={C.yellow} strokeWidth={3.5} fill="none" />
+          <rect x={3} y={-30} width={9} height={9} rx={2} fill={C.white} {...stroke(1.4)} />
+          <path d="M7.5 -28.5 V-22.5 M4.5 -25.5 H10.5" stroke={C.red} strokeWidth={2} />
+        </g>
       )}
       {chestBurn && (
         <g>

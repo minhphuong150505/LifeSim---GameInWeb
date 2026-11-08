@@ -1,5 +1,13 @@
 export type Topic =
-  'cpr' | 'choking' | 'burn' | 'bleeding' | 'seizure' | 'fainting' | 'nosebleed' | 'drowning';
+  | 'cpr'
+  | 'choking'
+  | 'burn'
+  | 'bleeding'
+  | 'seizure'
+  | 'fainting'
+  | 'nosebleed'
+  | 'drowning'
+  | 'stroke';
 
 export const TOPIC_LABELS: Record<Topic, string> = {
   cpr: 'Ép tim (CPR)',
@@ -10,6 +18,7 @@ export const TOPIC_LABELS: Record<Topic, string> = {
   fainting: 'Ngất',
   nosebleed: 'Chảy máu cam',
   drowning: 'Đuối nước',
+  stroke: 'Đột quỵ',
 };
 
 export const TOPIC_EMOJI: Record<Topic, string> = {
@@ -21,6 +30,7 @@ export const TOPIC_EMOJI: Record<Topic, string> = {
   fainting: '💫',
   nosebleed: '👃',
   drowning: '🏊',
+  stroke: '🧠',
 };
 
 export const ALL_TOPICS = Object.keys(TOPIC_LABELS) as Topic[];

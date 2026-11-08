@@ -27,4 +27,13 @@ export const BASE_STAGE: StageState = {
   wrap: false,
   blanket: false,
   rest: false,
+  nam: 'calm',
+  cup: 'hand',
+  aspirin: 'none',
+  signs: false,
+  alert115: false,
+  freeze: false,
+  banner: null,
+  lanPhone: false,
+  breathing: null,
 };

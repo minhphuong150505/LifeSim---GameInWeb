@@ -12,11 +12,23 @@ type LivingRoomProps = {
   clockMinutes?: number;
   /** Draws attention to the wall clock (timer questions). */
   clockHighlight?: boolean;
+  /** Hour shown by the wall clock (the hour hand points up when left out). */
+  clockHours?: number;
+  /** TV switched on (a show playing on the screen). */
+  tvOn?: boolean;
 };
 
 /** Living room background in the hand-drawn style (viewBox 400×300). */
-export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: LivingRoomProps) {
+export function LivingRoom({
+  ambulance,
+  clockMinutes = 10,
+  clockHighlight,
+  clockHours,
+  tvOn,
+}: LivingRoomProps) {
   const handAngle = (clockMinutes / 60) * 2 * Math.PI;
+  const hourAngle =
+    clockHours === undefined ? 0 : (((clockHours % 12) + clockMinutes / 60) / 12) * 2 * Math.PI;
   return (
     <g>
       <defs>
@@ -136,7 +148,7 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
         {[0, 1, 2, 3].map((i) => (
           <path key={i} d="M0 -15 V-12" transform={`rotate(${i * 90})`} {...stroke(2)} />
         ))}
-        <path d="M0 0 V-9" {...stroke(2.5)} />
+        <path d={`M0 0 L${9 * Math.sin(hourAngle)} ${-9 * Math.cos(hourAngle)}`} {...stroke(2.5)} />
         <path d={`M0 0 L${13 * Math.sin(handAngle)} ${-13 * Math.cos(handAngle)}`} {...stroke(2)} />
         <circle r={2} fill={INK} />
       </g>
@@ -170,13 +182,30 @@ export function LivingRoom({ ambulance, clockMinutes = 10, clockHighlight }: Liv
       ))}
       <path d="M324 202 v7 M386 202 v7" {...stroke(3)} />
       <rect x={326} y={102} width={58} height={42} rx={3} fill="#56616d" {...stroke(2.5)} />
-      <path
-        d="M332 108 L344 108 M332 113 L339 113"
-        stroke={C.white}
-        strokeWidth={2}
-        strokeLinecap="round"
-        opacity={0.6}
-      />
+      {tvOn ? (
+        <g>
+          <rect x={330} y={106} width={50} height={34} rx={2} fill="#9fd8ef" />
+          <path d="M330 130 Q342 122 352 128 Q364 120 380 127 V140 H330 Z" fill={C.grass} />
+          <circle cx={370} cy={114} r={4} fill={C.yellow} />
+          <path d="M340 128 l4 -9 4 9 Z" fill={C.red} />
+          <rect x={330} y={106} width={50} height={34} rx={2} fill={C.white} opacity={0.12}>
+            <animate
+              attributeName="opacity"
+              values="0.05;0.2;0.05"
+              dur="2.4s"
+              repeatCount="indefinite"
+            />
+          </rect>
+        </g>
+      ) : (
+        <path
+          d="M332 108 L344 108 M332 113 L339 113"
+          stroke={C.white}
+          strokeWidth={2}
+          strokeLinecap="round"
+          opacity={0.6}
+        />
+      )}
       <path d="M350 144 V152 M344 152 H362" {...stroke(2.5)} />
 
       {/* plant in a smiling pot */}
