@@ -188,7 +188,7 @@ export function Hub() {
                 className="ink-border flex h-full w-full flex-col overflow-hidden rounded-card bg-paper text-left shadow-pop active:translate-y-0.5"
               >
                 <span
-                  className="relative block aspect-[16/9] w-full overflow-hidden border-b-[2.5px] border-navy"
+                  className="relative block aspect-[4/3] w-full overflow-hidden border-b-[2.5px] border-navy"
                   style={{ backgroundColor: c.tone }}
                 >
                   <span className="absolute inset-0">

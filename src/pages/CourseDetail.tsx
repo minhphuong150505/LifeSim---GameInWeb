@@ -24,7 +24,7 @@ export function CourseDetail() {
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-4 px-4">
         <div className="flex flex-col gap-3">
           <div
-            className="ink-border aspect-[16/9] overflow-hidden rounded-[22px] shadow-pop"
+            className="ink-border aspect-[4/3] overflow-hidden rounded-[22px] shadow-pop"
             style={{ backgroundColor: course.tone }}
           >
             <CourseCover course={course} />

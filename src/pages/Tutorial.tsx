@@ -14,7 +14,6 @@ import { CourseCover } from '../features/courses/CourseBanner';
 import { cn } from '../lib/cn';
 import { useUserStore } from '../store/user';
 
-
 function StoryArt() {
   return (
     <div className="ink-border relative h-full w-full overflow-hidden rounded-[20px]">
@@ -88,7 +87,9 @@ function HubArt() {
           <PinIcon size={26} />
         </span>
         <span className="min-w-0">
-          <span className="block font-display text-[20px] leading-none text-navy">Khám phá khóa học</span>
+          <span className="block font-display text-[20px] leading-none text-navy">
+            Khám phá khóa học
+          </span>
           <span className="block truncate text-[11px] font-semibold text-navy/80">
             Tìm khoá học sơ cứu thực tế gần bạn
           </span>
@@ -116,13 +117,16 @@ function HubArt() {
   );
 }
 
-const HUB_PREVIEW = ['cpr-aed', 'hctd-tphcm', 'wb-bls', 'so-cuu-co-ban', 'cc115', 'wb-du-lich']
+const HUB_PREVIEW = ['ssvn-scc-4-0', 'hctd-tphcm', 'wb-bls', 'ssvn-tre-em', 'cc115', 'wb-du-lich']
   .map((id) => getCourse(id))
   .filter((c): c is Course => Boolean(c));
 
 /** The mascot's welcome, one line per tap. */
 const WELCOME_LINES: React.ReactNode[] = [
-  <span key="1" className="font-display text-[clamp(30px,4.6vw,46px)] leading-tight text-primary-dark">
+  <span
+    key="1"
+    className="font-display text-[clamp(30px,4.6vw,46px)] leading-tight text-primary-dark"
+  >
     Chào mừng đến với LifeSim!
   </span>,
   'Khám phá kiến thức về sơ cấp cứu thông qua những tình huống mô phỏng thực tế, nơi bạn sẽ học cách đưa ra quyết định, xử lý tình huống khẩn cấp và rèn luyện kỹ năng qua những thử thách tương tác thú vị!',
@@ -234,9 +238,7 @@ export function Tutorial() {
                   />
                 </motion.div>
               </AnimatePresence>
-              <p className="mt-3 text-right font-display text-lg text-muted">
-                Chạm để tiếp tục ▸
-              </p>
+              <p className="mt-3 text-right font-display text-lg text-muted">Chạm để tiếp tục ▸</p>
             </div>
           </motion.button>
         ) : (

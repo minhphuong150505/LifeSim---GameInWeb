@@ -40,13 +40,13 @@ export function CoursesPopup({ open, onClose }: { open: boolean; onClose: () => 
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="relative w-[min(94vw,calc(var(--app-h,100dvh)*0.84*16/9))]"
+            className="relative w-[min(94vw,calc(var(--app-h,100dvh)*0.9*4/3))]"
           >
             <button
               type="button"
               onClick={register}
               aria-label={`Xem khoá ${course.title}`}
-              className="ink-border block aspect-[16/9] w-full overflow-hidden rounded-[22px] shadow-pop active:scale-[0.99]"
+              className="ink-border block aspect-[4/3] w-full overflow-hidden rounded-[22px] shadow-pop active:scale-[0.99]"
               style={{ backgroundColor: course.tone }}
             >
               <CourseCover course={course} fit="cover" />
