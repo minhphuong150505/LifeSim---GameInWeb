@@ -27,4 +27,6 @@ export const BASE_STAGE: StageState = {
   wrap: false,
   blanket: false,
   rest: false,
+  choke: 'none',
+  rescuer: 'none',
 };

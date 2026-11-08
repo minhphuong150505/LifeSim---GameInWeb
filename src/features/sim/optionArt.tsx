@@ -11,6 +11,7 @@ import { LOOKS } from '../../art/looks';
 import { Head, Person } from '../../art/Person';
 import { ProfileArt, type ProfileGeometry, type ProfileProps } from '../../art/Profile';
 import { BURN_ART } from './optionArtBurn';
+import { CHOKE_ART } from './optionArtChoke';
 import { WATER_ART } from './optionArtWater';
 
 /* Answer illustrations for the A/B/C options. Each one is drawn from the shared art kit
@@ -377,6 +378,7 @@ const ART = {
   ),
   ...WATER_ART,
   ...BURN_ART,
+  ...CHOKE_ART,
 } satisfies Record<string, () => React.ReactNode>;
 
 export type ArtKey = keyof typeof ART;

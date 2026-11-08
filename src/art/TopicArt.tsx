@@ -1,6 +1,7 @@
 import type { Topic } from '../data/topics';
 import { BandageIcon, BoltIcon, HeartIcon, StarIcon } from './icons';
 import { C, INK, stroke } from './ink';
+import { DiningChair, DiningRoom, DiningTable } from './DiningRoom';
 import { Kitchen, TAP } from './Kitchen';
 import { LivingRoom } from './LivingRoom';
 import { Person } from './Person';
@@ -77,31 +78,36 @@ export function TopicArt({ topic, className }: { topic: Topic; className?: strin
     );
   }
   if (topic === 'choking') {
+    // The brother at the dining table, hands at his throat.
     return (
       <svg
-        viewBox="0 0 160 170"
+        viewBox="150 150 150 150"
         preserveAspectRatio="xMidYMid slice"
         className={className}
         aria-hidden
       >
-        <rect width={160} height={170} fill="#fde3da" />
-        <rect x={0} y={112} width={160} height={58} fill={C.wood} />
-        <path d="M0 112 H160" {...stroke(2.5)} />
-        <ellipse cx={80} cy={112} rx={52} ry={14} fill={C.white} {...stroke(3)} />
-        <ellipse cx={80} cy={108} rx={34} ry={7} fill="#f3c9a6" />
-        <path d="M56 80 C70 70 90 70 104 80" fill="none" {...stroke(3)} />
-        <circle cx={80} cy={52} r={22} fill={C.skin} {...stroke(3)} />
-        <path d="M70 50 l4 4 M74 50 l-4 4 M86 50 l4 4 M90 50 l-4 4" {...stroke(2.2)} />
-        <ellipse cx={80} cy={63} rx={4} ry={3} fill={INK} />
-        <path d="M58 70 C62 78 70 80 74 76 M102 70 C98 78 90 80 86 76" fill="none" {...stroke(3)} />
+        <DiningRoom />
+        <DiningChair x={226} seatY={246} />
+        <Person
+          kind="brother"
+          pose="sit"
+          x={226}
+          y={246}
+          armR="throat"
+          armL="throat"
+          eyes="wide"
+          mouth="o"
+          sweat
+        />
+        <DiningTable />
         <text
-          x={118}
-          y={36}
+          x={252}
+          y={186}
           fontFamily="Itim, sans-serif"
-          fontSize={28}
+          fontSize={24}
           fill={C.red}
           stroke={INK}
-          strokeWidth={1.5}
+          strokeWidth={1.4}
         >
           !
         </text>

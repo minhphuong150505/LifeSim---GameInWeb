@@ -483,11 +483,14 @@ export function LyingPerson({
   kind,
   airway,
   mouthDirty,
+  awake,
   k = 0.9,
 }: {
   kind: PersonKind;
   airway?: boolean;
   mouthDirty?: boolean;
+  /** Conscious again: eyes open, breathing calmly. */
+  awake?: boolean;
   k?: number;
 }) {
   const s = k * LOOKS[kind].scale;
@@ -502,8 +505,8 @@ export function LyingPerson({
         x={0}
         y={30}
         scale={1 / LOOKS[kind].scale}
-        eyes="closed"
-        mouth={airway ? 'open' : 'flat'}
+        eyes={awake ? 'open' : 'closed'}
+        mouth={awake ? 'smile' : airway ? 'open' : 'flat'}
         tilt={airway ? 'up' : 'normal'}
       />
       {mouthDirty && (

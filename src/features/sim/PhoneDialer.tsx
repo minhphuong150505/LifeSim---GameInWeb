@@ -9,15 +9,27 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 
 type Stage = 'dial' | 'calling' | 'connected';
 
-/** Phone keypad → simulated emergency call. Only 115 connects. */
-export function PhoneDialer({ open, onDone }: { open: boolean; onDone: () => void }) {
-  return <AnimatePresence>{open && <Dialer onDone={onDone} />}</AnimatePresence>;
+/**
+ * Phone keypad → simulated emergency call. Only 115 connects. With `speaker`, the player must
+ * also turn on the loudspeaker so both hands stay free (CPR guided by the dispatcher).
+ */
+export function PhoneDialer({
+  open,
+  onDone,
+  speaker,
+}: {
+  open: boolean;
+  onDone: () => void;
+  speaker?: boolean;
+}) {
+  return <AnimatePresence>{open && <Dialer onDone={onDone} speaker={speaker} />}</AnimatePresence>;
 }
 
-function Dialer({ onDone }: { onDone: () => void }) {
+function Dialer({ onDone, speaker }: { onDone: () => void; speaker?: boolean }) {
   const [number, setNumber] = useState('');
   const [stage, setStage] = useState<Stage>('dial');
   const [hint, setHint] = useState<string | null>(null);
+  const [loud, setLoud] = useState(false);
 
   useEffect(() => {
     if (stage !== 'calling') return;
@@ -137,15 +149,31 @@ function Dialer({ onDone }: { onDone: () => void }) {
               <p className="text-center font-display text-xl text-success-dark">● Đã kết nối 115</p>
               <div className="ink-border rounded-2xl bg-paper p-3 text-[15px] leading-relaxed text-navy">
                 <p className="font-display text-primary-dark">Tổng đài 115:</p>
-                “Trung tâm cấp cứu 115 xin nghe! Bạn hãy bình tĩnh cho biết địa chỉ và tình trạng
-                của người bệnh nhé.”
+                {speaker && loud
+                  ? '“Tôi đã nghe rõ qua loa ngoài. Hãy đặt em nằm ngửa trên mặt phẳng và bắt đầu ép ngực theo hướng dẫn của tôi nhé!”'
+                  : '“Trung tâm cấp cứu 115 xin nghe! Bạn hãy bình tĩnh cho biết địa chỉ và tình trạng của người bệnh nhé.”'}
               </div>
               <p className="text-center text-xs text-muted">
                 Cuộc gọi mô phỏng – trong thực tế hãy gọi 115 khi khẩn cấp.
               </p>
-              <Button block size="lg" variant="green" className="mt-auto" onClick={onDone}>
-                Trả lời tổng đài ▸
-              </Button>
+              {speaker && !loud ? (
+                <Button
+                  block
+                  size="lg"
+                  variant="yellow"
+                  className="mt-auto"
+                  onClick={() => {
+                    setLoud(true);
+                    playSound('select');
+                  }}
+                >
+                  🔊 Bật loa ngoài
+                </Button>
+              ) : (
+                <Button block size="lg" variant="green" className="mt-auto" onClick={onDone}>
+                  Trả lời tổng đài ▸
+                </Button>
+              )}
             </div>
           )}
         </div>
