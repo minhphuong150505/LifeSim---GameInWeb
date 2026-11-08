@@ -543,7 +543,7 @@ export const COURSES: Course[] = [
     id: 'so-cuu-co-ban',
     tab: 'Sơ cứu cơ bản',
     title: 'Sơ cứu cơ bản cho gia đình',
-    partner: 'Family Medical Practice Vietnam',
+    partner: 'Trung tâm Kỹ năng An Toàn Xanh',
     tagline: 'Thực hành trên mô hình cùng huấn luyện viên có chứng chỉ.',
     description:
       'Khoá học 1 buổi giúp bạn tự tin xử lý các tình huống thường gặp trong nhà: chảy máu cam, bỏng, hóc dị vật và vết thương hở. Học viên được thực hành trực tiếp và nhận giấy chứng nhận hoàn thành.',
