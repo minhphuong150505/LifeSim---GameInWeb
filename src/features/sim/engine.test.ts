@@ -6,11 +6,13 @@ import {
   MAX_BOLTS,
   roundReward,
   roundScore,
+  stageAfterIntro,
   starsFor,
   STARTING_BANDAGES,
   type RoundAction,
   type RoundState,
 } from './engine';
+import { CHOKE_TASKS, CYCLE, taskEndState } from './chokingTaskLogic';
 import { ART_KEYS } from './optionArt';
 import type { OptionId, SimRound } from './types';
 import { isRoundUnlocked, nextRoundToPlay } from './unlock';
@@ -33,8 +35,8 @@ const wrongOf = (r: SimRound, i: number): OptionId[] => {
 const rightOf = (r: SimRound, i: number) => r.questions[i]?.correctId as OptionId;
 
 describe('bundled simulation data', () => {
-  it('has scenarios 1 (nosebleed), 2 (drowning) and 5 (burns), with the scripted rewards', () => {
-    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning', 'burns']);
+  it('has scenarios 1 (nosebleed), 2 (drowning), 4 (choking) and 5 (burns), with the scripted rewards', () => {
+    expect(simScenarios.map((s) => s.id)).toEqual(['nosebleed', 'drowning', 'choking', 'burns']);
     expect(allRounds.map((r) => r.code)).toEqual([
       '1.1',
       '1.2',
@@ -42,15 +44,21 @@ describe('bundled simulation data', () => {
       '2.1',
       '2.2',
       '2.3',
+      '4.1',
+      '4.2',
+      '4.3',
       '5.1',
       '5.2',
       '5.3',
     ]);
-    expect(allRounds.map((r) => r.reward)).toEqual([20, 25, 30, 20, 30, 40, 20, 25, 30]);
-    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7, 5, 5, 5]);
+    expect(allRounds.map((r) => r.reward)).toEqual([
+      20, 25, 30, 20, 30, 40, 20, 25, 30, 20, 25, 30,
+    ]);
+    expect(allRounds.map((r) => r.questions.length)).toEqual([5, 5, 4, 3, 5, 7, 5, 5, 4, 5, 5, 5]);
     expect(nextRoundId('1-1')).toBe('1-2');
     expect(nextRoundId('1-3')).toBe('2-1');
-    expect(nextRoundId('2-3')).toBe('5-1');
+    expect(nextRoundId('2-3')).toBe('4-1');
+    expect(nextRoundId('4-3')).toBe('5-1');
     expect(nextRoundId('5-3')).toBeNull();
   });
   it('uses the burn answers from the script, in the kitchen', () => {
@@ -67,6 +75,56 @@ describe('bundled simulation data', () => {
     }
     // The large burn ends with the ambulance arriving.
     expect(getRound('5-3')?.questions.at(-1)?.effect?.ambulance).toBe(true);
+  });
+  it('uses the choking answers from the script, in the dining room', () => {
+    const answers = (id: string) =>
+      getRound(id)
+        ?.questions.map((q) => q.correctId)
+        .join('');
+    expect(answers('4-1')).toBe('abccb');
+    expect(answers('4-2')).toBe('bcbca');
+    expect(answers('4-3')).toBe('bcbc');
+    for (const r of allRounds.filter((x) => x.id.startsWith('4-'))) {
+      expect(r.stage.scene).toBe('dining-room');
+      expect(r.cast).toContain('brother');
+      for (const q of r.questions) expect(q.hint).toBeTruthy();
+    }
+    expect(getRound('4-2')?.cast).toEqual(['brother', 'player', 'mom', 'dad', 'grandma']);
+    expect(getRound('4-3')?.cast).toEqual(['brother', 'player', 'mom', 'dad']);
+    // 4.3 starts with the brother collapsing and ends with him breathing, medics arriving.
+    const r43 = getRound('4-3') as SimRound;
+    expect(stageAfterIntro(r43).choke).toBe('down');
+    expect(r43.questions.at(-1)?.effect).toMatchObject({ choke: 'breathing', ambulance: true });
+    expect(getRound('4-2')?.questions.at(-1)?.taskTitle).toBe(
+      'Hãy nhờ người thân gọi cấp cứu 115!',
+    );
+  });
+  it('runs the back-blow and abdominal-thrust tasks as the script describes', () => {
+    const blows = CHOKE_TASKS['back-blows'].steps;
+    expect(blows.map((s) => s.kind)).toEqual(['choice', 'choice', 'spot', 'press']);
+    const [stand, lean, spot, press] = blows;
+    expect(stand?.kind === 'choice' && stand.correct).toBe('behind-side');
+    expect(lean?.kind === 'choice' && lean.correct).toBe('forward');
+    expect(spot?.kind === 'spot' && spot.choices.find((c) => c.id === spot.correct)?.text).toBe(
+      'Giữa hai xương bả vai',
+    );
+    expect(press?.kind === 'press' && press.count).toBe(CYCLE);
+    expect(taskEndState('back-blows')).toEqual({ rescuer: 'back', posture: 'forward' });
+
+    const thrusts = CHOKE_TASKS['abdominal-thrusts'].steps;
+    expect(thrusts.map((s) => s.kind)).toEqual(['choice', 'spot', 'press']);
+    const tSpot = thrusts[1];
+    expect(
+      tSpot?.kind === 'spot' && tSpot.choices.find((c) => c.id === tSpot.correct)?.text,
+    ).toContain('trên rốn, dưới xương sườn');
+    expect(taskEndState('abdominal-thrusts')).toEqual({ rescuer: 'thrust', posture: 'upright' });
+    for (const t of Object.values(CHOKE_TASKS)) {
+      for (const s of t.steps) {
+        if (s.kind === 'press') continue;
+        expect(s.choices).toHaveLength(3);
+        expect(s.choices.some((c) => c.id === s.correct)).toBe(true);
+      }
+    }
   });
   it('uses the drowning answers from the script', () => {
     const answers = (id: string) =>
@@ -105,6 +163,10 @@ describe('bundled simulation data', () => {
       '2.2:find-floats',
       '2.3:cpr-30',
       '2.3:breath-order',
+      '4.2:back-blows',
+      '4.2:abdominal-thrusts',
+      '4.2:call-115',
+      '4.3:call-115-speaker',
       '5.2:cling-wrap',
       '5.3:call-115',
     ]);

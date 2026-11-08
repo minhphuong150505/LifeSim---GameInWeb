@@ -16,10 +16,23 @@ export type CastMember =
   | 'sister';
 
 /**
- * Backdrop of a round: the living room (scenario 1), one of the water scenes (scenario 2)
- * or the kitchen (scenario 5).
+ * Backdrop of a round: the living room (scenario 1), one of the water scenes (scenario 2),
+ * the dining room (scenario 4) or the kitchen (scenario 5).
  */
-export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen';
+export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 'dining-room';
+
+/**
+ * How the choking brother is doing (scenario 4): eating, coughing hard, coughing weakly,
+ * unable to cough or speak (hands at the throat), collapsed on the floor, breathing again.
+ */
+export type ChokeLevel = 'none' | 'cough' | 'weak' | 'severe' | 'down' | 'breathing';
+
+/**
+ * Where the player is (scenario 4): across the table, bending next to the brother, behind
+ * him slightly to one side (back blows), right behind him with the arms round his belly
+ * (abdominal thrusts), kneeling next to him on the floor.
+ */
+export type Rescuer = 'none' | 'beside' | 'back' | 'thrust' | 'kneel';
 
 /** How the burn on the sister's arm looks (scenario 5). */
 export type BurnLevel = 'none' | 'red' | 'blister' | 'severe';
@@ -76,6 +89,10 @@ export type StageState = {
   blanket: boolean;
   /** The sister sits down to rest. */
   rest: boolean;
+
+  /* Dining room (scenario 4 – choking) */
+  choke: ChokeLevel;
+  rescuer: Rescuer;
 };
 
 export type OptionId = 'a' | 'b' | 'c';
@@ -96,7 +113,13 @@ export type SimTask =
   /** Put the rescue-breath steps in the right order. */
   | 'breath-order'
   /** Optional: buy cling film and lay it over the burn. */
-  | 'cling-wrap';
+  | 'cling-wrap'
+  /** Stand behind, lean the child forward, find the spot between the shoulder blades, 5 blows. */
+  | 'back-blows'
+  /** Stand behind, place the fist above the navel and below the ribs, 5 thrusts. */
+  | 'abdominal-thrusts'
+  /** Call 115 and put the phone on speaker (CPR guided by the dispatcher). */
+  | 'call-115-speaker';
 
 /** Real photo shown with an explanation, with an optional marker drawn on top. */
 export type ExplainImage = {
@@ -120,6 +143,8 @@ export type SimQuestion = {
   /** Short caption describing the new illustration. */
   caption?: string;
   task?: SimTask;
+  /** Replaces the default title of the item task (e.g. "Hãy nhờ người thân gọi cấp cứu 115!"). */
+  taskTitle?: string;
   /** Picture shown above the options; the player can also tap its A/B/C spots. */
   figure?: 'chest-spots';
   /** Photo illustrating the explanation. */

@@ -311,7 +311,9 @@ export type ArmPose =
   /** Both arms straight down in front, hands on someone lying in front (CPR). */
   | 'press'
   /** Arm raised forward to the side, hand at counter height (hand under the tap). */
-  | 'reach';
+  | 'reach'
+  /** Hand clutching the throat – the universal sign of choking. */
+  | 'throat';
 export type PersonPose = 'stand' | 'sit';
 
 export type PersonProps = FaceProps & {
@@ -372,6 +374,8 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
       return { hand: { x: 4 * side, y: 22 }, elbow: { x: 12 * side, y: -6 } };
     case 'reach':
       return { hand: { x: 36 * side, y: -52 }, elbow: { x: 27 * side, y: -30 } };
+    case 'throat':
+      return { hand: { x: 5 * side, y: headY + 26 }, elbow: { x: 24 * side, y: -20 } };
     default:
       return { hand: { x: sx + 6 * side, y: -4 }, elbow: { x: sx + 5 * side, y: -18 } };
   }
@@ -526,7 +530,8 @@ export function Person({
   };
 
   // Arms that reach the face are drawn over the head; the rest behind the torso.
-  const front = (p: ArmPose) => p === 'nose' || p === 'phone' || p === 'hold' || p === 'press';
+  const front = (p: ArmPose) =>
+    p === 'nose' || p === 'phone' || p === 'hold' || p === 'press' || p === 'throat';
 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -k : k} ${k}) translate(0 ${hipLift})`}>
