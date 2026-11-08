@@ -75,12 +75,13 @@ export function Hub() {
     const shown = COURSES.filter(
       (c) =>
         (filters.mode === null || c.mode === filters.mode) &&
-        (filters.budget === null || c.priceVnd <= filters.budget) &&
+        (filters.budget === null || (c.priceVnd !== null && c.priceVnd <= filters.budget)) &&
         (filters.topic === null || c.topics.includes(filters.topic)),
     );
-    // Courses teaching the player's weakest topic first.
-    const hit = (c: Course) => (focusTopic && c.topics.includes(focusTopic) ? 0 : 1);
-    return [...shown].sort((a, b) => hit(a) - hit(b));
+    // Courses teaching the player's weakest topic first, then the newest ("Khoá mới nhất").
+    const rank = (c: Course) =>
+      (focusTopic && c.topics.includes(focusTopic) ? 0 : 2) + (c.isNew ? 0 : 1);
+    return [...shown].sort((a, b) => rank(a) - rank(b));
   }, [filters, focusTopic]);
   const activeCount = Object.values(filters).filter((v) => v !== null).length;
 
@@ -195,6 +196,7 @@ export function Hub() {
                       <Badge tone="red">🎯 Gợi ý</Badge>
                     )}
                     {c.sponsored && <Badge tone="navy">Đối tác</Badge>}
+                    {c.isNew && <Badge tone="green">Mới</Badge>}
                   </span>
                 </span>
                 <span className="flex flex-1 flex-col p-2.5">

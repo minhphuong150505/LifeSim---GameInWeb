@@ -36,6 +36,12 @@ export function CourseDetail() {
             <dd className="font-semibold text-navy">{course.duration}</dd>
             <dt className="text-muted">Lịch học</dt>
             <dd className="font-semibold text-navy">{course.schedule}</dd>
+            {course.audience && (
+              <>
+                <dt className="text-muted">Đối tượng</dt>
+                <dd className="font-semibold text-navy">{course.audience}</dd>
+              </>
+            )}
             {course.address && (
               <>
                 <dt className="text-muted">Địa chỉ</dt>
