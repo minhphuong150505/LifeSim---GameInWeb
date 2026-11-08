@@ -357,7 +357,9 @@ export type ArmPose =
   /** Hand resting against the cheek (recovery position). */
   | 'cheek'
   /** Hand on the belly (stomach ache). */
-  | 'belly';
+  | 'belly'
+  /** Hand clutching the throat – the universal sign of choking. */
+  | 'throat';
 export type PersonPose = 'stand' | 'sit';
 
 export type PersonProps = FaceProps & {
@@ -426,6 +428,8 @@ function handFor(pose: ArmPose, side: 1 | -1, headY: number): { hand: Pt; elbow:
       return { hand: { x: 22 * side, y: headY + 14 }, elbow: { x: 30 * side, y: -40 } };
     case 'belly':
       return { hand: { x: 3 * side, y: -10 }, elbow: { x: 19 * side, y: -12 } };
+    case 'throat':
+      return { hand: { x: 5 * side, y: headY + 26 }, elbow: { x: 24 * side, y: -20 } };
     default:
       return { hand: { x: sx + 6 * side, y: -4 }, elbow: { x: sx + 5 * side, y: -18 } };
   }
@@ -587,7 +591,8 @@ export function Person({
     p === 'hold' ||
     p === 'press' ||
     p === 'cheek' ||
-    p === 'belly';
+    p === 'belly' ||
+    p === 'throat';
 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -k : k} ${k}) translate(0 ${hipLift})`}>

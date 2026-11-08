@@ -1,16 +1,15 @@
 import type { SimRound, SimScenario, UpcomingScenario } from '../../features/sim/types';
 import { burns } from './burns';
+import { choking } from './choking';
 import { drowning } from './drowning';
 import { nosebleed } from './nosebleed';
 import { stroke } from './stroke';
 
 /** Playable scenarios, in unlock order. Add a new one by writing a data file next to `nosebleed.ts`. */
-export const simScenarios: SimScenario[] = [nosebleed, drowning, stroke, burns];
+export const simScenarios: SimScenario[] = [nosebleed, drowning, stroke, choking, burns];
 
 /** Shown on the map as "Sắp ra mắt". */
-export const upcomingScenarios: UpcomingScenario[] = [
-  { id: 'choking', number: 4, title: 'Hóc dị vật', topic: 'choking', location: 'Căng tin' },
-];
+export const upcomingScenarios: UpcomingScenario[] = [];
 
 /** Every round across scenarios, in play order. */
 export const allRounds: SimRound[] = simScenarios.flatMap((s) => s.rounds);

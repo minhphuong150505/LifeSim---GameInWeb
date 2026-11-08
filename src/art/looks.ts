@@ -15,7 +15,8 @@ export type PersonKind =
   | 'sister'
   | 'nam'
   | 'lan'
-  | 'paramedic';
+  | 'paramedic'
+  | 'medic';
 export type HairStyle =
   | 'boy'
   | 'ponytail'
@@ -183,5 +184,14 @@ export const LOOKS: Record<PersonKind, Look & { scale: number }> = {
     pants: '#3f5f86',
     medic: true,
     scale: 1.12,
+  },
+  /* Tình huống 4 – Hóc dị vật: nhân viên y tế đến ở cuối màn 4.3 */
+  medic: {
+    hairStyle: 'cap',
+    hair: '#3a2a20',
+    skin: '#f6d2b0',
+    shirt: C.white,
+    pants: '#4d8fc2',
+    scale: 1.1,
   },
 };

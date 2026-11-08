@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'rea
 import { FullscreenKeeper } from '../components/FullscreenKeeper';
 import { GameScale } from '../components/GameScale';
 import { RotateHint } from '../components/RotateHint';
+import { isFreeOrientationPath } from '../lib/landscape';
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
 import { useSessionStore } from '../store/session';
@@ -29,6 +30,9 @@ const CourseDetail = lazy(() =>
   import('../pages/CourseDetail').then((m) => ({ default: m.CourseDetail })),
 );
 const Handbook = lazy(() => import('../pages/Handbook').then((m) => ({ default: m.Handbook })));
+const HandbookArticlePage = lazy(() =>
+  import('../pages/Handbook').then((m) => ({ default: m.HandbookArticlePage })),
+);
 const ArtGallery = import.meta.env.DEV
   ? lazy(() => import('../dev/ArtGallery').then((m) => ({ default: m.ArtGallery })))
   : null;
@@ -62,38 +66,66 @@ function Loading() {
 export function App() {
   return (
     <BrowserRouter>
-      {/* Landscape game frame, scaled uniformly to fit any screen. */}
-      <GameScale>
-        <ScrollReset />
-        <Suspense fallback={<Loading />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/onboarding" element={<Navigate to="/login" replace />} />
-            {ArtGallery && <Route path="/dev/art" element={<ArtGallery />} />}
-            <Route element={<RequireLogin />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/tutorial" element={<Tutorial />} />
-              <Route path="/play/:id" element={<Play />} />
-              <Route element={<AppLayout />}>
-                <Route path="/core" element={<CoreTopics />} />
-                <Route path="/core/:scenarioId" element={<Scenarios />} />
-                <Route path="/scenarios" element={<Navigate to="/core" replace />} />
-                <Route path="/daily" element={<Daily />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/hub" element={<Hub />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/handbook" element={<Handbook />} />
-                <Route path="/station" element={<Station />} />
-                <Route path="/course/:id" element={<CourseDetail />} />
-              </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-        <RotateHint />
-        <FullscreenKeeper />
-      </GameScale>
+      <Shell />
     </BrowserRouter>
+  );
+}
+
+/**
+ * The game runs in the landscape game frame (scaled uniformly, rotate hint in portrait).
+ * Reading routes such as the handbook are a normal responsive page instead, readable in
+ * portrait and landscape.
+ */
+function Shell() {
+  const free = isFreeOrientationPath(useLocation().pathname);
+  const routes = <AppRoutes />;
+  return (
+    <>
+      {free ? (
+        <div id="page-root" className="fixed inset-0 overflow-y-auto overscroll-contain">
+          {routes}
+        </div>
+      ) : (
+        <GameScale>
+          <ScrollReset />
+          {routes}
+          <RotateHint />
+        </GameScale>
+      )}
+      <FullscreenKeeper />
+    </>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={<Navigate to="/login" replace />} />
+        {ArtGallery && <Route path="/dev/art" element={<ArtGallery />} />}
+        <Route element={<RequireLogin />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/tutorial" element={<Tutorial />} />
+          <Route path="/play/:id" element={<Play />} />
+          {/* Portrait-friendly reading pages, outside the game frame (see Shell). */}
+          <Route path="/handbook" element={<Handbook />} />
+          <Route path="/handbook/:id" element={<HandbookArticlePage />} />
+          <Route element={<AppLayout />}>
+            <Route path="/core" element={<CoreTopics />} />
+            <Route path="/core/:scenarioId" element={<Scenarios />} />
+            <Route path="/scenarios" element={<Navigate to="/core" replace />} />
+            <Route path="/daily" element={<Daily />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/hub" element={<Hub />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/station" element={<Station />} />
+            <Route path="/course/:id" element={<CourseDetail />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

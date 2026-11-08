@@ -36,4 +36,6 @@ export const BASE_STAGE: StageState = {
   banner: null,
   lanPhone: false,
   breathing: null,
+  choke: 'none',
+  rescuer: 'none',
 };

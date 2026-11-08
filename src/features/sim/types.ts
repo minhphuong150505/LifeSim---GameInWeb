@@ -21,9 +21,11 @@ export type CastMember =
 
 /**
  * Backdrop of a round: the living room (scenario 1), one of the water scenes (scenario 2),
- * the living room with Bác Nam (scenario 3) or the kitchen (scenario 5).
+ * the living room with Bác Nam (scenario 3), the dining room (scenario 4) or the kitchen
+ * (scenario 5).
  */
-export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 'stroke-room';
+export type SceneKind =
+  'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 'stroke-room' | 'dining-room';
 
 /**
  * Bác Nam (scenario 3): watching TV, stroke signs, resting on the sofa, speaking more clearly,
@@ -32,6 +34,19 @@ export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 
  */
 export type NamState =
   'calm' | 'stroke' | 'rest' | 'better' | 'unresponsive' | 'recovery' | 'floor' | 'cpr';
+
+/**
+ * How the choking brother is doing (scenario 4): eating, coughing hard, coughing weakly,
+ * unable to cough or speak (hands at the throat), collapsed on the floor, breathing again.
+ */
+export type ChokeLevel = 'none' | 'cough' | 'weak' | 'severe' | 'down' | 'breathing';
+
+/**
+ * Where the player is (scenario 4): across the table, bending next to the brother, behind
+ * him slightly to one side (back blows), right behind him with the arms round his belly
+ * (abdominal thrusts), kneeling next to him on the floor.
+ */
+export type Rescuer = 'none' | 'beside' | 'back' | 'thrust' | 'kneel';
 
 /** How the burn on the sister's arm looks (scenario 5). */
 export type BurnLevel = 'none' | 'red' | 'blister' | 'severe';
@@ -107,6 +122,9 @@ export type StageState = {
   lanPhone: boolean;
   /** Breathing drawn on Bác Nam while lying down: regular rise and fall or rare gasps. */
   breathing: 'normal' | 'gasping' | null;
+  /* Dining room (scenario 4 – choking) */
+  choke: ChokeLevel;
+  rescuer: Rescuer;
 };
 
 export type OptionId = 'a' | 'b' | 'c';
@@ -135,7 +153,13 @@ export type SimTask =
   /** Sort phone / glass of water / aspirin into "safe to use" and "do not give". */
   | 'sort-items'
   /** Watch the breathing animations and say whether it is normal breathing. */
-  | 'breathing-check';
+  | 'breathing-check'
+  /** Stand behind, lean the child forward, find the spot between the shoulder blades, 5 blows. */
+  | 'back-blows'
+  /** Stand behind, place the fist above the navel and below the ribs, 5 thrusts. */
+  | 'abdominal-thrusts'
+  /** Call 115 and put the phone on speaker (CPR guided by the dispatcher). */
+  | 'call-115-speaker';
 
 /** Real photo shown with an explanation, with an optional marker drawn on top. */
 export type ExplainImage = {
@@ -159,6 +183,8 @@ export type SimQuestion = {
   /** Short caption describing the new illustration. */
   caption?: string;
   task?: SimTask;
+  /** Replaces the default title of the item task (e.g. "Hãy nhờ người thân gọi cấp cứu 115!"). */
+  taskTitle?: string;
   /** Picture shown above the options; the player can also tap its A/B/C spots. */
   figure?: 'chest-spots';
   /** Photo illustrating the explanation. */

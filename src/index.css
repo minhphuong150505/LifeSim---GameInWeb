@@ -138,6 +138,15 @@ button {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
+/* Handbook: a sober reference document, set in the text face rather than the game's display face. */
+.handbook h1,
+.handbook h2,
+.handbook h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
 /* "Rotate your phone" overlay: the game is designed for landscape. */
 .rotate-hint {
   display: none;

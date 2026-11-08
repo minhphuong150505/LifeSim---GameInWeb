@@ -11,6 +11,8 @@ type Stage = 'dial' | 'calling' | 'connected';
 
 type DialerProps = {
   onDone: () => void;
+  /** Also require turning on the loudspeaker so both hands stay free (CPR guided by 115). */
+  speaker?: boolean;
   /** Shown for any wrong number instead of the default message. */
   wrongHint?: string;
   /** What the 115 operator says once connected. */
@@ -24,15 +26,19 @@ type DialerProps = {
 const DEFAULT_LINE =
   'Trung tâm cấp cứu 115 xin nghe! Bạn hãy bình tĩnh cho biết địa chỉ và tình trạng của người bệnh nhé.';
 
-/** Phone keypad → simulated emergency call. Only 115 connects. */
+/**
+ * Phone keypad → simulated emergency call. Only 115 connects. With `speaker`, the player must
+ * also turn on the loudspeaker so both hands stay free (CPR guided by the dispatcher).
+ */
 export function PhoneDialer({ open, ...props }: DialerProps & { open: boolean }) {
   return <AnimatePresence>{open && <Dialer {...props} />}</AnimatePresence>;
 }
 
-function Dialer({ onDone, wrongHint, operatorLine, connected, onCancel }: DialerProps) {
+function Dialer({ onDone, speaker, wrongHint, operatorLine, connected, onCancel }: DialerProps) {
   const [number, setNumber] = useState('');
   const [stage, setStage] = useState<Stage>(connected ? 'connected' : 'dial');
   const [hint, setHint] = useState<string | null>(null);
+  const [loud, setLoud] = useState(false);
 
   useEffect(() => {
     if (stage !== 'calling') return;
@@ -163,15 +169,32 @@ function Dialer({ onDone, wrongHint, operatorLine, connected, onCancel }: Dialer
                 ● Đã kết nối tổng đài 115
               </p>
               <div className="ink-border rounded-2xl bg-paper p-3 text-[15px] leading-relaxed text-navy">
-                <p className="font-display text-primary-dark">Tổng đài 115:</p>“
-                {operatorLine ?? DEFAULT_LINE}”
+                <p className="font-display text-primary-dark">Tổng đài 115:</p>
+                {speaker && loud
+                  ? '“Tôi đã nghe rõ qua loa ngoài. Hãy đặt em nằm ngửa trên mặt phẳng và bắt đầu ép ngực theo hướng dẫn của tôi nhé!”'
+                  : `“${operatorLine ?? DEFAULT_LINE}”`}
               </div>
               <p className="text-center text-xs text-muted">
                 Cuộc gọi mô phỏng – trong thực tế hãy gọi 115 khi khẩn cấp.
               </p>
-              <Button block size="lg" variant="green" className="mt-auto" onClick={onDone}>
-                Trả lời tổng đài ▸
-              </Button>
+              {speaker && !loud ? (
+                <Button
+                  block
+                  size="lg"
+                  variant="yellow"
+                  className="mt-auto"
+                  onClick={() => {
+                    setLoud(true);
+                    playSound('select');
+                  }}
+                >
+                  🔊 Bật loa ngoài
+                </Button>
+              ) : (
+                <Button block size="lg" variant="green" className="mt-auto" onClick={onDone}>
+                  Trả lời tổng đài ▸
+                </Button>
+              )}
             </div>
           )}
         </div>
