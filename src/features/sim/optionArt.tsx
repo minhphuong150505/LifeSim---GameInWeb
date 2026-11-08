@@ -11,6 +11,7 @@ import { LOOKS } from '../../art/looks';
 import { Head, Person } from '../../art/Person';
 import { ProfileArt, type ProfileGeometry, type ProfileProps } from '../../art/Profile';
 import { BURN_ART } from './optionArtBurn';
+import { STROKE_ART } from './optionArtStroke';
 import { CHOKE_ART } from './optionArtChoke';
 import { WATER_ART } from './optionArtWater';
 
@@ -378,6 +379,7 @@ const ART = {
   ),
   ...WATER_ART,
   ...BURN_ART,
+  ...STROKE_ART,
   ...CHOKE_ART,
 } satisfies Record<string, () => React.ReactNode>;
 

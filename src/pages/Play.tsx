@@ -11,6 +11,7 @@ import { BandageBank } from '../features/sim/BandageBank';
 import { DragItem } from '../features/sim/DragItem';
 import {
   createRoundReducer,
+  currentTask,
   initialRoundState,
   MAX_BOLTS,
   RETRY_COST,
@@ -39,6 +40,13 @@ import { taskEndState } from '../features/sim/chokingTaskLogic';
 import { DiningStage } from '../features/sim/DiningStage';
 import { KitchenStage, kitchenTarget } from '../features/sim/KitchenStage';
 import { Stage } from '../features/sim/Stage';
+import { StrokeStage } from '../features/sim/StrokeStage';
+import {
+  BreathingTask,
+  Dial115Task,
+  SortItemsTask,
+  StrokeSignsTask,
+} from '../features/sim/strokeTasks';
 import { NOSE_POINT } from '../features/sim/stageLayout';
 import { WaterStage, waterTarget } from '../features/sim/WaterStage';
 import { RIGHT_FINDS } from '../features/sim/waterTaskLogic';
@@ -180,6 +188,8 @@ function RoundSession({ round }: { round: SimRound }) {
   const [bagOpen, setBagOpen] = useState(false);
   const [ad, setAd] = useState<'double' | 'retry' | null>(null);
   const [dialing, setDialing] = useState(false);
+  /** The free, always-on 115 phone of scenario 3 is open. */
+  const [freeCall, setFreeCall] = useState(false);
   const [carrying, setCarrying] = useState<ItemId | null>(null);
   const [iceApplied, setIceApplied] = useState(false);
   const [found, setFound] = useState<BankItemId[]>([]);
@@ -196,7 +206,7 @@ function RoundSession({ round }: { round: SimRound }) {
 
   const question = round.questions[state.qIndex];
   const beat = state.phase === 'intro' ? round.intro[state.beat] : undefined;
-  const task = state.phase === 'task' ? question?.task : undefined;
+  const task = currentTask(round, state);
   const itemTask = isItemTask(task) ? task : undefined;
   const taskInfo = itemTask ? ITEM_TASKS[itemTask] : null;
   const taskItem = taskInfo?.item ?? null;
@@ -209,8 +219,9 @@ function RoundSession({ round }: { round: SimRound }) {
     iceApplied && taskInfo?.applied ? { ...state.stage, ...taskInfo.applied } : state.stage;
   const stage = state.phase === 'task' ? { ...baseStage, ...taskPatch } : baseStage;
   const kitchen = stage.scene === 'kitchen';
+  const strokeRoom = stage.scene === 'stroke-room';
   const dining = stage.scene === 'dining-room';
-  const water = stage.scene !== 'living-room' && !kitchen && !dining;
+  const water = stage.scene !== 'living-room' && !kitchen && !strokeRoom && !dining;
   const patient = scenario?.patient ?? 'em trai';
   useAmbience(round.ambience);
 
@@ -276,6 +287,16 @@ function RoundSession({ round }: { round: SimRound }) {
     setBagOpen(false);
     if (DRAGGED.includes(id)) setCarrying(id);
     if (id === 'phone' && useWalletStore.getState().use('phone')) setDialing(true);
+  };
+
+  /** The free 115 phone connected: ends the call task, or just records the call. */
+  const freeCallDone = () => {
+    setFreeCall(false);
+    if (task === 'dial-115') {
+      finishTask({ called: true, phone: true });
+    } else if (!stage.called) {
+      dispatch({ type: 'STAGE', effect: { called: true, phone: !stage.lanPhone } });
+    }
   };
 
   const mistake = () => {
@@ -413,6 +434,18 @@ function RoundSession({ round }: { round: SimRound }) {
         >
           {dragged}
         </KitchenStage>
+      ) : strokeRoom ? (
+        <StrokeStage
+          ref={svgRef}
+          cast={round.cast}
+          stage={stage}
+          speaker={beat?.kind === 'line' ? beat.speaker : null}
+          mode={state.phase === 'intro' || (stage.ambulance && !sidePanel) ? 'wide' : 'focus'}
+          focusX={sidePanel ? 0.25 : 0.5}
+          showCloseup={state.phase !== 'intro'}
+        >
+          {dragged}
+        </StrokeStage>
       ) : (
         <Stage
           ref={svgRef}
@@ -444,6 +477,15 @@ function RoundSession({ round }: { round: SimRound }) {
         onBag={() => setBagOpen(true)}
         onShop={() => setShopOpen(true)}
         onBank={() => setBankOpen(true)}
+        call={
+          scenario?.freeCall
+            ? {
+                onClick: () => setFreeCall(true),
+                urgent: stage.alert115 || task === 'dial-115',
+                done: stage.called,
+              }
+            : undefined
+        }
       />
 
       {beat && beat.kind !== 'mission' && (
@@ -516,6 +558,10 @@ function RoundSession({ round }: { round: SimRound }) {
             />
           )}
           {task === 'breath-order' && <BreathOrderTask onDone={() => finishTask()} />}
+          {task === 'stroke-signs' && <StrokeSignsTask onDone={() => finishTask()} />}
+          {task === 'dial-115' && <Dial115Task onOpen={() => setFreeCall(true)} />}
+          {task === 'sort-items' && <SortItemsTask onDone={() => finishTask()} />}
+          {task === 'breathing-check' && <BreathingTask onDone={finishTask} />}
         </SidePanel>
       )}
 
@@ -557,6 +603,18 @@ function RoundSession({ round }: { round: SimRound }) {
           setDialing(false);
           finishTask(taskInfo?.done ?? { phone: true });
         }}
+      />
+      <PhoneDialer
+        open={freeCall}
+        connected={stage.called}
+        wrongHint="Số cấp cứu y tế tại Việt Nam là 115."
+        operatorLine={
+          stage.called
+            ? `Tổng đài 115 vẫn đang hỗ trợ bạn. Hãy cập nhật tình trạng của ${patient} và làm theo hướng dẫn.`
+            : 'Xin cho biết địa chỉ và tình trạng người bệnh.'
+        }
+        onCancel={() => setFreeCall(false)}
+        onDone={freeCallDone}
       />
 
       <Modal open={state.phase === 'won'} title="Thành công rồi!" tone="red" sparkle>

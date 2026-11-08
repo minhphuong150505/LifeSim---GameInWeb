@@ -1,4 +1,4 @@
-import type { OptionId, SimRound, StageState } from './types';
+import type { OptionId, SimRound, SimTask, StageState } from './types';
 
 /** 3 lightning bolts in one round = round lost. */
 export const MAX_BOLTS = 3;
@@ -23,6 +23,8 @@ export type RoundState = {
   stage: StageState;
   /** 1 for the first try at the round, +1 per replay. */
   attempt: number;
+  /** The round's opening task (before question 1) is being played. */
+  opening: boolean;
 };
 
 export type RoundAction =
@@ -33,6 +35,8 @@ export type RoundAction =
   | { type: 'TASK_DONE'; effect?: Partial<StageState> }
   /** Wrong move inside a hands-on task (e.g. picking an object that sinks): one bolt. */
   | { type: 'MISTAKE' }
+  /** Scene change outside the question flow (e.g. 115 called with the always-on button). */
+  | { type: 'STAGE'; effect: Partial<StageState> }
   | { type: 'RETRY' };
 
 /** Stage after the story beats `0..upTo` played their scene changes. */
@@ -47,9 +51,22 @@ export function stageAfterIntro(round: SimRound): StageState {
   return stageAtBeat(round, round.intro.length - 1);
 }
 
+/** Where the round goes once the story is over: its opening task, or question 1. */
+function afterIntro(round: SimRound): Pick<RoundState, 'phase' | 'opening'> {
+  return round.openingTask
+    ? { phase: 'task', opening: true }
+    : { phase: 'question', opening: false };
+}
+
+/** Hands-on task being played right now, if any. */
+export function currentTask(round: SimRound, state: RoundState): SimTask | undefined {
+  if (state.phase !== 'task') return undefined;
+  return state.opening ? round.openingTask : round.questions[state.qIndex]?.task;
+}
+
 export function initialRoundState(round: SimRound): RoundState {
   return {
-    phase: round.intro.length > 0 ? 'intro' : 'question',
+    ...(round.intro.length > 0 ? { phase: 'intro' as const, opening: false } : afterIntro(round)),
     beat: 0,
     qIndex: 0,
     hearts: 0,
@@ -73,11 +90,11 @@ export function createRoundReducer(round: SimRound) {
         if (state.phase !== 'intro') return state;
         return state.beat + 1 < round.intro.length
           ? { ...state, beat: state.beat + 1, stage: stageAtBeat(round, state.beat + 1) }
-          : { ...state, phase: 'question', stage: stageAfterIntro(round) };
+          : { ...state, ...afterIntro(round), stage: stageAfterIntro(round) };
 
       case 'SKIP_INTRO':
         return state.phase === 'intro'
-          ? { ...state, phase: 'question', stage: stageAfterIntro(round) }
+          ? { ...state, ...afterIntro(round), stage: stageAfterIntro(round) }
           : state;
 
       case 'ANSWER': {
@@ -108,9 +125,17 @@ export function createRoundReducer(round: SimRound) {
         return round.questions[state.qIndex]?.task ? { ...state, phase: 'task' } : advance(state);
       }
 
-      case 'TASK_DONE':
+      case 'TASK_DONE': {
         if (state.phase !== 'task') return state;
-        return advance({ ...state, stage: { ...state.stage, ...action.effect } });
+        const stage = { ...state.stage, ...action.effect };
+        return state.opening
+          ? { ...state, phase: 'question', opening: false, stage }
+          : advance({ ...state, stage });
+      }
+
+      case 'STAGE':
+        if (state.phase === 'won' || state.phase === 'lost') return state;
+        return { ...state, stage: { ...state.stage, ...action.effect } };
 
       case 'MISTAKE': {
         if (state.phase !== 'task') return state;
@@ -122,7 +147,7 @@ export function createRoundReducer(round: SimRound) {
         // Replays skip the story and start again from question 1.
         return {
           ...initialRoundState(round),
-          phase: 'question',
+          ...afterIntro(round),
           stage: stageAfterIntro(round),
           attempt: state.attempt + 1,
         };

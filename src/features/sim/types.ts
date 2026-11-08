@@ -13,13 +13,27 @@ export type CastMember =
   | 'victim'
   | 'friendA'
   | 'friendB'
-  | 'sister';
+  | 'sister'
+  /* Tình huống 3 – Đột quỵ */
+  | 'nam'
+  | 'lan'
+  | 'paramedic';
 
 /**
  * Backdrop of a round: the living room (scenario 1), one of the water scenes (scenario 2),
- * the dining room (scenario 4) or the kitchen (scenario 5).
+ * the living room with Bác Nam (scenario 3), the dining room (scenario 4) or the kitchen
+ * (scenario 5).
  */
-export type SceneKind = 'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 'dining-room';
+export type SceneKind =
+  'living-room' | 'pool' | 'lake' | 'shore' | 'kitchen' | 'stroke-room' | 'dining-room';
+
+/**
+ * Bác Nam (scenario 3): watching TV, stroke signs, resting on the sofa, speaking more clearly,
+ * unresponsive on the sofa, on his side on the floor (recovery position), on his back on the
+ * floor, receiving CPR.
+ */
+export type NamState =
+  'calm' | 'stroke' | 'rest' | 'better' | 'unresponsive' | 'recovery' | 'floor' | 'cpr';
 
 /**
  * How the choking brother is doing (scenario 4): eating, coughing hard, coughing weakly,
@@ -90,6 +104,24 @@ export type StageState = {
   /** The sister sits down to rest. */
   rest: boolean;
 
+  /* Living room with Bác Nam (scenario 3 – stroke) */
+  nam: NamState;
+  /** The glass of water: in his hand, dropped on the floor, offered by cô Lan, on the side table. */
+  cup: 'hand' | 'floor' | 'lan' | 'table';
+  /** Aspirin blister pack: not around, in cô Lan's hand, left on the side table. */
+  aspirin: 'none' | 'lan' | 'table';
+  /** Face–Arm–Speech signs circled on Bác Nam. */
+  signs: boolean;
+  /** The 115 button turns into a big pulsing "GỌI 115 NGAY". */
+  alert115: boolean;
+  /** Freeze-frame: story time paused while the player learns the signs. */
+  freeze: boolean;
+  /** Status banner over the scene, e.g. "ƯU TIÊN: 115". */
+  banner: string | null;
+  /** Cô Lan holds the phone (on speaker) and talks to 115. */
+  lanPhone: boolean;
+  /** Breathing drawn on Bác Nam while lying down: regular rise and fall or rare gasps. */
+  breathing: 'normal' | 'gasping' | null;
   /* Dining room (scenario 4 – choking) */
   choke: ChokeLevel;
   rescuer: Rescuer;
@@ -114,6 +146,14 @@ export type SimTask =
   | 'breath-order'
   /** Optional: buy cling film and lay it over the burn. */
   | 'cling-wrap'
+  /** Tap the Face–Arm–Speech signs on Bác Nam (never blocks the 115 call). */
+  | 'stroke-signs'
+  /** Free phone: dial 1-1-5 and press call (wrong numbers only get a hint). */
+  | 'dial-115'
+  /** Sort phone / glass of water / aspirin into "safe to use" and "do not give". */
+  | 'sort-items'
+  /** Watch the breathing animations and say whether it is normal breathing. */
+  | 'breathing-check'
   /** Stand behind, lean the child forward, find the spot between the shoulder blades, 5 blows. */
   | 'back-blows'
   /** Stand behind, place the fist above the navel and below the ribs, 5 thrusts. */
@@ -149,7 +189,12 @@ export type SimQuestion = {
   figure?: 'chest-spots';
   /** Photo illustrating the explanation. */
   explainImage?: ExplainImage;
+  /** Small infographic shown with the explanation. */
+  infoCard?: InfoCard;
 };
+
+/** Infographics of scenario 3: B.E.F.A.S.T., the 115 call checklist and the 8:20/8:25 timeline. */
+export type InfoCard = 'befast' | 'checklist' | 'timeline';
 
 /** Scene change played when a story beat appears (someone swims out, the camera zooms…). */
 type BeatEffect = { effect?: Partial<StageState> };
@@ -178,6 +223,8 @@ export type SimRound = {
   intro: Beat[];
   questions: SimQuestion[];
   ambience?: Ambience;
+  /** Hands-on activity played right after the story, before the first question. */
+  openingTask?: SimTask;
 };
 
 export type SimScenario = {
@@ -190,6 +237,8 @@ export type SimScenario = {
   shopItems: ItemId[];
   /** Who is being helped, used in task titles (defaults to "em trai"). */
   patient?: string;
+  /** A free "GỌI 115" button stays on screen the whole time (scenario 3). */
+  freeCall?: boolean;
   rounds: SimRound[];
 };
 

@@ -13,6 +13,9 @@ export type PersonKind =
   | 'friendA'
   | 'friendB'
   | 'sister'
+  | 'nam'
+  | 'lan'
+  | 'paramedic'
   | 'medic';
 export type HairStyle =
   | 'boy'
@@ -25,7 +28,9 @@ export type HairStyle =
   | 'pigtails'
   | 'spiky'
   | 'curly'
-  | 'buzz';
+  | 'buzz'
+  /** Receding grey hair, bald on top (older man). */
+  | 'elder';
 
 export type Look = {
   hairStyle: HairStyle;
@@ -38,6 +43,9 @@ export type Look = {
   glasses?: boolean;
   /** First-aid backpack straps (mascot). */
   backpack?: boolean;
+  mustache?: boolean;
+  /** Reflective stripes and a cross badge on the shirt (ambulance crew). */
+  medic?: boolean;
 };
 
 export const LOOKS: Record<PersonKind, Look & { scale: number }> = {
@@ -149,6 +157,33 @@ export const LOOKS: Record<PersonKind, Look & { scale: number }> = {
     pants: '#e98b9a',
     shorts: true,
     scale: 0.8,
+  },
+  /* Tình huống 3 – Đột quỵ */
+  nam: {
+    hairStyle: 'elder',
+    hair: '#d6d0c6',
+    skin: '#f6d2b0',
+    shirt: '#f2c46b',
+    pants: '#6b6157',
+    mustache: true,
+    scale: 1.08,
+  },
+  lan: {
+    hairStyle: 'bun',
+    hair: '#6e625a',
+    skin: '#f8dcc4',
+    shirt: '#f4a3a3',
+    pants: '#6b7a99',
+    scale: 1.02,
+  },
+  paramedic: {
+    hairStyle: 'short',
+    hair: '#2f2520',
+    skin: '#f0c49c',
+    shirt: '#5aa0d6',
+    pants: '#3f5f86',
+    medic: true,
+    scale: 1.12,
   },
   /* Tình huống 4 – Hóc dị vật: nhân viên y tế đến ở cuối màn 4.3 */
   medic: {

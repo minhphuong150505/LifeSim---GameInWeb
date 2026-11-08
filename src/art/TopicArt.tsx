@@ -5,6 +5,7 @@ import { DiningChair, DiningRoom, DiningTable } from './DiningRoom';
 import { Kitchen, TAP } from './Kitchen';
 import { LivingRoom } from './LivingRoom';
 import { Person } from './Person';
+import { SlurBubble } from './StrokeArt';
 import { PoolBackdrop, Swimmer } from './WaterScenes';
 
 /** Cover illustration of a topic card (Core game topic picker, Hub course thumbnails). */
@@ -49,6 +50,21 @@ export function TopicArt({ topic, className }: { topic: Topic; className?: strin
           <circle r={14} fill={C.red} {...stroke(2.5)} />
           <circle r={6} fill="#8fd0ea" {...stroke(2)} />
         </g>
+      </svg>
+    );
+  }
+  if (topic === 'stroke') {
+    // Bác Nam on the sofa: drooping mouth corner, weak left arm, slurred speech.
+    return (
+      <svg
+        viewBox="120 56 160 170"
+        preserveAspectRatio="xMidYMid slice"
+        className={className}
+        aria-hidden
+      >
+        <LivingRoom tvOn clockHours={8} clockMinutes={25} />
+        <Person kind="nam" pose="sit" x={200} y={170} eyes="worried" mouth="droop" armL="limp" />
+        <SlurBubble x={248} y={78} s={0.9} />
       </svg>
     );
   }

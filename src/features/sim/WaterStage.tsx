@@ -122,7 +122,10 @@ export const WaterStage = forwardRef<SVGSVGElement, WaterStageProps>(function Wa
   }, []);
 
   const scene =
-    stage.scene === 'living-room' || stage.scene === 'kitchen' || stage.scene === 'dining-room'
+    stage.scene === 'living-room' ||
+    stage.scene === 'kitchen' ||
+    stage.scene === 'stroke-room' ||
+    stage.scene === 'dining-room'
       ? 'pool'
       : stage.scene;
   const cams = CAMERAS[scene];
@@ -604,13 +607,7 @@ function BankTag({ id, x, y }: { id: BankItemId; x: number; y: number }) {
         stroke={INK}
         strokeWidth={1.3}
       />
-      <text
-        y={2.6}
-        textAnchor="middle"
-        fontFamily="Itim, sans-serif"
-        fontSize={size}
-        fill={INK}
-      >
+      <text y={2.6} textAnchor="middle" fontFamily="Itim, sans-serif" fontSize={size} fill={INK}>
         {tag.text}
       </text>
     </g>

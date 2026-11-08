@@ -13,6 +13,9 @@ export const CAST_NAMES: Record<CastMember, string> = {
   friendA: 'Bạn A',
   friendB: 'Bạn B',
   sister: 'Em gái',
+  nam: 'Bác Nam',
+  lan: 'Cô Lan',
+  paramedic: 'Nhân viên cấp cứu',
 };
 
 /** Where each living-room character stands/sits, and the top of their head, in room units. */
