@@ -176,7 +176,7 @@ export function Hub() {
             Không có khoá nào khớp bộ lọc. Hãy chọn hình thức, ngân sách hoặc nhu cầu khác.
           </Card>
         )}
-        <ul className="grid grid-cols-2 gap-3 pb-2 @xl:grid-cols-3 @5xl:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-4 pb-2">
           {list.map((c) => (
             <li key={c.id}>
               <button
@@ -199,12 +199,12 @@ export function Hub() {
                     {c.isNew && <Badge tone="green">Mới</Badge>}
                   </span>
                 </span>
-                <span className="flex flex-1 flex-col p-2.5">
-                  <span className="font-display text-[17px] leading-snug text-navy">{c.title}</span>
-                  <span className="mt-0.5 text-xs font-semibold text-muted">
+                <span className="flex flex-1 flex-col p-3.5">
+                  <span className="font-display text-[22px] leading-snug text-navy">{c.title}</span>
+                  <span className="mt-1 text-sm font-semibold text-muted">
                     🏫 {c.partner} · {c.mode}
                   </span>
-                  <span className="mt-auto pt-1 text-sm font-bold text-primary-dark">
+                  <span className="mt-auto pt-1.5 text-base font-bold text-primary-dark">
                     {c.price}
                   </span>
                 </span>
