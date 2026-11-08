@@ -317,6 +317,24 @@ export function Swimmer({
   const struggling = mode === 'struggle';
   const eyes: Eyes = struggling ? 'wide' : mode === 'float' ? 'worried' : 'happy';
   const mouth: Mouth = struggling ? 'open' : mode === 'float' ? 'flat' : 'smile';
+  /** One arm: skin from the shoulder through `pts` to the hand, with a short shirt sleeve. */
+  const limb = (side: 1 | -1, pts: { x: number; y: number }[]) => {
+    const sh = { x: 13 * side, y: -6 };
+    const first = pts[0] ?? sh;
+    const hand = pts[pts.length - 1] ?? sh;
+    const sleeveEnd = { x: sh.x + (first.x - sh.x) * 0.45, y: sh.y + (first.y - sh.y) * 0.45 };
+    return (
+      <>
+        <Limb
+          d={`M${sh.x} ${sh.y} ${pts.map((p) => `L${p.x} ${p.y}`).join(' ')}`}
+          color={look.skin}
+          width={7}
+        />
+        <Limb d={`M${sh.x} ${sh.y} L${sleeveEnd.x} ${sleeveEnd.y}`} color={look.shirt} width={9} />
+        <circle cx={hand.x} cy={hand.y} r={5} fill={look.skin} {...stroke(2)} />
+      </>
+    );
+  };
   const arm = (side: 1 | -1) => {
     const sh = { x: 13 * side, y: -6 };
     if (struggling) {
@@ -329,48 +347,34 @@ export function Swimmer({
             dur={side === 1 ? '0.55s' : '0.65s'}
             repeatCount="indefinite"
           />
-          <Limb
-            d={`M${sh.x} ${sh.y} L${24 * side} -26 L${30 * side} -48`}
-            color={look.skin}
-            width={7}
-          />
-          <circle cx={30 * side} cy={-48} r={5.2} fill={look.skin} {...stroke(2)} />
+          {limb(side, [
+            { x: 24 * side, y: -26 },
+            { x: 30 * side, y: -48 },
+          ])}
         </g>
       );
     }
-    if (mode === 'float') {
-      return (
-        <g key={side}>
-          <Limb d={`M${sh.x} ${sh.y} L${22 * side} -2`} color={look.skin} width={7} />
-          <circle cx={22 * side} cy={-2} r={5} fill={look.skin} {...stroke(2)} />
-        </g>
-      );
-    }
+    if (mode === 'float') return <g key={side}>{limb(side, [{ x: 22 * side, y: -2 }])}</g>;
     if (mode === 'tow') {
-      return side === 1 ? (
-        <g key={side}>
-          <Limb d={`M${sh.x} ${sh.y} L${30} -10`} color={look.skin} width={7} />
-          <circle cx={30} cy={-10} r={5} fill={look.skin} {...stroke(2)} />
-        </g>
-      ) : null;
+      return side === 1 ? <g key={side}>{limb(side, [{ x: 30, y: -10 }])}</g> : null;
     }
     if (mode === 'play') {
       return (
         <g key={side}>
-          <Limb
-            d={`M${sh.x} ${sh.y} L${24 * side} -12 L${30 * side} -4`}
-            color={look.skin}
-            width={7}
-          />
-          <circle cx={30 * side} cy={-4} r={5} fill={look.skin} {...stroke(2)} />
+          {limb(side, [
+            { x: 24 * side, y: -12 },
+            { x: 30 * side, y: -4 },
+          ])}
         </g>
       );
     }
     // swim: one arm reaching forward over the water
     return side === 1 ? (
       <g key={side}>
-        <Limb d={`M${sh.x} ${sh.y} L28 -26 L40 -20`} color={look.skin} width={7} />
-        <circle cx={40} cy={-20} r={5} fill={look.skin} {...stroke(2)} />
+        {limb(side, [
+          { x: 28, y: -26 },
+          { x: 40, y: -20 },
+        ])}
       </g>
     ) : null;
   };
@@ -389,7 +393,10 @@ export function Swimmer({
         )}
         {arm(-1)}
         {arm(1)}
-        <path d="M-17 4 Q-17 -9 -8 -11 L8 -11 Q17 -9 17 4 Z" fill={look.skin} {...stroke(2.2)} />
+        {/* shirt above the waterline, with a neckline */}
+        <path d="M-17 4 Q-17 -9 -8 -11 L8 -11 Q17 -9 17 4 Z" fill={look.shirt} {...stroke(2.2)} />
+        <path d="M-6 -11 Q0 -5 6 -11 Z" fill={look.skin} {...stroke(1.6)} />
+        <path d="M9 -9 Q15 -6 15 4 L11 4 Q12 -4 7 -9 Z" fill={INK} opacity={0.1} />
         <g transform="translate(0 -34) scale(0.98)">
           <Head look={look} face={{ eyes, mouth }} />
         </g>

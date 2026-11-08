@@ -8,14 +8,23 @@ import { cn } from '../../lib/cn';
  * Cover of a course in cards, the pop-up and the detail page: the partner's banner image,
  * a drawn banner for the demo partner, or the course's topic illustration.
  */
-export function CourseCover({ course, className }: { course: Course; className?: string }) {
+export function CourseCover({
+  course,
+  className,
+  fit = 'contain',
+}: {
+  course: Course;
+  className?: string;
+  /** How a banner image fills its box. */
+  fit?: 'contain' | 'cover';
+}) {
   if (course.banner) {
     return (
       <img
         src={course.banner}
         alt={course.title}
         draggable={false}
-        className={cn('h-full w-full object-contain', className)}
+        className={cn('h-full w-full', fit === 'cover' ? 'object-cover' : 'object-contain', className)}
       />
     );
   }
