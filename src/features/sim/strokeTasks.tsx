@@ -331,10 +331,16 @@ const HIP = { x: 82, y: 40 };
 const CHEST = { x: HIP.x + LYING_CHEST_DX * LK * LOOKS.nam.scale, y: HIP.y };
 
 /** What Ông Nội is doing now: lying on his back with rare, irregular gasps. */
-function BreathClip({ frozen }: { frozen?: boolean }) {
+function BreathClip({ frozen, small }: { frozen?: boolean; small?: boolean }) {
   const anim = { values: '1 1;1 1;1 1.6;1 1;1 1', keyTimes: '0;0.62;0.68;0.78;1', dur: '5.5s' };
   return (
-    <div className="ink-border relative mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl bg-[#f7e3c4] short:rounded-xl">
+    <div
+      className={cn(
+        'ink-border relative mx-auto w-full overflow-hidden rounded-2xl bg-[#f7e3c4] transition-[max-width] duration-300 short:rounded-xl',
+        // Once answered, make room for the feedback line and "Tiếp tục" without zooming out.
+        small ? 'max-w-[300px]' : 'max-w-[420px]',
+      )}
+    >
       <svg viewBox="10 0 100 64" className="block h-auto w-full" aria-hidden>
         <rect x={0} y={0} width={120} height={64} fill={C.floor} />
         <g transform={`translate(${HIP.x} ${HIP.y})`}>
@@ -411,7 +417,7 @@ export function BreathingTask({ onDone }: { onDone: (effect: Partial<StageState>
   return (
     <div className="flex flex-col gap-2 short:gap-1">
       <TaskTitle>Nhiệm vụ: Nhịp thở của Ông Nội đang thay đổi. Ông đang thở như thế nào?</TaskTitle>
-      <BreathClip frozen={wrong} />
+      <BreathClip frozen={wrong} small={answer !== null} />
       <div className="grid grid-cols-2 gap-2">
         <Button
           variant="secondary"

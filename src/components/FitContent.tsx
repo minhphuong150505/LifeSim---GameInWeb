@@ -25,11 +25,14 @@ export function FitContent({
     const inner = innerRef.current;
     if (!outer || !inner) return;
     const fit = () => {
+      // Reset first: when the panel's height follows its content (no fixed height), measuring
+      // while still zoomed out would read the already-shrunk height and shrink again on every
+      // resize – a feedback loop down to MIN_ZOOM.
+      inner.style.zoom = '1';
       // Both heights are measured on screen so the game frame's scale cancels out.
       const available = outer.getBoundingClientRect().height;
       if (available <= 0) return;
       let zoom = 1;
-      inner.style.zoom = '1';
       // A few passes: shrinking makes text reflow onto fewer lines.
       for (let i = 0; i < 4; i += 1) {
         const needed = inner.getBoundingClientRect().height;
