@@ -43,8 +43,10 @@ export type HandbookArticle = {
   icon: HandbookIcon;
   /** "Ảnh đề xuất" – brief for the real photo; used as its alt text once a photo is added. */
   photoBrief: string;
-  /** Optional photo in /public (none supplied yet – the card falls back to an icon panel). */
+  /** Photo in /public/handbook: the card and the top of the article (else an icon panel). */
   photo?: string;
+  /** Second photo, shown in "Bạn nên làm gì?". */
+  photo2?: string;
   recognize: HandbookList;
   actions: ActionItem[];
   /** Explanation printed after the steps. */
@@ -80,6 +82,8 @@ export const EMERGENCY_NUMBERS = [
 export const HANDBOOK: HandbookArticle[] = [
   {
     id: 'chay-mau-cam',
+    photo: '/handbook/chay-mau-cam-1.jpg',
+    photo2: '/handbook/chay-mau-cam-2.jpg',
     number: '01',
     title: 'Chảy máu cam',
     cardTitle: 'Chảy máu cam',
@@ -122,6 +126,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'chay-mau-nhieu',
+    photo: '/handbook/chay-mau-nhieu-1.jpg',
+    photo2: '/handbook/chay-mau-nhieu-2.jpg',
     number: '02',
     title: 'Chảy máu nhiều',
     cardTitle: 'Chảy máu nhiều',
@@ -161,6 +167,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'bong',
+    photo: '/handbook/bong-1.jpg',
+    photo2: '/handbook/bong-2.jpg',
     number: '03',
     title: 'Bỏng và bỏng nước',
     cardTitle: 'Bỏng & bỏng nước',
@@ -202,6 +210,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'hoc-di-vat',
+    photo: '/handbook/hoc-di-vat-1.jpg',
+    photo2: '/handbook/hoc-di-vat-2.jpg',
     number: '04',
     title: 'Hóc dị vật',
     cardTitle: 'Hóc dị vật',
@@ -249,6 +259,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'bat-tinh-con-tho',
+    photo: '/handbook/bat-tinh-con-tho-1.jpg',
+    photo2: '/handbook/bat-tinh-con-tho-2.jpg',
     number: '05',
     title: 'Bất tỉnh nhưng còn thở',
     cardTitle: 'Bất tỉnh nhưng còn thở',
@@ -289,6 +301,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'cpr-aed',
+    photo: '/handbook/cpr-aed-1.jpg',
+    photo2: '/handbook/cpr-aed-2.jpg',
     number: '06',
     title: 'Ngừng thở – CPR & AED',
     cardTitle: 'CPR & AED',
@@ -326,6 +340,8 @@ export const HANDBOOK: HandbookArticle[] = [
   },
   {
     id: 'co-giat',
+    photo: '/handbook/co-giat-1.jpg',
+    photo2: '/handbook/co-giat-2.jpg',
     number: '07',
     title: 'Co giật',
     cardTitle: 'Co giật',

@@ -629,6 +629,14 @@ export function HandbookArticlePage() {
             tone="green"
             icon={<CheckCircle size={20} className="shrink-0" />}
           >
+            {article.photo2 && (
+              <img
+                src={article.photo2}
+                alt={`Minh hoạ cách xử trí: ${article.title}`}
+                loading="lazy"
+                className="mb-4 aspect-[16/9] w-full rounded-lg object-cover"
+              />
+            )}
             <Actions article={article} />
           </Section>
 
