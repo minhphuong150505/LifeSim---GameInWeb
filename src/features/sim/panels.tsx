@@ -62,7 +62,6 @@ export function Hud({
   onBag,
   onShop,
   onBank,
-  call,
 }: {
   title: string;
   hearts: number;
@@ -76,8 +75,6 @@ export function Hud({
   onBag: () => void;
   onShop: () => void;
   onBank: () => void;
-  /** Always-on, free emergency call button (scenario 3); `urgent` makes it big and pulsing. */
-  call?: { onClick: () => void; urgent: boolean; done: boolean };
 }) {
   return (
     <div className="absolute inset-x-0 top-0 z-30 flex items-center gap-1.5 px-[max(8px,env(safe-area-inset-left))] pr-[max(8px,env(safe-area-inset-right))] pt-[max(6px,env(safe-area-inset-top))] short:gap-1 short:pt-1">
@@ -118,33 +115,6 @@ export function Hud({
         </motion.span>
       )}
       <span className="flex-1" />
-      {call && (
-        <motion.button
-          type="button"
-          onClick={call.onClick}
-          aria-label={call.done ? 'Gọi 115 (đã kết nối)' : 'Gọi 115 ngay'}
-          animate={call.urgent && !call.done ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-          transition={call.urgent && !call.done ? { repeat: Infinity, duration: 1 } : undefined}
-          className={cn(
-            'ink-border flex h-12 shrink-0 items-center gap-1 rounded-2xl px-2 font-display text-white shadow-pop short:h-10',
-            call.done ? 'bg-success-dark' : 'bg-primary-dark',
-            call.urgent && !call.done
-              ? 'text-[17px] short:text-[14px]'
-              : 'text-[15px] short:text-[13px]',
-          )}
-        >
-          <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden>
-            <path
-              d="M5 3 L9 3 L11 8 L8.5 9.5 C9.5 11.8 12.2 14.5 14.5 15.5 L16 13 L21 15 L21 19 C21 20 20 21 19 21 C10 21 3 14 3 5 C3 4 4 3 5 3 Z"
-              fill="#fffdf6"
-              stroke="#3b2d26"
-              strokeWidth={1.8}
-              strokeLinejoin="round"
-            />
-          </svg>
-          {call.done ? '115 ✓' : call.urgent ? 'GỌI 115 NGAY' : 'GỌI 115'}
-        </motion.button>
-      )}
       <CurrencyPill className="shrink-0" onClick={onBank} />
       <div className="relative">
         <button
@@ -277,9 +247,12 @@ export function SidePanel({
   children,
   label,
   compact,
+  fill,
 }: {
   children: React.ReactNode;
   label: string;
+  /** Reach the bottom of the screen (questions: the options grow to fill it). */
+  fill?: boolean;
   /** Narrow panel, leaving most of the scene free to tap (find-the-object tasks). */
   compact?: boolean;
 }) {
@@ -290,11 +263,12 @@ export function SidePanel({
       animate={{ x: 0, opacity: 1 }}
       className={cn(
         'ink-border absolute right-[max(8px,env(safe-area-inset-right))] top-[70px] z-20 flex max-h-[calc(100%-80px)] flex-col',
+        fill && 'bottom-[max(10px,env(safe-area-inset-bottom))]',
         'overflow-hidden rounded-[22px] bg-paper p-3 pb-2 shadow-pop short:bottom-1 short:top-[46px] short:rounded-2xl short:p-2 short:pb-1.5 tiny:top-[40px]',
         compact ? 'w-[min(34%,380px)]' : 'w-[min(54%,620px)]',
       )}
     >
-      <FitContent innerClassName="flex flex-col">{children}</FitContent>
+      <FitContent innerClassName="flex min-h-full flex-col">{children}</FitContent>
     </motion.section>
   );
 }
@@ -317,7 +291,7 @@ export function QuestionPanel({
       key={question.id}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col gap-2 short:gap-1"
+      className="flex flex-1 flex-col gap-2 short:gap-1"
     >
       <h2 className="shrink-0 font-display text-[22px] leading-snug text-navy short:text-[15px] short:leading-tight tiny:text-[13px]">
         <span className="mr-1.5 inline-block rounded-full bg-primary px-2 align-[2px] font-display text-[12px] leading-5 text-white short:text-[11px] short:leading-4">
@@ -325,15 +299,15 @@ export function QuestionPanel({
         </span>
         {question.prompt}
       </h2>
-      <div className={cn(question.figure && 'flex items-stretch gap-2')}>
+      <div
+        className={cn('flex flex-1 flex-col', question.figure && 'flex-row items-stretch gap-2')}
+      >
         {question.figure === 'chest-spots' && <ChestSpots wrongIds={wrongIds} onPick={onAnswer} />}
-        <ul
-          className={cn('flex flex-col gap-1.5 short:gap-1', question.figure && 'min-w-0 flex-1')}
-        >
+        <ul className={cn('flex flex-1 flex-col gap-2 short:gap-1', question.figure && 'min-w-0')}>
           {question.options.map((o) => {
             const wrong = wrongIds.includes(o.id);
             return (
-              <li key={o.id}>
+              <li key={o.id} className="flex flex-1">
                 <motion.button
                   type="button"
                   disabled={wrong}
@@ -342,12 +316,12 @@ export function QuestionPanel({
                   animate={wrong ? { x: [0, -10, 10, -7, 7, 0] } : { x: 0 }}
                   transition={{ duration: 0.4 }}
                   aria-label={`${LETTERS[o.id]}. ${o.text}${wrong ? ' (đã chọn sai)' : ''}`}
-                  className="ink-border relative flex w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl"
+                  className="ink-border relative flex min-h-full w-full items-center gap-2.5 overflow-hidden rounded-2xl bg-cream p-1.5 pr-2 text-left shadow-pop short:gap-1.5 short:rounded-xl short:p-1"
                 >
                   {!question.figure && (
                     <OptionArt
                       art={o.art}
-                      className="aspect-square w-[clamp(26px,calc(var(--app-h)*0.13),72px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg"
+                      className="aspect-square w-[clamp(26px,calc(var(--app-h)*0.17),96px)] shrink-0 overflow-hidden rounded-xl border-2 border-navy bg-paper short:rounded-lg"
                     />
                   )}
                   <span className="ink-border grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent font-display text-lg text-navy short:h-5 short:w-5 short:text-xs">

@@ -2,7 +2,7 @@
 
 export type SignId = 'face' | 'arm' | 'speech';
 
-/** Face–Arm–Speech hotspots on the close-up of Bác Nam; boxes in % of the picture (x, y, w, h). */
+/** Face–Arm–Speech hotspots on the close-up of Ông Nội; boxes in % of the picture (x, y, w, h). */
 export const SIGN_SPOTS: { id: SignId; label: string; box: [number, number, number, number] }[] = [
   { id: 'face', label: 'Méo miệng', box: [22, 30, 34, 30] },
   { id: 'arm', label: 'Yếu một bên tay', box: [50, 56, 30, 44] },
@@ -73,10 +73,10 @@ export function sortIsRight(item: SortItemId, bin: SortBin): boolean {
 
 export type BreathAnswer = 'normal' | 'abnormal';
 
-/** Animation B (rare, irregular gasps) is what Bác Nam is doing now. */
+/** Rare, irregular gasps: what Ông Nội is doing now. */
 export const BREATH_NOW: BreathAnswer = 'abnormal';
 
 export const BREATH_RIGHT =
   'Người bệnh không phản ứng + không thở bình thường: bắt đầu CPR theo hướng dẫn 115.';
 export const BREATH_WRONG =
-  'Hãy nhìn kỹ khung B: chỉ có những nhịp ngáp rời rạc, không đều – đó không phải là thở bình thường.';
+  'Hãy nhìn kỹ: Ông Nội chỉ có những nhịp ngáp rời rạc, không đều – đó không phải là thở bình thường.';

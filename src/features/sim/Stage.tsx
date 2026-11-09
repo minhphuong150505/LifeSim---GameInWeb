@@ -4,7 +4,7 @@ import { C, INK } from '../../art/ink';
 import { LivingRoom } from '../../art/LivingRoom';
 import { Person } from '../../art/Person';
 import { ProfileArt } from '../../art/Profile';
-import { COMFORT_MOM, NOSE_POINT, SPOTS } from './stageLayout';
+import { COMFORT_MOM, NOSE_POINT, SPOTS, focusBox } from './stageLayout';
 import type { CastMember, StageState } from './types';
 
 type StageProps = {
@@ -28,7 +28,7 @@ type StageProps = {
 };
 
 const WIDE = { y: 24, h: 334 };
-const FOCUS = { y: 58, h: 172, x: 200 };
+const FOCUS = { y: 14, h: 216, x: 200 };
 
 /** The living-room scene filling the whole screen; forwards a ref to the <svg>. */
 export const Stage = forwardRef<SVGSVGElement, StageProps>(function Stage(
@@ -53,10 +53,10 @@ export const Stage = forwardRef<SVGSVGElement, StageProps>(function Stage(
   }, []);
 
   const focus = mode === 'focus';
-  const box = focus ? FOCUS : WIDE;
+  const box = focus ? focusBox(FOCUS, aspect) : WIDE;
   const w = box.h * aspect;
   const x0 = focus ? FOCUS.x - focusX * w : 200 - w / 2;
-  const viewBox = `${x0.toFixed(1)} ${box.y} ${w.toFixed(1)} ${box.h}`;
+  const viewBox = `${x0.toFixed(1)} ${box.y.toFixed(1)} ${w.toFixed(1)} ${box.h.toFixed(1)}`;
 
   const has = (c: CastMember) => cast.includes(c) && !focus;
   const bleedingFace = stage.bleeding && !stage.icePack;

@@ -51,13 +51,19 @@ function Chip({
   );
 }
 
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <fieldset className="flex min-w-0 items-center gap-2">
-      <legend className="float-left w-24 shrink-0 text-sm font-bold text-navy">{label}</legend>
-      <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto pb-1">{children}</div>
-    </fieldset>
-  );
+type FilterKey = keyof Filters;
+const FILTER_TABS: { key: FilterKey; label: string }[] = [
+  { key: 'mode', label: 'Hình thức' },
+  { key: 'budget', label: 'Ngân sách' },
+  { key: 'topic', label: 'Nhu cầu' },
+];
+
+/** Label of the value picked for one filter (shown on its button), or null for "Tất cả". */
+function activeLabel(key: FilterKey, f: Filters): string | null {
+  if (key === 'mode') return f.mode;
+  if (key === 'budget')
+    return BUDGETS.find((b) => b.value === f.budget && b.value !== null)?.label ?? null;
+  return f.topic ? TOPIC_LABELS[f.topic] : null;
 }
 
 /**
@@ -69,7 +75,7 @@ export function Hub() {
   const topicStats = useProgressStore((s) => s.topicStats);
   const focusTopic = useMemo(() => weakestTopic(topicStats), [topicStats]);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
 
   const list = useMemo(() => {
     const shown = COURSES.filter(
@@ -93,14 +99,31 @@ export function Hub() {
       <PageHeader title="Practice Hub" subtitle="Tìm khoá học sơ cứu thực tế phù hợp với bạn." />
       <div className="mx-auto max-w-6xl space-y-3 px-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant={filtersOpen || activeCount > 0 ? 'navy' : 'secondary'}
-            onClick={() => setFiltersOpen((o) => !o)}
-            aria-expanded={filtersOpen}
-            aria-controls="hub-filters"
-          >
-            ⚙️ Bộ lọc{activeCount > 0 ? ` (${activeCount})` : ''} {filtersOpen ? '▴' : '▾'}
-          </Button>
+          {FILTER_TABS.map((t) => {
+            const value = activeLabel(t.key, filters);
+            const open = openFilter === t.key;
+            return (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setOpenFilter(open ? null : t.key)}
+                aria-expanded={open}
+                aria-controls="hub-filters"
+                className={cn(
+                  'ink-border flex min-h-11 items-center gap-1.5 rounded-2xl px-3.5 font-display text-[17px] shadow-pop active:translate-y-0.5',
+                  open || value ? 'bg-navy text-white' : 'bg-paper text-navy',
+                )}
+              >
+                {t.label}
+                {value && (
+                  <span className="font-sans text-sm font-semibold opacity-85">· {value}</span>
+                )}
+                <span aria-hidden className="text-sm">
+                  {open ? '▲' : '▼'}
+                </span>
+              </button>
+            );
+          })}
           {activeCount > 0 && (
             <Button variant="ghost" onClick={() => setFilters(EMPTY_FILTERS)}>
               Xoá lọc
@@ -112,67 +135,66 @@ export function Hub() {
         </div>
 
         <AnimatePresence initial={false}>
-          {filtersOpen && (
+          {openFilter && (
             <motion.div
               id="hub-filters"
+              key={openFilter}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <Card className="space-y-2 p-3">
-                <FilterRow label="Hình thức">
-                  {MODES.map((m) => (
-                    <Chip
-                      key={m.label}
-                      active={filters.mode === m.value}
-                      onClick={() => setFilters((f) => ({ ...f, mode: m.value }))}
-                    >
-                      {m.label}
-                    </Chip>
-                  ))}
-                </FilterRow>
-                <FilterRow label="Ngân sách">
-                  {BUDGETS.map((b) => (
-                    <Chip
-                      key={b.label}
-                      active={filters.budget === b.value}
-                      onClick={() => setFilters((f) => ({ ...f, budget: b.value }))}
-                    >
-                      {b.label}
-                    </Chip>
-                  ))}
-                </FilterRow>
-                <FilterRow label="Nhu cầu">
-                  <Chip
-                    active={filters.topic === null}
-                    onClick={() => setFilters((f) => ({ ...f, topic: null }))}
-                  >
-                    Tất cả
-                  </Chip>
-                  {ALL_TOPICS.map((t) => (
-                    <Chip
-                      key={t}
-                      active={filters.topic === t}
-                      onClick={() => setFilters((f) => ({ ...f, topic: t }))}
-                    >
-                      <span aria-hidden>{TOPIC_EMOJI[t]} </span>
-                      {TOPIC_LABELS[t]}
-                    </Chip>
-                  ))}
-                </FilterRow>
+              <Card className="p-3">
+                <div
+                  role="group"
+                  aria-label={FILTER_TABS.find((t) => t.key === openFilter)?.label}
+                  className="flex flex-wrap gap-1.5"
+                >
+                  {openFilter === 'mode' &&
+                    MODES.map((m) => (
+                      <Chip
+                        key={m.label}
+                        active={filters.mode === m.value}
+                        onClick={() => setFilters((f) => ({ ...f, mode: m.value }))}
+                      >
+                        {m.label}
+                      </Chip>
+                    ))}
+                  {openFilter === 'budget' &&
+                    BUDGETS.map((b) => (
+                      <Chip
+                        key={b.label}
+                        active={filters.budget === b.value}
+                        onClick={() => setFilters((f) => ({ ...f, budget: b.value }))}
+                      >
+                        {b.label}
+                      </Chip>
+                    ))}
+                  {openFilter === 'topic' && (
+                    <>
+                      <Chip
+                        active={filters.topic === null}
+                        onClick={() => setFilters((f) => ({ ...f, topic: null }))}
+                      >
+                        Tất cả
+                      </Chip>
+                      {ALL_TOPICS.map((t) => (
+                        <Chip
+                          key={t}
+                          active={filters.topic === t}
+                          onClick={() => setFilters((f) => ({ ...f, topic: t }))}
+                        >
+                          <span aria-hidden>{TOPIC_EMOJI[t]} </span>
+                          {TOPIC_LABELS[t]}
+                        </Chip>
+                      ))}
+                    </>
+                  )}
+                </div>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {focusTopic && (
-          <p className="ink-border rounded-2xl bg-[#fff1c2] px-3 py-2 text-sm text-ink">
-            🎯 Gợi ý: ưu tiên khoá về{' '}
-            <span className="font-bold text-primary-dark">{TOPIC_LABELS[focusTopic]}</span> – chủ đề
-            bạn đang có độ chính xác thấp nhất.
-          </p>
-        )}
 
         {list.length === 0 && (
           <Card className="text-center text-sm text-muted">

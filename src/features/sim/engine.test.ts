@@ -87,7 +87,7 @@ describe('bundled simulation data', () => {
     expect(answers('3-4')).toBe('babc');
     const stroke = simScenarios.find((s) => s.id === 'stroke');
     expect(stroke?.number).toBe(3);
-    expect(stroke?.freeCall).toBe(true);
+    expect(stroke?.patient).toBe('Ông Nội');
     for (const r of stroke?.rounds ?? []) {
       expect(r.stage.scene).toBe('stroke-room');
       expect(r.cast).toContain('nam');
@@ -95,7 +95,7 @@ describe('bundled simulation data', () => {
       expect(tasks).toHaveLength(1);
       for (const q of r.questions) expect(q.hint).toBeTruthy();
     }
-    expect(getRound('3-2')?.openingTask).toBe('dial-115');
+    expect(getRound('3-2')?.openingTask).toBe('call-115-speaker');
     // Ends with the ambulance crew taking over.
     expect(getRound('3-4')?.questions.at(-1)?.effect?.ambulance).toBe(true);
   });
@@ -352,10 +352,10 @@ describe('round engine', () => {
     const red = createRoundReducer(r);
     let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
     expect(s).toMatchObject({ phase: 'task', opening: true, qIndex: 0 });
-    expect(currentTask(r, s)).toBe('dial-115');
+    expect(currentTask(r, s)).toBe('call-115-speaker');
     // Answers are ignored while the call is being made.
     expect(red(s, { type: 'ANSWER', optionId: rightOf(r, 0) }).hearts).toBe(0);
-    s = red(s, { type: 'TASK_DONE', effect: { called: true } });
+    s = red(s, { type: 'TASK_DONE', effect: { phone: true, called: true } });
     expect(s).toMatchObject({ phase: 'question', opening: false, qIndex: 0 });
     expect(s.stage.called).toBe(true);
     expect(currentTask(r, s)).toBeUndefined();
@@ -366,19 +366,6 @@ describe('round engine', () => {
     expect(s).toMatchObject({ phase: 'won', hearts: 4 });
     // A replay starts again with the call.
     expect(red(s, { type: 'RETRY' })).toMatchObject({ phase: 'task', opening: true });
-  });
-
-  it('records a call made with the always-on 115 button without leaving the question', () => {
-    const r = getRound('3-1') as SimRound;
-    const red = createRoundReducer(r);
-    let s = red(initialRoundState(r), { type: 'SKIP_INTRO' });
-    expect(s.stage).toMatchObject({ nam: 'stroke', freeze: true, called: false });
-    s = red(s, { type: 'STAGE', effect: { called: true } });
-    expect(s).toMatchObject({ phase: 'question', qIndex: 0, bolts: 0 });
-    expect(s.stage.called).toBe(true);
-    s = red(s, { type: 'ANSWER', optionId: rightOf(r, 0) });
-    s = red(s, { type: 'ACK' });
-    expect(currentTask(r, s)).toBe('stroke-signs');
   });
 
   it('scores 3/2/1 stars by bolts and scales points with difficulty', () => {

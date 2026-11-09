@@ -11,6 +11,7 @@ import { C, INK, stroke } from '../../art/ink';
 import { LOOKS } from '../../art/looks';
 import { Head, Limb, Person, type Eyes, type Mouth } from '../../art/Person';
 import { LyingPerson, PressingHands } from '../../art/WaterScenes';
+import { focusBox } from './stageLayout';
 import type { CastMember, ChokeLevel, StageState } from './types';
 
 /** Scale of the brother (his look's own scale). */
@@ -113,7 +114,7 @@ type DiningStageProps = {
 
 const WIDE = { y: 26, h: 290 };
 /** Zoom used while answering: the brother and the player next to him. */
-const FOCUS = { y: 92, h: 222 };
+const FOCUS = { y: 50, h: 264 };
 
 /** Scenario 4 stage: the dining room filling the screen; forwards a ref to the <svg>. */
 export const DiningStage = forwardRef<SVGSVGElement, DiningStageProps>(function DiningStage(
@@ -138,12 +139,12 @@ export const DiningStage = forwardRef<SVGSVGElement, DiningStageProps>(function 
 
   const focus = mode === 'focus';
   const bro = brotherSpot(stage);
-  const box = focus ? FOCUS : WIDE;
+  const box = focus ? focusBox(FOCUS, aspect) : WIDE;
   const w = box.h * aspect;
   // Centre on the brother, nudged towards wherever the player is helping from.
   const cx = bro.pose === 'lie' ? bro.x - 4 : bro.pose === 'stand' ? bro.x + 6 : bro.x - 22;
   const x0 = focus ? cx - focusX * w : 200 - w / 2;
-  const viewBox = `${x0.toFixed(1)} ${box.y} ${w.toFixed(1)} ${box.h}`;
+  const viewBox = `${x0.toFixed(1)} ${box.y.toFixed(1)} ${w.toFixed(1)} ${box.h.toFixed(1)}`;
   // Zoomed in, only the brother and the player are shown.
   const has = (c: CastMember) => cast.includes(c) && !focus;
   const talking = (c: CastMember) => speaker === c;

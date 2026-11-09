@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { PhoneIcon } from '../../art/icons';
 import { C, stroke } from '../../art/ink';
 import { LOOKS } from '../../art/looks';
 import { Person } from '../../art/Person';
@@ -58,7 +57,7 @@ export function StrokeSignsTask({ onDone }: { onDone: () => void }) {
   return (
     <div className="flex flex-col gap-2 short:gap-1">
       <TaskTitle>
-        Nhiệm vụ: Chạm vào các dấu hiệu bất thường trên bác Nam để ghi nhớ Face – Arm – Speech.
+        Nhiệm vụ: Chạm vào các dấu hiệu bất thường trên Ông Nội để ghi nhớ Face – Arm – Speech.
       </TaskTitle>
       <div className="flex items-stretch gap-3 short:gap-2">
         <motion.div
@@ -152,9 +151,6 @@ export function StrokeSignsTask({ onDone }: { onDone: () => void }) {
               >
                 {miss > 0 ? SIGN_MISS : 'Chạm theo thứ tự bất kỳ: khóe miệng, cánh tay, lời nói.'}
               </motion.p>
-              <p className="text-[13px] leading-snug text-muted short:text-[11px]">
-                Không bắt buộc trước khi gọi 115 – nút GỌI 115 luôn bấm được.
-              </p>
             </>
           )}
           {done && (
@@ -164,40 +160,6 @@ export function StrokeSignsTask({ onDone }: { onDone: () => void }) {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ───────────────────────── 3.2 · dial 115 (free) ───────────────────────── */
-
-export function Dial115Task({ onOpen }: { onOpen: () => void }) {
-  const steps = ['Chạm vào điện thoại.', 'Nhập lần lượt 1 – 1 – 5.', 'Nhấn nút GỌI.'];
-  return (
-    <div className="flex flex-col gap-3 short:gap-1.5">
-      <div className="ink-border rounded-card bg-[#fff1c2] p-4 shadow-soft short:rounded-xl short:p-2">
-        <div className="flex items-center gap-2 short:[&>svg]:h-7 short:[&>svg]:w-7">
-          <PhoneIcon size={40} />
-          <p className="font-display text-xl leading-snug text-navy short:text-[15px] short:leading-tight">
-            Nhập số và thực hiện cuộc gọi 115
-          </p>
-        </div>
-        <ol className="mt-3 space-y-1.5 short:mt-1 short:space-y-0.5">
-          {steps.map((s, i) => (
-            <li
-              key={s}
-              className="text-[15px] font-semibold text-navy short:text-[12px] short:leading-snug"
-            >
-              {i + 1}. {s}
-            </li>
-          ))}
-        </ol>
-        <p className="mt-2 text-sm text-muted short:mt-1 short:text-[11px]">
-          Mọi thao tác đều miễn phí, không cần băng gạc.
-        </p>
-      </div>
-      <Button size="lg" block onClick={onOpen}>
-        📞 Mở điện thoại
-      </Button>
     </div>
   );
 }
@@ -368,27 +330,11 @@ const LK = 0.42;
 const HIP = { x: 82, y: 40 };
 const CHEST = { x: HIP.x + LYING_CHEST_DX * LK * LOOKS.nam.scale, y: HIP.y };
 
-/** Bác Nam lying on his back with the chest rising: regular (A) or rare gasps (B). */
-function BreathClip({
-  mode,
-  frozen,
-  current,
-}: {
-  mode: 'normal' | 'gasping';
-  frozen?: boolean;
-  current?: boolean;
-}) {
-  const normal = mode === 'normal';
-  const anim = normal
-    ? { values: '1 1;1 1.35;1 1', keyTimes: '0;0.5;1', dur: '3s' }
-    : { values: '1 1;1 1;1 1.6;1 1;1 1', keyTimes: '0;0.62;0.68;0.78;1', dur: '5.5s' };
+/** What Ông Nội is doing now: lying on his back with rare, irregular gasps. */
+function BreathClip({ frozen }: { frozen?: boolean }) {
+  const anim = { values: '1 1;1 1;1 1.6;1 1;1 1', keyTimes: '0;0.62;0.68;0.78;1', dur: '5.5s' };
   return (
-    <div
-      className={cn(
-        'ink-border relative flex-1 overflow-hidden rounded-2xl bg-[#f7e3c4] short:rounded-xl',
-        current && 'ring-4 ring-primary/60',
-      )}
-    >
+    <div className="ink-border relative mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl bg-[#f7e3c4] short:rounded-xl">
       <svg viewBox="10 0 100 64" className="block h-auto w-full" aria-hidden>
         <rect x={0} y={0} width={120} height={64} fill={C.floor} />
         <g transform={`translate(${HIP.x} ${HIP.y})`}>
@@ -409,7 +355,7 @@ function BreathClip({
             )}
           </g>
         </g>
-        {frozen && !normal && (
+        {frozen && (
           <ellipse
             cx={CHEST.x - 18}
             cy={CHEST.y - 4}
@@ -422,32 +368,26 @@ function BreathClip({
           />
         )}
         <path
-          d={normal ? 'M50 16 q3 -3 6 0 t6 0' : 'M50 18 l4 -5 l3 7 l4 -9'}
+          d="M50 18 l4 -5 l3 7 l4 -9"
           fill="none"
-          stroke={normal ? C.blueDark : C.redDark}
+          stroke={C.redDark}
           strokeWidth={1.8}
           strokeLinecap="round"
         >
           {!frozen && (
             <animate
               attributeName="opacity"
-              values={normal ? '0.2;1;0.2' : '0;0;1;0;0'}
-              keyTimes={normal ? '0;0.5;1' : '0;0.62;0.68;0.78;1'}
+              values="0;0;1;0;0"
+              keyTimes={anim.keyTimes}
               dur={anim.dur}
               repeatCount="indefinite"
             />
           )}
         </path>
       </svg>
-      <p className="border-t-2 border-navy bg-paper px-1 py-0.5 text-center text-[12px] font-semibold leading-tight text-navy short:text-[10px]">
-        <b className="font-display">{normal ? 'A' : 'B'}</b> –{' '}
-        {normal ? 'lồng ngực nâng hạ đều (so sánh)' : 'nhịp ngáp rời rạc, không đều'}
-      </p>
-      {current && (
-        <span className="absolute left-1 top-1 rounded-full bg-primary px-1.5 font-display text-[10px] leading-4 text-white">
-          ĐANG THẤY
-        </span>
-      )}
+      <span className="absolute left-1.5 top-1.5 rounded-full bg-primary px-2 font-display text-[12px] leading-5 text-white">
+        ĐANG THẤY
+      </span>
     </div>
   );
 }
@@ -470,14 +410,8 @@ export function BreathingTask({ onDone }: { onDone: (effect: Partial<StageState>
 
   return (
     <div className="flex flex-col gap-2 short:gap-1">
-      <TaskTitle>
-        Nhiệm vụ: Nhịp thở của bác Nam đang thay đổi. Hoạt ảnh B là tình trạng hiện tại – bác đang
-        thở thế nào?
-      </TaskTitle>
-      <div className="flex gap-2">
-        <BreathClip mode="normal" />
-        <BreathClip mode="gasping" current frozen={wrong} />
-      </div>
+      <TaskTitle>Nhiệm vụ: Nhịp thở của Ông Nội đang thay đổi. Ông đang thở như thế nào?</TaskTitle>
+      <BreathClip frozen={wrong} />
       <div className="grid grid-cols-2 gap-2">
         <Button
           variant="secondary"
@@ -517,9 +451,7 @@ export function BreathingTask({ onDone }: { onDone: (effect: Partial<StageState>
           size="lg"
           block
           variant="green"
-          onClick={() =>
-            onDone({ nam: 'floor', breathing: 'gasping', banner: 'Không thở bình thường → CPR' })
-          }
+          onClick={() => onDone({ nam: 'floor', breathing: 'gasping' })}
         >
           Tiếp tục ▸
         </Button>

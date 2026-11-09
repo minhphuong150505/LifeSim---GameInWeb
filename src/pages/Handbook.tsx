@@ -278,18 +278,6 @@ export function Handbook() {
           )}
         </section>
 
-        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-          <h2 className="text-base text-slate-900">Mỗi bài gồm</h2>
-          <ol className="mt-2 grid gap-x-6 gap-y-1 text-sm text-slate-600 sm:grid-cols-2">
-            {SECTIONS.map((s, i) => (
-              <li key={s.id}>
-                <span className="mr-1.5 font-semibold text-slate-400">{i + 1}.</span>
-                {s.label}
-              </li>
-            ))}
-          </ol>
-        </section>
-
         <div className="mt-6">
           <EmergencyPanel />
         </div>

@@ -35,8 +35,6 @@ export type RoundAction =
   | { type: 'TASK_DONE'; effect?: Partial<StageState> }
   /** Wrong move inside a hands-on task (e.g. picking an object that sinks): one bolt. */
   | { type: 'MISTAKE' }
-  /** Scene change outside the question flow (e.g. 115 called with the always-on button). */
-  | { type: 'STAGE'; effect: Partial<StageState> }
   | { type: 'RETRY' };
 
 /** Stage after the story beats `0..upTo` played their scene changes. */
@@ -132,10 +130,6 @@ export function createRoundReducer(round: SimRound) {
           ? { ...state, phase: 'question', opening: false, stage }
           : advance({ ...state, stage });
       }
-
-      case 'STAGE':
-        if (state.phase === 'won' || state.phase === 'lost') return state;
-        return { ...state, stage: { ...state.stage, ...action.effect } };
 
       case 'MISTAKE': {
         if (state.phase !== 'task') return state;

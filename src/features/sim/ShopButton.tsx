@@ -20,7 +20,11 @@ export function ShopButton() {
         <ShopIcon size={32} />
         Cửa hàng
       </button>
-      <Shop open={panel === 'shop'} onClose={() => setPanel(null)} onOpenBank={() => setPanel('bank')} />
+      <Shop
+        open={panel === 'shop'}
+        onClose={() => setPanel(null)}
+        onOpenBank={() => setPanel('bank')}
+      />
       <BandageBank open={panel === 'bank'} onClose={() => setPanel(null)} />
     </>
   );

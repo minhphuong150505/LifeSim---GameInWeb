@@ -19,7 +19,7 @@ import {
 } from '../../art/StrokeArt';
 import { PressingHands } from '../../art/WaterScenes';
 
-/* Answer illustrations for scenario 3 (stroke): Bác Nam (62), the player and cô Lan in the
+/* Answer illustrations for scenario 3 (stroke): Ông Nội (62), the player and cô Lan in the
  * living room, drawn with the same kit as the stage. They show what the option does, never
  * whether it is right. */
 
@@ -236,7 +236,7 @@ const lying = (x: number, y: number, k = 0.5) => (
 const chestOf = (x: number, k = 0.5) => x + LYING_CHEST_DX * k * LOOKS.nam.scale;
 const faceOf = (x: number, k = 0.5) => x - 62 * k * LOOKS.nam.scale;
 
-/** Bác Nam with the stroke look: drooping mouth, weak left arm. */
+/** Ông Nội with the stroke look: drooping mouth, weak left arm. */
 const strokeNam = (p: Who) => nam({ eyes: 'worried', mouth: 'droop', armL: 'limp', ...p });
 
 export const STROKE_ART = {
@@ -803,7 +803,7 @@ export const STROKE_ART = {
     <Pic bg="#eaf4f8">
       <Bubble x={14} y={22} w={72} h={40}>
         <Txt x={50} y={48} size={14}>
-          “Bác ngất.”
+          “Ông ngất.”
         </Txt>
       </Bubble>
     </Pic>

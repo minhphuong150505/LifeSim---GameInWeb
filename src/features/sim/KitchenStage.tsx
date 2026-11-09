@@ -5,6 +5,7 @@ import { C, INK, stroke, type Pt } from '../../art/ink';
 import { Kitchen, KITCHEN_FLOOR_Y, TAP } from '../../art/Kitchen';
 import { LOOKS } from '../../art/looks';
 import { Person, type ArmPose } from '../../art/Person';
+import { focusBox } from './stageLayout';
 import type { CastMember, StageState } from './types';
 
 /** Scale of the sister (on top of her look's own scale). */
@@ -50,7 +51,7 @@ type KitchenStageProps = {
 
 const WIDE = { y: 20, h: 290 };
 /** Zoom used while answering: the sister's whole body plus the tap, centred on her. */
-const FOCUS = { y: 92, h: 210 };
+const FOCUS = { y: 52, h: 250 };
 
 /** Scenario 5 stage: the kitchen filling the screen; forwards a ref to the <svg>. */
 export const KitchenStage = forwardRef<SVGSVGElement, KitchenStageProps>(function KitchenStage(
@@ -75,10 +76,10 @@ export const KitchenStage = forwardRef<SVGSVGElement, KitchenStageProps>(functio
 
   const focus = mode === 'focus';
   const sis = sisterSpot(stage);
-  const box = focus ? FOCUS : WIDE;
+  const box = focus ? focusBox(FOCUS, aspect) : WIDE;
   const w = box.h * aspect;
   const x0 = focus ? sis.x - 8 - focusX * w : 200 - w / 2;
-  const viewBox = `${x0.toFixed(1)} ${box.y} ${w.toFixed(1)} ${box.h}`;
+  const viewBox = `${x0.toFixed(1)} ${box.y.toFixed(1)} ${w.toFixed(1)} ${box.h.toFixed(1)}`;
   // Zoomed in, only the sister is shown (the others would stand in front of the camera).
   const has = (c: CastMember) => cast.includes(c) && !focus;
   const hurt = stage.burn !== 'none' && !stage.wrap;

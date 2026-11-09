@@ -54,7 +54,7 @@ export function TopicArt({ topic, className }: { topic: Topic; className?: strin
     );
   }
   if (topic === 'stroke') {
-    // Bác Nam on the sofa: drooping mouth corner, weak left arm, slurred speech.
+    // Ông Nội on the sofa: drooping mouth corner, weak left arm, slurred speech.
     return (
       <svg
         viewBox="120 56 160 170"

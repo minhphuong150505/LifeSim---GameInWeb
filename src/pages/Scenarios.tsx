@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CastFace } from '../art/CastFace';
-import { BandageIcon, HelpIcon, LockIcon, StarIcon } from '../art/icons';
+import { HelpIcon, LockIcon, StarIcon } from '../art/icons';
 import { TopicArt } from '../art/TopicArt';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
@@ -34,7 +34,8 @@ export function Scenarios() {
   const next = nextRoundToPlay(allRounds, records);
   const n = scenario.rounds.length;
   const pts = scenario.rounds.map((_, i) => ({
-    x: n === 1 ? 50 : 14 + (i * 72) / (n - 1),
+    // Nodes stay left of the picture in the top-right corner (x ≤ 70%).
+    x: n === 1 ? 45 : 12 + (i * 58) / (n - 1),
     y: ZIGZAG[i % ZIGZAG.length] as number,
   }));
   const d = pts
@@ -110,7 +111,7 @@ export function Scenarios() {
           />
         </svg>
 
-        <div className="ink-border absolute right-3 top-3 hidden h-[34%] w-[16%] min-w-[110px] overflow-hidden rounded-2xl bg-paper shadow-pop @xl:block">
+        <div className="ink-border absolute right-3 top-3 hidden h-[34%] w-[17%] min-w-[110px] overflow-hidden rounded-2xl bg-paper shadow-pop @xl:block">
           <TopicArt topic={scenario.topic} className="h-full w-full" />
         </div>
 
@@ -148,7 +149,7 @@ export function Scenarios() {
                     <StarIcon key={s} filled={(record?.bestStars ?? 0) >= s} size={18} />
                   ))}
                 </div>
-                <p className="wood ink-border mt-0.5 whitespace-nowrap rounded-lg px-2 font-display text-[15px] leading-6 text-navy">
+                <p className="wood ink-border mt-0.5 w-max max-w-[200px] rounded-lg px-2 py-0.5 text-center font-display text-[15px] leading-5 text-navy">
                   {round.title}
                 </p>
                 {isNext && (
@@ -215,23 +216,15 @@ function RoundDetails({
         </ul>
       </div>
       <div className="flex flex-col gap-2">
-        <div className="ink-border overflow-hidden rounded-2xl bg-cream">
-          <div className="flex items-center justify-between gap-2 bg-[#eef7e6] px-3 py-2">
-            <span className="text-sm font-semibold text-navy">🏆 Thắng màn nhận</span>
-            <span className="flex items-center gap-1 font-display text-xl text-success-dark">
-              +{round.reward} <BandageIcon size={26} />
-            </span>
-          </div>
-        </div>
+        <Button variant="secondary" block onClick={onGuide}>
+          <HelpIcon size={26} /> Hướng dẫn
+        </Button>
         {record && (
           <p className="text-sm text-muted">
             Đã chơi {record.plays} lần · Kỷ lục {record.bestScore} điểm · {record.bestStars}/3 sao
           </p>
         )}
-        <Button variant="secondary" block onClick={onGuide} className="mt-auto">
-          <HelpIcon size={26} /> Hướng dẫn
-        </Button>
-        <Button size="lg" block disabled={!unlocked} onClick={onPlay}>
+        <Button size="lg" block disabled={!unlocked} onClick={onPlay} className="mt-auto">
           {unlocked
             ? record
               ? 'Chơi lại'

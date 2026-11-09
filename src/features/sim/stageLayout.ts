@@ -13,7 +13,7 @@ export const CAST_NAMES: Record<CastMember, string> = {
   friendA: 'Bạn A',
   friendB: 'Bạn B',
   sister: 'Em gái',
-  nam: 'Bác Nam',
+  nam: 'Ông Nội',
   lan: 'Cô Lan',
   paramedic: 'Nhân viên cấp cứu',
 };
@@ -33,3 +33,17 @@ export const COMFORT_MOM = { x: 252, y: SOFA_SEAT_Y, headTop: 86 };
 
 /** Brother's nose in room units – the drop target for items (radius in room units). */
 export const NOSE_POINT = { x: 200, y: 130, r: 16 };
+
+/** Narrowest screen shape (width / height) a zoomed-in camera frames, so narrow screens (iPad)
+ * do not blow the characters up next to the side panel. */
+const FOCUS_MIN_ASPECT = 2.1;
+
+/**
+ * Camera box for a zoomed-in shot: on screens narrower than FOCUS_MIN_ASPECT the box grows
+ * upwards (same floor line) so the same width of the scene stays in view.
+ */
+export function focusBox<T extends { y: number; h: number }>(box: T, aspect: number): T {
+  if (aspect >= FOCUS_MIN_ASPECT) return box;
+  const h = (box.h * FOCUS_MIN_ASPECT) / aspect;
+  return { ...box, y: box.y + box.h - h, h };
+}

@@ -3,8 +3,8 @@ import { LOOKS } from './looks';
 import { Head, Person, type Eyes, type Mouth } from './Person';
 import { LyingPerson } from './WaterScenes';
 
-/* Props and poses of scenario 3 (stroke): Bác Nam's glass of water, the aspirin blister pack,
- * the side table, car keys, the AED box, and Bác Nam lying on the floor. All drawn around
+/* Props and poses of scenario 3 (stroke): Ông Nội's glass of water, the aspirin blister pack,
+ * the side table, car keys, the AED box, and Ông Nội lying on the floor. All drawn around
  * (0, 0) in the shared hand-drawn style. */
 
 /** Glass of water; `tipped` lies on its side with a puddle. */
@@ -127,7 +127,7 @@ export function AedBox({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   );
 }
 
-/** Broken speech bubble "Bác... không..." (slurred speech). */
+/** Broken speech bubble "Ông... không..." (slurred speech). */
 export function SlurBubble({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
@@ -138,13 +138,13 @@ export function SlurBubble({ x, y, s = 1 }: { x: number; y: number; s?: number }
         strokeDasharray="6 3"
       />
       <text x={0} y={2} textAnchor="middle" fontFamily="Itim, sans-serif" fontSize={8.5} fill={INK}>
-        Bác... kh...
+        Ông... kh...
       </text>
     </g>
   );
 }
 
-/** Bác Nam's face, big (close-ups); `droop` shows the stroke signs on the face. */
+/** Ông Nội's face, big (close-ups); `droop` shows the stroke signs on the face. */
 export function NamHead({
   x,
   y,
@@ -169,14 +169,14 @@ export function NamHead({
 export const LYING_CHEST_DX = -20;
 
 /**
- * Bác Nam lying on his back on the floor, head on the left (CPR / before it). Origin = hips.
+ * Ông Nội lying on his back on the floor, head on the left (CPR / before it). Origin = hips.
  */
 export function NamOnBack({ k = 0.9 }: { k?: number }) {
   return <LyingPerson kind="nam" k={k} />;
 }
 
 /**
- * Bác Nam in the recovery position: on his side facing the viewer, head on the left, top hand
+ * Ông Nội in the recovery position: on his side facing the viewer, head on the left, top hand
  * against the cheek and the top knee bent. Origin = hips on the floor.
  */
 export function NamRecovery({ k = 0.9, mouth = 'flat' }: { k?: number; mouth?: Mouth }) {

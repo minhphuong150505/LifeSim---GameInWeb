@@ -16,25 +16,26 @@ import {
   SlurBubble,
 } from '../../art/StrokeArt';
 import { PressingHands } from '../../art/WaterScenes';
+import { focusBox } from './stageLayout';
 import type { CastMember, NamState, StageState } from './types';
 
-/* Scenario 3 stage: the living room with Bác Nam on the sofa (or on the floor once he loses
+/* Scenario 3 stage: the living room with Ông Nội on the sofa (or on the floor once he loses
  * consciousness), the player, cô Lan and – at the very end – the ambulance crew. */
 
 const NAM_K = LOOKS.nam.scale;
 const SEAT = { x: 200, y: SOFA_SEAT_Y + 4 };
-/** Hips of Bác Nam lying on the rug (head to the left). */
+/** Hips of Ông Nội lying on the rug (head to the left). */
 const FLOOR = { x: 244, y: 262 };
 const LYING_K = 0.9;
 const TABLE = { x: 304, y: 214 };
 const LAN = { x: 348, y: 292 };
 const PLAYER = { x: 70, y: 290 };
-/** Player sitting next to Bác Nam on the right sofa cushion. */
+/** Player sitting next to Ông Nội on the right sofa cushion. */
 const BESIDE = { x: 268, y: SOFA_SEAT_Y };
 
 const onFloor = (n: NamState) => n === 'recovery' || n === 'floor' || n === 'cpr';
 
-/** Face and arms of Bác Nam sitting on the sofa, by state. */
+/** Face and arms of Ông Nội sitting on the sofa, by state. */
 function namLook(
   stage: StageState,
   talking: boolean,
@@ -67,17 +68,17 @@ type StrokeStageProps = {
   cast: CastMember[];
   stage: StageState;
   speaker?: CastMember | null;
-  /** `wide` = the whole living room (story), `focus` = zoomed on Bác Nam while answering. */
+  /** `wide` = the whole living room (story), `focus` = zoomed on Ông Nội while answering. */
   mode: 'wide' | 'focus';
-  /** Horizontal position of Bác Nam on screen in focus mode (0–1). */
+  /** Horizontal position of Ông Nội on screen in focus mode (0–1). */
   focusX?: number;
   showCloseup?: boolean;
   children?: React.ReactNode;
 };
 
 const WIDE = { y: 24, h: 334 };
-const FOCUS = { y: 46, h: 196, x: 200 };
-const FOCUS_FLOOR = { y: 112, h: 236, x: 236 };
+const FOCUS = { y: 0, h: 242, x: 200 };
+const FOCUS_FLOOR = { y: 70, h: 278, x: 236 };
 
 function clockOf(label: string | null): { h: number; m: number } | null {
   const m = label?.match(/^(\d{1,2}):(\d{2})$/);
@@ -106,10 +107,14 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
 
   const focus = mode === 'focus';
   const floor = onFloor(stage.nam);
-  const box = focus ? (floor ? FOCUS_FLOOR : FOCUS) : WIDE;
+  const box = focus ? focusBox(floor ? FOCUS_FLOOR : FOCUS, aspect) : WIDE;
   const w = box.h * aspect;
-  const x0 = focus ? (floor ? FOCUS_FLOOR.x : FOCUS.x) - focusX * w : 200 - w / 2;
-  const viewBox = `${x0.toFixed(1)} ${box.y} ${w.toFixed(1)} ${box.h}`;
+  const sofaCare =
+    !floor && stage.nam !== 'calm' && stage.nam !== 'stroke' && (stage.phone || stage.lanPhone);
+  // With the player sitting beside Ông Nội, the camera frames both of them.
+  const focusCx = floor ? FOCUS_FLOOR.x : sofaCare ? (SEAT.x + BESIDE.x) / 2 : FOCUS.x;
+  const x0 = focus ? focusCx - focusX * w : 200 - w / 2;
+  const viewBox = `${x0.toFixed(1)} ${box.y.toFixed(1)} ${w.toFixed(1)} ${box.h.toFixed(1)}`;
   const has = (c: CastMember) => cast.includes(c) && !focus;
   const clock = clockOf(stage.clock);
 
@@ -122,10 +127,8 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
   const face = { x: FLOOR.x - 62 * lyingS, y: FLOOR.y };
 
   // Where the player is: kneeling for CPR, kneeling by his head, next to him on the sofa, standing.
-  const sofaCare =
-    !floor && stage.nam !== 'calm' && stage.nam !== 'stroke' && (stage.phone || stage.lanPhone);
   const kneelHead = floor && !stage.hands;
-  // Close to Bác Nam the player stays visible even in the zoomed-in shot.
+  // Close to Ông Nội the player stays visible even in the zoomed-in shot.
   const playerShown = cast.includes('player');
 
   const phoneBubble = (x: number, y: number) => (
@@ -155,7 +158,7 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
         preserveAspectRatio="xMidYMid slice"
         className="absolute inset-0 h-full w-full"
         role="img"
-        aria-label={focus ? 'Cận cảnh bác Nam' : 'Phòng khách nhà bác Nam'}
+        aria-label={focus ? 'Cận cảnh Ông Nội' : 'Phòng khách nhà Ông Nội'}
       >
         <rect x={-1200} y={-600} width={2800} height={792} fill={C.wall} />
         <rect x={-1200} y={192} width={2800} height={900} fill={C.floor} />
@@ -175,7 +178,7 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
         )}
         {stage.cup === 'floor' && <Cup x={176} y={214} tipped />}
 
-        {/* Player sitting beside Bác Nam or kneeling on the floor is drawn behind him. */}
+        {/* Player sitting beside Ông Nội or kneeling on the floor is drawn behind him. */}
         {playerShown && sofaCare && (
           <Person
             kind="player"
@@ -220,6 +223,9 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
           </g>
         ) : (
           <Person kind="nam" pose="sit" {...SEAT} {...look} />
+        )}
+        {stage.nam === 'floor' && stage.breathing && (
+          <ChestRise x={chest.x} y={chest.y - 6} mode={stage.breathing} />
         )}
         {stage.hands && <PressingHands x={chest.x} y={chest.y - 2} />}
         {floor && stage.breathing && (
@@ -320,26 +326,31 @@ export const StrokeStage = forwardRef<SVGSVGElement, StrokeStageProps>(function 
         </div>
       )}
 
-      {(stage.freeze || stage.banner) && (
-        <div className="pointer-events-none absolute bottom-[max(10px,env(safe-area-inset-bottom))] left-[max(10px,env(safe-area-inset-left))] z-10 flex flex-col items-start gap-1">
-          {stage.banner && (
-            <motion.span
-              key={stage.banner}
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="ink-border rounded-full bg-primary px-3 py-0.5 font-display text-[15px] text-white shadow-soft short:text-[12px]"
-            >
-              {stage.banner}
-            </motion.span>
-          )}
-          {stage.freeze && (
-            <span className="ink-border rounded-full bg-paper px-3 py-0.5 font-display text-[13px] text-navy shadow-soft short:text-[11px]">
-              ⏸ Tạm dừng thời gian để học
-            </span>
-          )}
-        </div>
-      )}
       {children}
     </div>
   );
 });
+
+/** Chest of Ông Nội lying on his back, rising with each breath (regular or rare gasps). */
+function ChestRise({ x, y, mode }: { x: number; y: number; mode: 'normal' | 'gasping' }) {
+  const anim =
+    mode === 'normal'
+      ? { values: '1 1;1 1.35;1 1', keyTimes: '0;0.5;1', dur: '3s' }
+      : { values: '1 1;1 1;1 1.6;1 1;1 1', keyTimes: '0;0.62;0.68;0.78;1', dur: '5.5s' };
+  const s = LYING_K * NAM_K;
+  return (
+    <g transform={`translate(${x} ${y})`} aria-hidden>
+      <g>
+        <ellipse rx={9 * s} ry={14 * s} fill={LOOKS.nam.shirt} {...stroke(2)} />
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values={anim.values}
+          keyTimes={anim.keyTimes}
+          dur={anim.dur}
+          repeatCount="indefinite"
+        />
+      </g>
+    </g>
+  );
+}

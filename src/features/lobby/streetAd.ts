@@ -14,12 +14,17 @@ export type StreetReward = { kind: 'bandages'; amount: number } | { kind: 'item'
  * doesn't own yet (cheap items only, so ads never replace saving up for the big ones).
  */
 export function rollStreetReward(owned: string[], rand: () => number = Math.random): StreetReward {
-  const pool = ALL_VARIANTS.filter((v) => v.slot !== 'theme' && v.price <= 80 && !owned.includes(v.id));
+  const pool = ALL_VARIANTS.filter(
+    (v) => v.slot !== 'theme' && v.price <= 80 && !owned.includes(v.id),
+  );
   if (pool.length > 0 && rand() < ITEM_CHANCE) {
     const pick = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))];
     if (pick) return { kind: 'item', id: pick.id };
   }
-  const amount = STREET_BANDAGES[Math.min(STREET_BANDAGES.length - 1, Math.floor(rand() * STREET_BANDAGES.length))];
+  const amount =
+    STREET_BANDAGES[
+      Math.min(STREET_BANDAGES.length - 1, Math.floor(rand() * STREET_BANDAGES.length))
+    ];
   return { kind: 'bandages', amount: amount ?? STREET_BANDAGES[0] };
 }
 
