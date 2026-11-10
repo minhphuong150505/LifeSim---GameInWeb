@@ -13,8 +13,6 @@ import {
   normalizePhone,
   orderCode,
   totalFee,
-  validateRegistration,
-  type RegistrationErrors,
   type RegistrationForm,
 } from './registration';
 
@@ -35,13 +33,11 @@ const INPUT =
 function Field({
   id,
   label,
-  error,
   className,
   children,
 }: {
   id: string;
   label: string;
-  error?: string;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -51,11 +47,6 @@ function Field({
         {label}
       </label>
       {children}
-      {error && (
-        <p id={`${id}-err`} className="mt-0.5 text-xs font-semibold text-primary-dark">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -74,17 +65,17 @@ export function CourseRegister({
   onClose: () => void;
 }) {
   const [form, setForm] = useState<RegistrationForm>(EMPTY_FORM);
-  const [errors, setErrors] = useState<RegistrationErrors>({});
   const [step, setStep] = useState<Step>('form');
   const [method, setMethod] = useState<Method>('bank');
   const [code, setCode] = useState('');
 
+  const name = form.name.trim() || 'Khách demo';
+  const phone = normalizePhone(form.phone) || '0900 000 000';
   const total = totalFee(course.priceVnd, form.seats);
   const needsPayment = total !== null && total > 0;
 
   const set = <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }));
-    if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }));
   };
 
   const close = () => {
@@ -103,9 +94,6 @@ export function CourseRegister({
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validateRegistration(form);
-    setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
     setCode(orderCode());
     if (needsPayment) setStep('pay');
     else finish();
@@ -115,11 +103,6 @@ export function CourseRegister({
     setStep('paying');
     window.setTimeout(finish, 1400);
   };
-
-  const err = (k: keyof RegistrationForm) => ({
-    'aria-invalid': errors[k] ? true : undefined,
-    'aria-describedby': errors[k] ? `reg-${k}-err` : undefined,
-  });
 
   const title =
     step === 'done'
@@ -163,7 +146,7 @@ export function CourseRegister({
         {step === 'form' && (
           <form noValidate onSubmit={submit} className="flex flex-col gap-3 short:gap-2">
             <div className="grid grid-cols-2 gap-x-3 gap-y-2 short:gap-y-1">
-              <Field id="reg-name" label="Họ tên *" error={errors.name} className="col-span-2">
+              <Field id="reg-name" label="Họ tên" className="col-span-2">
                 <input
                   id="reg-name"
                   value={form.name}
@@ -172,10 +155,9 @@ export function CourseRegister({
                   maxLength={60}
                   placeholder="Nguyễn Văn A"
                   className={INPUT}
-                  {...err('name')}
                 />
               </Field>
-              <Field id="reg-age" label="Tuổi *" error={errors.age}>
+              <Field id="reg-age" label="Tuổi">
                 <input
                   id="reg-age"
                   type="number"
@@ -186,10 +168,9 @@ export function CourseRegister({
                   onChange={(e) => set('age', e.target.value)}
                   placeholder="25"
                   className={INPUT}
-                  {...err('age')}
                 />
               </Field>
-              <Field id="reg-phone" label="Số điện thoại *" error={errors.phone}>
+              <Field id="reg-phone" label="Số điện thoại">
                 <input
                   id="reg-phone"
                   type="tel"
@@ -199,10 +180,9 @@ export function CourseRegister({
                   onChange={(e) => set('phone', e.target.value)}
                   placeholder="0912 345 678"
                   className={INPUT}
-                  {...err('phone')}
                 />
               </Field>
-              <Field id="reg-email" label="Email (nếu có)" error={errors.email}>
+              <Field id="reg-email" label="Email (nếu có)">
                 <input
                   id="reg-email"
                   type="email"
@@ -212,10 +192,9 @@ export function CourseRegister({
                   onChange={(e) => set('email', e.target.value)}
                   placeholder="ban@email.com"
                   className={INPUT}
-                  {...err('email')}
                 />
               </Field>
-              <Field id="reg-seats" label="Số lượng khoá học" error={errors.seats}>
+              <Field id="reg-seats" label="Số lượng khoá học">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -238,7 +217,6 @@ export function CourseRegister({
                       set('seats', Math.min(MAX_SEATS, Math.max(1, Number.isFinite(n) ? n : 1)));
                     }}
                     className={cn(INPUT, 'text-center')}
-                    {...err('seats')}
                   />
                   <button
                     type="button"
@@ -263,11 +241,12 @@ export function CourseRegister({
             <dl className="ink-border grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 rounded-2xl bg-paper p-2.5 text-sm">
               <dt className="text-muted">Người đăng ký</dt>
               <dd className="truncate font-semibold text-navy">
-                {form.name.trim()} · {form.age} tuổi
+                {name}
+                {form.age.trim() && ` · ${form.age.trim()} tuổi`}
               </dd>
               <dt className="text-muted">Liên hệ</dt>
               <dd className="truncate font-semibold text-navy">
-                {normalizePhone(form.phone)}
+                {phone}
                 {form.email.trim() && ` · ${form.email.trim()}`}
               </dd>
               <dt className="text-muted">Mã đơn</dt>
@@ -334,8 +313,8 @@ export function CourseRegister({
               <CheckIcon size={30} /> Mã đơn {code}
             </motion.div>
             <p className="text-center text-[15px] leading-relaxed text-ink">
-              {course.partner} sẽ liên hệ <b>{form.name.trim()}</b> qua số{' '}
-              <b>{normalizePhone(form.phone)}</b> để xác nhận lịch học cho {form.seats} người.
+              {course.partner} sẽ liên hệ <b>{name}</b> qua số <b>{phone}</b> để xác nhận lịch học
+              cho {form.seats} người.
             </p>
             <Button size="lg" variant="green" block onClick={close}>
               Tuyệt vời!
@@ -345,7 +324,7 @@ export function CourseRegister({
 
         {step !== 'done' && (
           <p className="-mt-1 text-center text-[11px] leading-snug text-muted">
-            Bản demo: không gửi thông tin và không trừ tiền thật.
+            Bản demo: có thể bỏ trống thông tin, không trừ tiền thật.
           </p>
         )}
       </div>
