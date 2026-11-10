@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { CheckIcon } from '../art/icons';
 import { Button } from '../components/Button';
-import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
 import { getCourse } from '../data/courses';
 import { CourseCover } from '../features/courses/CourseBanner';
+import { CourseRegister } from '../features/courses/CourseRegister';
 
 /** Detail page of a partner course (stand-in for the partner's own website in the demo). */
 export function CourseDetail() {
   const { id } = useParams();
   const course = getCourse(id);
-  const [registered, setRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
   if (!course) return <Navigate to="/" replace />;
 
   return (
@@ -73,40 +73,18 @@ export function CourseDetail() {
                 <p className="text-sm font-semibold text-navy/80">{course.priceNote}</p>
               )}
             </div>
-            <Button
-              size="lg"
-              variant="green"
-              onClick={() =>
-                course.url
-                  ? window.open(course.url, '_blank', 'noopener,noreferrer')
-                  : setRegistered(true)
-              }
-            >
+            <Button size="lg" variant="green" onClick={() => setRegistering(true)}>
               Đăng ký học
             </Button>
           </div>
           <p className="text-xs text-muted">
-            {course.url
-              ? `Khoá học do ${course.partner} tổ chức. "Đăng ký học" mở trang chính thức của đơn vị. Lịch và học phí có thể thay đổi, vui lòng kiểm tra lại trên trang đó.`
-              : `Khoá học do ${course.partner} cung cấp và thu phí. LifeSim chỉ giới thiệu. (Dữ liệu demo.)`}
+            Khoá học do {course.partner} tổ chức. Điền thông tin và thanh toán ngay trong ứng dụng;
+            đơn vị sẽ liên hệ để xác nhận lịch học.
           </p>
         </div>
       </div>
 
-      <Modal
-        open={registered}
-        onClose={() => setRegistered(false)}
-        title="Đã gửi đăng ký!"
-        tone="green"
-      >
-        <p className="text-center text-[15px] leading-relaxed text-ink">
-          {course.partner} sẽ liên hệ với bạn để xác nhận lịch học. (Bản demo: chưa gửi thông tin
-          thật.)
-        </p>
-        <Button block className="mt-3" onClick={() => setRegistered(false)}>
-          Đóng
-        </Button>
-      </Modal>
+      <CourseRegister course={course} open={registering} onClose={() => setRegistering(false)} />
     </div>
   );
 }
